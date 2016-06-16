@@ -433,6 +433,7 @@
     <Compile Include="Areas\Site\SiteAreaRegistration.cs" />
     <Compile Include="Areas\SAM\Controllers\UtilsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\RdbTestController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UiTestController.cs" />
     <Compile Include="Global.asax.cs">
@@ -442,6 +443,7 @@
     <Compile Include="Helpers\BexisModelManager.cs" />
     <Compile Include="Helpers\BexisUIHelper.cs" />
     <Compile Include="Models\EntitySelectorModel.cs" />
+    <Compile Include="Models\RdbTestModel.cs" />
     <Compile Include="Models\UiTestModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -956,6 +958,7 @@
     <Content Include="Views\Test\Index.cshtml" />
     <Content Include="Views\Shared\_EntitySelectorInWindowView.cshtml" />
     <Content Include="Views\Shared\_EntitySelectorView.cshtml" />
+    <Content Include="Views\RdbTest\RdbOverview.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1207,6 +1210,14 @@
     <ProjectReference Include="..\..\Modules\DDM\BExIS.Ddm.Providers.LuceneProvider\BExIS.Ddm.Providers.LuceneProvider.csproj">
       <Project>{fbe3101a-791a-4eab-9b8f-f6e071f8dbdc}</Project>
       <Name>BExIS.Ddm.Providers.LuceneProvider</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Modules\RDB\BEXIS.Rdb.Entities\BEXIS.Rdb.Entities.csproj">
+      <Project>{ec2c146a-5619-48d2-9575-2f4876f8dc05}</Project>
+      <Name>BEXIS.Rdb.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Modules\RDB\BEXIS.Rdb.Helper\BEXIS.Rdb.Helper.csproj">
+      <Project>{941e15fa-86eb-415c-b457-b05c63eff606}</Project>
+      <Name>BEXIS.Rdb.Helper</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Modules\RPM\BExIS.RPM.Model\BExIS.RPM.Model.csproj">
       <Project>{063b9e3f-e0dd-43fe-9910-5b1544b8b861}</Project>
