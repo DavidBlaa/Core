@@ -47,6 +47,11 @@
     GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
     pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
     pagerStyles |= GridPagerStyles.Numeric;
+    string link = "";
+    if (@Model.Reciever != null)
+    {
+        link = "/" + @Model.Reciever.Area + "/" + @Model.Reciever.Controller + "/" + @Model.Reciever.Action;
+    }
 
 }
 <div>
@@ -108,11 +113,11 @@
           .TableHtmlAttributes(new {
               idIndex = @idIndex,
               submitId = @submitId,
-              link = "/" + @Model.Reciever.Area + "/" + @Model.Reciever.Controller + "/" + @Model.Reciever.Action,
+              link = @link,
               style="width:"+@width+"px;"
           })
           .Pageable(paging =>
-                paging.PageSize(10, new int[] { 5, 10, 50 })
+                paging.PageSize(10, new int[] { 5, 10, 50, 200, 500 })
                     .Total(Model.Data.Rows.Count)
                     .Style(pagerStyles)
                     )

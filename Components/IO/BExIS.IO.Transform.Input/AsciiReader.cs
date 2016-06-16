@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Timers;
 using BExIS.IO.Transform.Validation.DSValidation;
 using BExIS.IO.Transform.Validation.Exceptions;
@@ -21,6 +23,70 @@ namespace BExIS.IO.Transform.Input
     /// <remarks></remarks>        
     public class AsciiReader:DataReader
     {
+        /// <summary>
+        /// Read the whole FileStream line by line until no more come. 
+        /// return each row as a list of strings
+        /// Return value is a list of datatuples
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref="AsciiFileReaderInfo"/>
+        /// <param name="FileStream">Stream of the FileStream</param>
+        /// <param name="fileName">name of the FileStream</param>
+        /// <param name="fri">AsciiFileReaderInfo needed</param>
+        /// <returns>List of datatuples</returns>
+        public List<List<string>> ReadFile(Stream file, string fileName, AsciiFileReaderInfo fri)
+        {
+            List<List<string>> tmp = new List<List<string>>();
+
+            this.FileStream = file;
+            this.FileName = fileName;
+            this.Info = fri;
+
+            // Check params
+            if (this.FileStream == null)
+            {
+                this.ErrorMessages.Add(new Error(ErrorType.Other, "File not exist"));
+            }
+            if (!this.FileStream.CanRead)
+            {
+                this.ErrorMessages.Add(new Error(ErrorType.Other, "File is not readable"));
+            }
+            if (this.Info.Variables <= 0)
+            {
+                this.ErrorMessages.Add(new Error(ErrorType.Other, "Startrow of Variable can´t be 0"));
+            }
+            if (this.Info.Data <= 0)
+            {
+                this.ErrorMessages.Add(new Error(ErrorType.Other, "Startrow of Data can´t be 0"));
+            }
+
+            if (this.ErrorMessages.Count == 0)
+            {
+               
+                using (StreamReader streamReader = new StreamReader(file))
+                {
+                    string line;
+                    int index = fri.Variables;
+                    char seperator = AsciiFileReaderInfo.GetSeperator(fri.Seperator);
+
+                    while ((line = streamReader.ReadLine()) != null)
+                    {
+                        if (index >= this.Info.Data)
+                        {
+                            // return List of VariablesValues, and error messages
+                            tmp.Add(rowToList(line, seperator));
+                        }
+
+                        index++;
+                    }
+                }
+            }
+
+            return tmp;
+        }
+
+
+
         /// <summary>
         /// Read the whole FileStream line by line until no more come. 
         /// Convert the lines into a datatuple based on the datastructure.
