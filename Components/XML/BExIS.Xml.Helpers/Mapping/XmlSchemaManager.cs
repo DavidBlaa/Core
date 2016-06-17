@@ -513,13 +513,19 @@ namespace BExIS.Xml.Helpers.Mapping
             string tmpDestinationPath = Path.GetDirectoryName(newXsdFilePath);
             string tmpSourcePath = Path.GetDirectoryName(xsdFilePath);
 
-            if (additionalFiles != null)
-            {
-                foreach (var filename in additionalFiles.Distinct())
-                {
-                    MoveFile(Path.Combine(tmpSourcePath, filename), Path.Combine(tmpDestinationPath, filename));
-                }
-            }
+            //if (additionalFiles != null)
+            //{
+            //    foreach (var filename in additionalFiles.Distinct())
+            //    {
+            //        string filepath = Path.Combine(tmpDestinationPath, filename);
+            //        if (File.Exists(filepath))
+            //        {
+            //            File.Delete(filepath);
+            //        }
+
+            //        MoveFile(Path.Combine(tmpSourcePath, filename), filepath);
+            //    }
+            //}
 
             #endregion
 
@@ -576,7 +582,6 @@ namespace BExIS.Xml.Helpers.Mapping
 
                 XmlSchemaElement rootElement = (XmlSchemaElement)root;
                 mappingFileInternalToExternal.Header.AddToDestination(rootElement.Name, rootElement.Name);
-
 
                 rootElementName = rootElement.Name;
  

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Linq;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.MetadataStructure;
@@ -16,7 +12,7 @@ namespace BExIS.Xml.Services
         /// <summary>
         /// returns a value of a metadata node
         /// </summary>
-        /// <param name="datasetVersion"></param>
+        /// <param name="datasetid"></param>
         /// <param name="name"></param>
         /// <returns></returns>
         public static string GetInformation(long datasetid, AttributeNames name)

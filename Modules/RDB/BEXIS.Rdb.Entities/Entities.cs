@@ -51,7 +51,7 @@ namespace BEXIS.Rdb.Entities
 
     public class Site: BaseRdbEntity
     {
-        public string BoundingBox { get; set; }
+        public Coordinate BoundingBox { get; set; }
         public long Contributor { get; set; }
         public List<long> Plots { get; set; }
 
@@ -59,13 +59,13 @@ namespace BEXIS.Rdb.Entities
         {
             Plots = new List<long>();
             Contributor = 0;
-            BoundingBox = "";
+            BoundingBox = new Coordinate();
         }
     }
 
     public class Plot : Site
     {
-        public string Coordinates { get; set; }
+        public Coordinate Coordinates { get; set; }
         public string TopographicPosition { get; set; }
         public string Orientation { get; set; }
         public string GroundwaterDepth { get; set; }
@@ -81,7 +81,7 @@ namespace BEXIS.Rdb.Entities
 
         public Plot()
         {
-            Coordinates = "";
+            Coordinates = new Coordinate();
             TopographicPosition = "";
             Orientation = "";
             GeologicalParentMaterialofEntireSoilProfile = "";
@@ -90,6 +90,18 @@ namespace BEXIS.Rdb.Entities
 
             Soils = new List<long>();
             Trees = new List<long>();
+        }
+    }
+
+    public class Coordinate
+    {
+        public string Longitude { get; set; }
+        public string Latitude { get; set; }
+
+        public Coordinate()
+        {
+            Longitude = "";
+            Latitude = "";
         }
     }
 
@@ -176,4 +188,6 @@ namespace BEXIS.Rdb.Entities
             Url = "";
         }
     }
+
+
 }

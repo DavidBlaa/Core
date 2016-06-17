@@ -1,0 +1,18 @@
+﻿@model BExIS.Web.Shell.Models.BarCodeModel
+@{
+    ViewBag.Title = "BarcodeGeneratorView";
+
+
+    MemoryStream ms = new MemoryStream();
+    Model.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
+
+    var img = String.Format("data:image/jpg;base64,{0}", Convert.ToBase64String(ms.ToArray()));
+    HtmlString x = new MvcHtmlString("<img src='" + img + "' />");
+
+}
+
+<h2>Barcode Generator </h2>
+
+
+
+@x
