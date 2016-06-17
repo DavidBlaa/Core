@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 
 using System.Web.Mvc;
-
+using BExIS.Web.Shell.Areas.RDB.Models;
 using BExIS.Web.Shell.Helpers;
 using BExIS.Web.Shell.Models;
 using BEXIS.Rdb.Entities;

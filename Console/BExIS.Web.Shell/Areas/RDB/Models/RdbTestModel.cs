@@ -18,7 +18,9 @@ namespace BExIS.Web.Shell.Areas.RDB.Models
 
     public class BarCodeModel
     {
+        public string Input;
         public Image Image;
+
     }
 
 }
