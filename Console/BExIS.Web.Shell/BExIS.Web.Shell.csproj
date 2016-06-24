@@ -381,6 +381,7 @@
     <Compile Include="Areas\MSM\Models\TreePartialModel.cs" />
     <Compile Include="Areas\MSM\Models\TestModel.cs" />
     <Compile Include="Areas\MSM\MSMAreaRegistration.cs" />
+    <Compile Include="Areas\RDB\Controllers\RdbController.cs" />
     <Compile Include="Areas\RDB\RDBAreaRegistration.cs" />
     <Compile Include="Areas\RPM\Controllers\DataStructureEditController.cs" />
     <Compile Include="Areas\RPM\Controllers\HelpController.cs" />
@@ -437,7 +438,6 @@
     <Compile Include="Areas\Site\SiteAreaRegistration.cs" />
     <Compile Include="Areas\SAM\Controllers\UtilsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Areas\RDB\Controllers\RdbTestController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UiTestController.cs" />
     <Compile Include="Global.asax.cs">
@@ -630,6 +630,7 @@
     <Content Include="fonts\fontawesome-webfont.eot" />
     <Content Include="Areas\RDB\Views\web.config" />
     <Content Include="Areas\RDB\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\RDB\Views\Rdb\Index.cshtml" />
     <None Include="Properties\PublishProfiles\BPP2907.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -964,8 +965,7 @@
     <Content Include="Views\Test\Index.cshtml" />
     <Content Include="Views\Shared\_EntitySelectorInWindowView.cshtml" />
     <Content Include="Views\Shared\_EntitySelectorView.cshtml" />
-    <Content Include="Areas\RDB\Views\RdbTest\RdbOverview.cshtml" />
-    <Content Include="Areas\RDB\Views\RdbTest\BarcodeGeneratorView.cshtml" />
+    <Content Include="Areas\RDB\Views\Rdb\BarcodeGeneratorView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

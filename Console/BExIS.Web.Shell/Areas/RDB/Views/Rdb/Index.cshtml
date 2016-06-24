@@ -1,30 +1,25 @@
-﻿@using BExIS.Web.Shell.Models
-@model BExIS.Web.Shell.Areas.RDB.Models.RdbTestModel
-
-@{
-    ViewBag.Title = "RdbOverview";
-
-}
+﻿@model BExIS.Web.Shell.Areas.RDB.Models.RdbTestModel
 
 <h2>Data from the old research database</h2>
 
 @foreach (var viewmodel in Model.ListOfEntites)
 {
     <h1>@viewmodel.Key</h1>
-    <hr/>
+    <hr />
 
     @Html.Partial("_EntitySelectorView", viewmodel.Value);
 
-    <hr/>
+    <hr />
 }
 
 
 @foreach (var tree in Model.Trees)
 {
-    <b>Name = @tree.ShortName</b><br/>
+    <b>Name = @tree.ShortName</b><br />
     <b>ID = @tree.Id</b><br />
-    <b>RefID = @tree.RefId</b><br/>
-    <ul><b>Diameter</b>
+    <b>RefID = @tree.RefId</b><br />
+    <ul>
+        <b>Diameter</b>
         @foreach (var diameter in tree.Diameters)
         {
             <li>
@@ -35,11 +30,12 @@
     </ul>
 
 
-    <ul> <b>TreeStemSlice</b>
+    <ul>
+        <b>TreeStemSlice</b>
         @foreach (var tss in tree.TreeStemSlices)
         {
             <li>Treestemsegment = @tss.Treestemsegment</li>
         }
     </ul>
-    <hr/>
+    <hr />
 }

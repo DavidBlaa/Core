@@ -82,9 +82,9 @@ namespace BEXIS.Rdb.Helper
             XDocument metadata = writer.CreateMetadataXml(metadataStructure.Id);
             #endregion
 
-            foreach (var tree in Trees)
+            for (int i = 0; i<200; i++)
             {
-                createDsFromTreeStemSlices(tree, metadata, unStructuredDataStructure, metadataStructure);
+                createDsFromTreeStemSlices(Trees.ElementAt(i), metadata, unStructuredDataStructure, metadataStructure);
             }
         }
 
@@ -113,15 +113,36 @@ namespace BEXIS.Rdb.Helper
 
                 #region Location
 
+                Plot plot = Plots.Where(p => p.Trees.Contains(tree.RefId)).FirstOrDefault();
+                if (plot != null)
+                {
+                    //plot
+                    //"Metadata/researchObjects/researchObjectsType/location/locationType/plot/plotType"
+                    destinationXPath = "Metadata/researchObjects/researchObjectsType/location/locationType/plot/plotType";
+                    XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = plot.Name;
+
+                    //plot abbr
+                    //Metadata/researchObjects/researchObjectsType/location/locationType/abbrPlot/abbrPlotType
+                    destinationXPath = "Metadata/researchObjects/researchObjectsType/location/locationType/abbrPlot/abbrPlotType";
+                    XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = plot.ShortName;
+
+                    Site site = Sites.Where(p => p.Plots.Contains(plot.RefId)).FirstOrDefault();
+
+                    if (site != null)
+                    {
+                        //site
+                        //"Metadata/researchObjects/researchObjectsType/location/locationType/site/siteType"
+                        destinationXPath =
+                            "Metadata/researchObjects/researchObjectsType/location/locationType/site/siteType";
+                        XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = site.Name;
+                    }
+                }
+
+
+
+
                 //site
                 //"Metadata/researchObjects/researchObjectsType/location/locationType/site/siteType"
-
-                //plot
-                //"Metadata/researchObjects/researchObjectsType/location/locationType/plot/plotType"
-
-                //plot abbr
-                //Metadata/researchObjects/researchObjectsType/location/locationType/abbrPlot/abbrPlotType
-
 
                 #endregion
 
