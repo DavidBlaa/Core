@@ -632,6 +632,7 @@
     <Content Include="Areas\RDB\Views\_ViewStart.cshtml" />
     <Content Include="Areas\RDB\Views\Rdb\Index.cshtml" />
     <None Include="Properties\PublishProfiles\BPP2907.pubxml" />
+    <None Include="Properties\PublishProfiles\RDB.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

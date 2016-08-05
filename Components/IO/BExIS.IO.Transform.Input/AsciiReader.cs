@@ -63,7 +63,7 @@ namespace BExIS.IO.Transform.Input
             if (this.ErrorMessages.Count == 0)
             {
                
-                using (StreamReader streamReader = new StreamReader(file))
+                using (StreamReader streamReader = new StreamReader(file, System.Text.Encoding.Default))
                 {
                     string line;
                     int index = fri.Variables;

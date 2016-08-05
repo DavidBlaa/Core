@@ -4,22 +4,21 @@
 @using BExIS.Dlm.Entities.DataStructure;
 
 @{
-	
-	int PageSize = Convert.ToInt16(ViewData["PageSize"]);
-	int CurrentPage =  Convert.ToInt16(ViewData["CurrentPage"]);
-	List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
-	HeaderItem Id = (HeaderItem)ViewData["Id"];
+
+    int PageSize = Convert.ToInt16(ViewData["PageSize"]);
+    int CurrentPage =  Convert.ToInt16(ViewData["CurrentPage"]);
+    List<HeaderItem> DefaultHeaderList = (List<HeaderItem>)ViewData["DefaultHeaderList"];
+    HeaderItem Id = (HeaderItem)ViewData["Id"];
 
 
-	StructuredDataStructure sds = new StructuredDataStructure();
-	Tuple<StructuredDataStructure, long> defaultModel = new Tuple<StructuredDataStructure, long>(sds, 0);
+    StructuredDataStructure sds = new StructuredDataStructure();
+    Tuple<StructuredDataStructure, long> defaultModel = new Tuple<StructuredDataStructure, long>(sds, 0);
 
 
-	GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
-	pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
-	pagerStyles |= GridPagerStyles.Numeric;
+    GridPagerStyles pagerStyles = GridPagerStyles.PageSizeDropDown;
+    pagerStyles |= GridPagerStyles.NextPreviousAndNumeric;
+    pagerStyles |= GridPagerStyles.Numeric;
 
-  
 }
 
 
@@ -77,7 +76,8 @@
                     )
                     .Groupable(false)
                     .Sortable(false)
-                    .Filterable(false);
+                    .Filterable(false)
+                    ;
                 }
 
             })
@@ -103,7 +103,6 @@
             .Sortable()
             .Filterable()
             .ColumnContextMenu()
-
 
 )
 

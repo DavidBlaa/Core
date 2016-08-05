@@ -51,7 +51,7 @@ namespace BEXIS.Rdb.Entities
 
     public class Site: BaseRdbEntity
     {
-        public Coordinate BoundingBox { get; set; }
+        public BoundingBox BoundingBox { get; set; }
         public long Contributor { get; set; }
         public List<long> Plots { get; set; }
 
@@ -59,7 +59,7 @@ namespace BEXIS.Rdb.Entities
         {
             Plots = new List<long>();
             Contributor = 0;
-            BoundingBox = new Coordinate();
+            BoundingBox = new BoundingBox();
         }
     }
 
@@ -84,6 +84,7 @@ namespace BEXIS.Rdb.Entities
             Coordinates = new Coordinate();
             TopographicPosition = "";
             Orientation = "";
+            GroundwaterDepth = "";
             GeologicalParentMaterialofEntireSoilProfile = "";
             SoilType = "";
             Vegetation = "";
@@ -102,6 +103,22 @@ namespace BEXIS.Rdb.Entities
         {
             Longitude = "";
             Latitude = "";
+        }
+    }
+
+    public class BoundingBox
+    {
+        public string EastLongitude { get; set; }
+        public string WestLongitude { get; set; }
+        public string NorthLatitude { get; set; }
+        public string SouthLatitude { get; set; }
+
+        public BoundingBox()
+        {
+            EastLongitude = "";
+            WestLongitude = "";
+            NorthLatitude = "";
+            SouthLatitude = "";
         }
     }
 
@@ -128,6 +145,7 @@ namespace BEXIS.Rdb.Entities
             Height = "";
             MassperTree = "";
             Contributor = 0;
+            Treespecies = "";
             SamplingDate = "";
             TreeStemSlices = new List<TreeStemSlice>();
             Volumewithoutbark = "";
@@ -152,6 +170,7 @@ namespace BEXIS.Rdb.Entities
 
     public class TreeStemSlice:BaseRdbEntity
     {
+ 
         public string Treestemsegment { get; set; }
 
         public TreeStemSlice()
@@ -189,5 +208,28 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
+    public class TmpBoundingBox
+    {
+        public long Id { get; set; }
+        public string EastLongtitude { get; set; }
+        public string WestLongtitude { get; set; }
+        public string NorthLatitude { get; set; }
+        public string SouthLatitude { get; set; }
 
+        public TmpBoundingBox()
+        {
+            Id = 0;
+            EastLongtitude = "";
+            WestLongtitude = "";
+            NorthLatitude = "";
+            SouthLatitude = "";
+        }
+    }
+
+    public class TmpMeasurementHeight
+    {
+        public long Id { get; set; }
+        public long ParentId { get; set; }
+        public string Value { get; set; }
+    }
 }

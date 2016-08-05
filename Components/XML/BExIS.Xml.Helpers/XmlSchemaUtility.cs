@@ -397,6 +397,8 @@ namespace BExIS.Xml.Helpers
         {
             bool allSimple = true;
 
+            if (!elements.Any()) return false;
+
             foreach (XmlSchemaElement element in elements)
             {
                 if (!IsSimpleType(element))
@@ -404,6 +406,8 @@ namespace BExIS.Xml.Helpers
                     allSimple = false;
                 }
             }
+
+
 
             return allSimple;
         }

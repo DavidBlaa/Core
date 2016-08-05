@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using BExIS.Dlm.Entities.DataStructure;
 using BExIS.IO;
 using BExIS.IO.Transform.Input;
 using BEXIS.Rdb.Entities;
@@ -22,6 +23,8 @@ namespace BEXIS.Rdb.Helper
         private string PLOT_CSV = "plots.csv";
         private string TREE_CSV = "0trees.csv";
         private string PERSON_CSV = "Person.csv";
+        private string LOCATION_COORDIANTE_CSV = "locationsWithCoordinates2.csv";
+        private string MEASUREMENT_HEIGHT_CSV = "MeasrurmentHeight_For_Csv.csv";
 
         private string AREA = "RDB";
 
@@ -35,10 +38,83 @@ namespace BEXIS.Rdb.Helper
         private int TYPE_ID_INDEX = 7;
         private int SUPERID_INDEX = 8;
 
-        
-
-
         private List<CsvFileEntity> rowList;
+
+        #region tmp object
+
+        public List<TmpMeasurementHeight> ReadMeasurmentHeightCsv()
+        {
+            List<TmpMeasurementHeight> tmp = new List<TmpMeasurementHeight>();
+
+            try
+            {
+                string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), MEASUREMENT_HEIGHT_CSV);
+                AsciiReader reader = new AsciiReader();
+
+                if (File.Exists(path))
+                {
+                    FileStream stream = reader.Open(path);
+                    AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+                    afri.Seperator = TextSeperator.semicolon;
+                    afri.Variables = 1;
+                    afri.Data = 2;
+
+                    List<List<string>> rowsOfBB = reader.ReadFile(stream, LOCATION_COORDIANTE_CSV, afri);
+
+                    foreach (var bb in rowsOfBB)
+                    {
+                        tmp.Add(CreateMeasurementHeightFromCsvRows(bb));
+                    }
+                    
+
+                }
+
+                return tmp;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public List<TmpBoundingBox> ReadBoundingBoxesCsv()
+        {
+            List<TmpBoundingBox> tmp = new List<TmpBoundingBox>();
+
+            try
+            {
+                string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), LOCATION_COORDIANTE_CSV);
+                AsciiReader reader = new AsciiReader();
+
+                if (File.Exists(path))
+                {
+                    FileStream stream = reader.Open(path);
+                    AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+                    afri.Seperator = TextSeperator.semicolon;
+                    afri.Variables = 1;
+                    afri.Data = 2;
+
+                    List<List<string>> rowsOfBB = reader.ReadFile(stream, LOCATION_COORDIANTE_CSV, afri);
+
+                    foreach (var bb in rowsOfBB)
+                    {
+                        tmp.Add(CreateBoundingBoxFromCsvRows(bb));
+                    }
+
+
+                }
+
+                return tmp;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        #endregion
 
         public List<Site> ReadSiteCsv()
         {
@@ -291,6 +367,32 @@ namespace BEXIS.Rdb.Helper
             return tmp;
         }
 
+        private TmpBoundingBox CreateBoundingBoxFromCsvRows(List<string> row)
+        {
+            TmpBoundingBox tmp = new TmpBoundingBox();
+            if (!String.IsNullOrEmpty(row.ElementAt(1)))
+            {
+                tmp.Id = Convert.ToInt64(row.ElementAt(1));
+                tmp.EastLongtitude = row.ElementAt(9);
+                tmp.WestLongtitude = row.ElementAt(10);
+                tmp.NorthLatitude = row.ElementAt(11);
+                tmp.SouthLatitude = row.ElementAt(12);
+            }
+            return tmp;
+        }
+
+        private TmpMeasurementHeight CreateMeasurementHeightFromCsvRows(List<string> row)
+        {
+            TmpMeasurementHeight tmp = new TmpMeasurementHeight();
+            if (!String.IsNullOrEmpty(row.ElementAt(1)))
+            {
+                tmp.Id = Convert.ToInt64(row.ElementAt(0));
+                tmp.ParentId = Convert.ToInt64(row.ElementAt(1));
+                tmp.Value = row.ElementAt(3);
+            }
+            return tmp;
+        }
+
         private Site CreateSiteFromCsvRows(List<CsvFileEntity> rows, long refId,long parentId)
         {
             Site tmp = new Site();
@@ -485,7 +587,7 @@ namespace BEXIS.Rdb.Helper
                     if (x.VarCat.Equals("D"))
                     {
                         List<CsvFileEntity> diameterRows = rowList.Where(e => e.ID.Equals(x.VarId)).ToList();
-                        DiameterClass d = CreateDiameter(diameterRows);
+                        DiameterClass d = CreateDiameter(diameterRows, x.VarId);
                         tmp.Diameters.Add(d);
                     }
                 }
@@ -499,8 +601,6 @@ namespace BEXIS.Rdb.Helper
 
             return tmp;
         }
-
-        
 
         private TreeStemSlice CreateTreeStemSlice(List<CsvFileEntity> rows)
         {
@@ -539,10 +639,10 @@ namespace BEXIS.Rdb.Helper
             return tmp;
         }
 
-        private DiameterClass CreateDiameter(List<CsvFileEntity> rows)
+        private DiameterClass CreateDiameter(List<CsvFileEntity> rows, long id)
         {
             DiameterClass tmp = new DiameterClass();
-
+            tmp.Id = id;
             foreach (var x in rows)
             {
                 try

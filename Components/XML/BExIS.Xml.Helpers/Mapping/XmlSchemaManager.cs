@@ -1011,7 +1011,7 @@ namespace BExIS.Xml.Helpers.Mapping
                         max = int.MaxValue;
 
                     if (packageUsage.MetadataAttributeUsages.Where(p => p.MetadataAttribute == attribute).Count() <= 0)
-                        metadataPackageManager.AddMetadataAtributeUsage(packageUsage, attribute, element.Name, attribute.Description, min, max);
+                        metadataPackageManager.AddMetadataAtributeUsage(packageUsage, attribute, element.Name, GetDescription(element.Annotation) , min, max);
 
 
                 #region generate  MappingRoute
@@ -1113,7 +1113,7 @@ namespace BExIS.Xml.Helpers.Mapping
                     MetadataNestedAttributeUsage u1 = new MetadataNestedAttributeUsage()
                     {
                         Label = element.Name,
-                        Description = attribute.Description,
+                        Description = GetDescription(element.Annotation),
                         MinCardinality = min,
                         MaxCardinality = max,
                         Master = compoundAttribute,

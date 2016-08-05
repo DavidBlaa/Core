@@ -10,6 +10,7 @@ using BEXIS.Rdb.Helper;
 using GenCode128;
 using Vaiona.Utils.Cfg;
 
+
 namespace BExIS.Web.Shell.Areas.RDB.Controllers
 {
     public class RdbController : Controller
@@ -21,6 +22,11 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
             importManager.Load();
 
             Dictionary<string, EntitySelectorModel> listOfEntities = new Dictionary<string, EntitySelectorModel>();
+
+
+            EntitySelectorModel bb = BexisModelManager.LoadEntitySelectorModel(importManager.TmpBoundingBoxes);
+            bb.Title = "boundingboxes";
+            listOfEntities.Add(bb.Title, bb);
 
             //sites
             EntitySelectorModel m = BexisModelManager.LoadEntitySelectorModel(importManager.Sites);
@@ -62,6 +68,10 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
             importManager.ConvertAll();
 
             Dictionary<string, EntitySelectorModel> listOfEntities = new Dictionary<string, EntitySelectorModel>();
+
+            EntitySelectorModel bb = BexisModelManager.LoadEntitySelectorModel(importManager.TmpBoundingBoxes);
+            bb.Title = "boundingboxes";
+            listOfEntities.Add(bb.Title, bb);
 
             //sites
             EntitySelectorModel m = BexisModelManager.LoadEntitySelectorModel(importManager.Sites);
