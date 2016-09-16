@@ -358,42 +358,70 @@ namespace BExIS.Dlm.Services.Data
 
                 if (tupleVersionIds != null && tupleVersionIds.Count > 0)
                 {
-                    long iternations = tupleVersionIds.Count / PreferedBatchSize + 1;
+                    long iternations = tupleVersionIds.Count / PreferedBatchSize;
+                    // when the number of columns is not a an exact multiply of the batch size, an additional iteration is needed to purge the last batch of the tuples.
+                    if (iternations * PreferedBatchSize < tupleVersionIds.Count)
+                        iternations++;
+
                     for (int round = 0; round < iternations; round++)
                     {
-                        Dictionary<string, object> parameters = new Dictionary<string, object>();
-                        parameters.Add("idsList", tupleVersionIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
-                        tupleVersionRepo.Execute(string.Format(queryStr, "DataTupleVersion"), parameters);
+                        // Guards the call to the Execute funtion in cases that there is no more record to purge.
+                        // An unusual but possible case is when the number of tuples is an exact multiply of the PreferredBatchSize.
+                        // In this case, the last round's Take function takes no Id and the idsList parameter is empty, which causes the ORM
+                        // to generate an invalid DB query.
+                        if (tupleVersionIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).Count() > 0)
+                        {
+                            Dictionary<string, object> parameters = new Dictionary<string, object>();
+                            parameters.Add("idsList", tupleVersionIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
+                            tupleVersionRepo.Execute(string.Format(queryStr, "DataTupleVersion"), parameters);
+                        }
                     }
                 }
                 if (tupleIds != null && tupleIds.Count > 0)
                 {
-                    long iternations = tupleIds.Count / PreferedBatchSize + 1;
+                    long iternations = tupleIds.Count / PreferedBatchSize;
+                    if (iternations * PreferedBatchSize < tupleIds.Count)
+                        iternations++;
+
                     for (int round = 0; round < iternations; round++)
                     {
-                        Dictionary<string, object> parameters = new Dictionary<string, object>();
-                        parameters.Add("idsList", tupleIds.Skip(round*PreferedBatchSize).Take(PreferedBatchSize).ToList());
-                        tuplesRepo.Execute(string.Format(queryStr, "DataTuple"), parameters);
+                        if (tupleIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).Count() > 0)
+                        {
+                            Dictionary<string, object> parameters = new Dictionary<string, object>();
+                            parameters.Add("idsList", tupleIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
+                            tuplesRepo.Execute(string.Format(queryStr, "DataTuple"), parameters);
+                        }
                     }
                 }
                 if (contentDescriptorIds != null && contentDescriptorIds.Count > 0)
                 {
-                    long iternations = contentDescriptorIds.Count / PreferedBatchSize + 1;
+                    long iternations = contentDescriptorIds.Count / PreferedBatchSize;
+                    if (iternations * PreferedBatchSize < contentDescriptorIds.Count)
+                        iternations++;
+
                     for (int round = 0; round < iternations; round++)
                     {
-                        Dictionary<string, object> parameters = new Dictionary<string, object>();
-                        parameters.Add("idsList", contentDescriptorIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
-                        tuplesRepo.Execute(string.Format(queryStr, "ContentDescriptor"), parameters);
+                        if (contentDescriptorIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).Count() > 0)
+                        {
+                            Dictionary<string, object> parameters = new Dictionary<string, object>();
+                            parameters.Add("idsList", contentDescriptorIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
+                            tuplesRepo.Execute(string.Format(queryStr, "ContentDescriptor"), parameters);
+                        }
                     }
                 }
                 if (versionIds != null && versionIds.Count > 0)
                 {
-                    long iternations = versionIds.Count / PreferedBatchSize + 1;
+                    long iternations = versionIds.Count / PreferedBatchSize;
+                    if (iternations * PreferedBatchSize < versionIds.Count)
+                        iternations++;
                     for (int round = 0; round < iternations; round++)
                     {
-                        Dictionary<string, object> parameters = new Dictionary<string, object>();
-                        parameters.Add("idsList", versionIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
-                        versionRepo.Execute(string.Format(queryStr, "DatasetVersion"), parameters);
+                        if (versionIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).Count() > 0)
+                        {
+                            Dictionary<string, object> parameters = new Dictionary<string, object>();
+                            parameters.Add("idsList", versionIds.Skip(round * PreferedBatchSize).Take(PreferedBatchSize).ToList());
+                            versionRepo.Execute(string.Format(queryStr, "DatasetVersion"), parameters);
+                        }
                     }
                 }
                 {
@@ -774,7 +802,10 @@ namespace BExIS.Dlm.Services.Data
                 var q1 = DatasetVersionRepo.Query(p =>
                         (p.Dataset.Status == DatasetStatus.CheckedIn || p.Dataset.Status == DatasetStatus.CheckedOut)
                         && (p.Status == DatasetVersionStatus.CheckedIn || p.Status == DatasetVersionStatus.CheckedOut)
-                    ).Select(p => p.Dataset.Id).Distinct();
+                    )
+                    .Select(p => p.Dataset.Id)
+                    .OrderBy(p=>p)
+                    .Distinct();
                 return (q1.ToList());
             }
             else //just the datasets that their latest version is checked-in
@@ -782,7 +813,10 @@ namespace BExIS.Dlm.Services.Data
                 var q1 = DatasetVersionRepo.Query(p =>
                         (p.Dataset.Status == DatasetStatus.CheckedIn || p.Dataset.Status == DatasetStatus.CheckedOut) // include checked in (latest) versions of currently checked out datasets
                         && (p.Status == DatasetVersionStatus.CheckedIn)
-                    ).Select(p => p.Dataset.Id).Distinct();
+                    )
+                    .Select(p => p.Dataset.Id)
+                    .OrderBy(p => p)
+                    .Distinct();
                 return (q1.ToList());
             }
 
@@ -807,7 +841,10 @@ namespace BExIS.Dlm.Services.Data
                 var q1 = DatasetVersionRepo.Query(p =>
                         (p.Dataset.Status == DatasetStatus.CheckedIn || p.Dataset.Status == DatasetStatus.CheckedOut)
                         && (p.Status == DatasetVersionStatus.CheckedIn || p.Status == DatasetVersionStatus.CheckedOut)
-                    ).Select(p => p.Id).Distinct();
+                    )
+                    .Select(p => p.Id)
+                    .OrderBy(p=>p)
+                    .Distinct();
                 return (q1.ToList());
             }
             else //just latest checked in versions
@@ -815,7 +852,10 @@ namespace BExIS.Dlm.Services.Data
                 var q1 = DatasetVersionRepo.Query(p =>
                         (p.Dataset.Status == DatasetStatus.CheckedIn || p.Dataset.Status == DatasetStatus.CheckedOut)
                         && (p.Status == DatasetVersionStatus.CheckedIn)
-                    ).Select(p => p.Id).Distinct();
+                    )
+                    .Select(p => p.Id)
+                    .OrderBy(p => p)
+                    .Distinct();
                 return (q1.ToList());
             }
         }
