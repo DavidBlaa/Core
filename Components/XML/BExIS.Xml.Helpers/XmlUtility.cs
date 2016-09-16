@@ -198,8 +198,8 @@ namespace BExIS.Xml.Helpers
             public static XElement GetXElementByAttribute(string nodeName, string attrName, string value, XDocument xDoc)
             {
                 string name = nodeName.Replace(" ","");
-                return xDoc.Root.Descendants(name).Where(p => p.Attribute(attrName).Value.Equals(value)).FirstOrDefault();
-            }
+                return xDoc.Root.Descendants(name).FirstOrDefault(p => p.Attribute(attrName) != null && p.Attribute(attrName).Value.Equals(value));
+        }
 
             /// <summary>
             /// 
@@ -211,7 +211,7 @@ namespace BExIS.Xml.Helpers
             public static IEnumerable<XElement> GetXElementsByAttribute(string nodeName, string attrName, string value, XDocument xDoc)
             {
                 string name = nodeName.Replace(" ", "");
-                return xDoc.Root.Descendants(name).Where(p => p.Attribute(attrName).Value.Equals(value));
+                return xDoc.Root.Descendants(name).Where(p => p.Attribute(attrName)!=null && p.Attribute(attrName).Value.Equals(value));
             }
 
             /// <summary>
@@ -224,7 +224,7 @@ namespace BExIS.Xml.Helpers
             public static XElement GetXElementByAttribute(string nodeName, string attrName, string value, XElement Parent)
             {
                 string name = nodeName.Replace(" ", "");
-                return Parent.Descendants(name).Where(p => p.Attribute(attrName).Value.Equals(value)).FirstOrDefault();
+                return Parent.Descendants(name).FirstOrDefault(p => p.Attribute(attrName) != null && p.Attribute(attrName).Equals(value));
             }
 
             /// <summary>

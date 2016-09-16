@@ -137,7 +137,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             bool loadFromExternal = resetTaskManager;
             long metadataStructureId = -1;
 
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant()); ;
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Create Dataset", this.Session.GetTenant());
             ViewData["Locked"] = locked;
             ViewData["HideOptional"] = true;
 
@@ -177,7 +177,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             return PartialView("MetadataEditor", Model);
         }
 
-        public ActionResult LoadMetadataFromExternal(long entityId, string title, long metadatastructureId, long datastructureId=-1,long researchplanId=-1, string sessionKeyForMetadata="")
+        public ActionResult LoadMetadataFromExternal(long entityId, string title, long metadatastructureId, long datastructureId=-1,long researchplanId=-1, string sessionKeyForMetadata="", bool resetTaskManager = false)
         {
             bool loadFromExternal = true;
             long metadataStructureId = -1;
@@ -192,11 +192,11 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             ViewData["HideOptional"] = true;
 
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-            //if (TaskManager == null)
-            //{
+            if (TaskManager == null || resetTaskManager)
+            {
                 TaskManager = new CreateTaskmanager();
                 //loadFromExternal = true;
-            //}
+            }
 
             List<StepModelHelper> stepInfoModelHelpers = new List<StepModelHelper>();
             MetadataEditorModel Model = new MetadataEditorModel();
@@ -204,7 +204,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
             if (loadFromExternal)
             {
                 string entityClassPath = "";
-                TaskManager = new CreateTaskmanager();
+                //TaskManager = new CreateTaskmanager();
                 Session["CreateDatasetTaskmanager"] = TaskManager;
                 TaskManager.AddToBus(CreateTaskmanager.ENTITY_ID, entityId);
 
@@ -2053,23 +2053,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
 
         private bool IsImportAvavilable(long metadataStructureId)
         {
-            //todo after release 2.9.1 and merge to dev change that code and use the XmlDatasetHelper exportinformations
-
-            MetadataStructureManager MSM = new MetadataStructureManager();
-            MetadataStructure ms = MSM.Repo.Get(metadataStructureId);
-
-            if (ms.Extra != null)
-            {
-                XElement xE = XmlUtility.GetXElementByAttribute("convertRef", "name", "mappingFileImport",
-                    XmlUtility.ToXDocument((XmlDocument)ms.Extra));
-
-                if (xE == null) return false;
-
-
-                return true;
-            }
-
-            return false;
+            return XmlDatasetHelper.HasExportInformation(metadataStructureId);
         }
 
 
@@ -2691,6 +2675,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                         if (simpleElement != null && !String.IsNullOrEmpty(simpleElement.Value))
                         {
                             simpleMetadataAttributeModel.Value = simpleElement.Value;
+                            stepModelHelper.Activated = true;
                             //Debug.WriteLine(xpath + "   :    " + simpleElement.Value);
                         }
 

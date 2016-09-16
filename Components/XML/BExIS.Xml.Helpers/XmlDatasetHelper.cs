@@ -189,6 +189,38 @@ namespace BExIS.Xml.Services
             return string.Empty;
         }
 
+        public static bool HasImportInformation(long metadataStructrueId)
+        {
+            // get MetadataStructure 
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+            MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(metadataStructrueId);
+
+            XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)metadataStructure.Extra);
+            IEnumerable<XElement> tmp = XmlUtility.GetXElementsByAttribute(nodeNames.convertRef.ToString(), AttributeNames.type.ToString(),
+                TransmissionType.mappingFileImport.ToString(), xDoc);
+
+            if (tmp.Any()) return true;
+
+            return false;
+        }
+
+        public static bool HasExportInformation(long metadataStructrueId)
+        {
+            // get MetadataStructure 
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+            MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(metadataStructrueId);
+
+            XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)metadataStructure.Extra);
+            IEnumerable<XElement> tmp = XmlUtility.GetXElementsByAttribute(nodeNames.convertRef.ToString(), AttributeNames.type.ToString(),
+                TransmissionType.mappingFileExport.ToString(), xDoc);
+
+            if (tmp.Any()) return true;
+
+            return false;
+
+        }
+
+
         //todo entity extention
         public static string GetEntityType(long datasetid)
         {
