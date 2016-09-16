@@ -411,7 +411,7 @@ namespace BEXIS.Rdb.Helper
 
                     workingCopy.Metadata = XmlMetadataWriter.ToXmlDocument(metadata);
 
-                    string title = XmlDatasetHelper.GetInformation(workingCopy, AttributeNames.title);
+                    string title = XmlDatasetHelper.GetInformation(workingCopy, NameAttributeValues.title);
 
                     datasetManager.EditDatasetVersion(workingCopy, null, null, null);
                     datasetManager.CheckInDataset(dataset.Id, "Metadata was submited.", GetUsernameOrDefault());
