@@ -25,6 +25,7 @@ namespace BEXIS.Rdb.Helper
         private string PERSON_CSV = "Person.csv";
         private string LOCATION_COORDIANTE_CSV = "locationsWithCoordinates2.csv";
         private string MEASUREMENT_HEIGHT_CSV = "MeasrurmentHeight_For_Csv.csv";
+        private string SAMPLE_IDS_TXT = "sampleIds.txt"; 
 
         private string AREA = "RDB";
 
@@ -100,6 +101,42 @@ namespace BEXIS.Rdb.Helper
                     foreach (var bb in rowsOfBB)
                     {
                         tmp.Add(CreateBoundingBoxFromCsvRows(bb));
+                    }
+
+
+                }
+
+                return tmp;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public List<TmpSampleId> ReadSampleIds()
+        {
+            List<TmpSampleId> tmp = new List<TmpSampleId>();
+
+            try
+            {
+                string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), SAMPLE_IDS_TXT);
+                AsciiReader reader = new AsciiReader();
+
+                if (File.Exists(path))
+                {
+                    FileStream stream = reader.Open(path);
+                    AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+                    afri.Seperator = TextSeperator.semicolon;
+                    afri.Variables = 1;
+                    afri.Data = 2;
+
+                    List<List<string>> rowsOfSampleIds = reader.ReadFile(stream, SAMPLE_IDS_TXT, afri);
+
+                    foreach (var bb in rowsOfSampleIds)
+                    {
+                        tmp.Add(CreateSampleIdFromCsvRows(bb));
                     }
 
 
@@ -393,6 +430,18 @@ namespace BEXIS.Rdb.Helper
             return tmp;
         }
 
+        private TmpSampleId CreateSampleIdFromCsvRows(List<string> row)
+        {
+            TmpSampleId tmp = new TmpSampleId();
+            if (!String.IsNullOrEmpty(row.ElementAt(1)))
+            {
+                tmp.Id = Convert.ToInt64(row.ElementAt(0));
+                tmp.ParentId = Convert.ToInt64(row.ElementAt(1));
+                tmp.Value = row.ElementAt(3).Replace("\"","");
+            }
+            return tmp;
+        }
+
         private Site CreateSiteFromCsvRows(List<CsvFileEntity> rows, long refId,long parentId)
         {
             Site tmp = new Site();
@@ -580,6 +629,7 @@ namespace BEXIS.Rdb.Helper
                         {
                             List<CsvFileEntity> treestemsliceRows = rowList.Where(e => e.ID.Equals(x.VarId)).ToList();
                             TreeStemSlice tss = CreateTreeStemSlice(treestemsliceRows);
+
                             tmp.TreeStemSlices.Add(tss);
                         }
                     }
@@ -605,7 +655,7 @@ namespace BEXIS.Rdb.Helper
         private TreeStemSlice CreateTreeStemSlice(List<CsvFileEntity> rows)
         {
             TreeStemSlice tmp = new TreeStemSlice();
-
+           
             foreach (var x in rows)
             {
                 try
@@ -626,6 +676,8 @@ namespace BEXIS.Rdb.Helper
 
                     }
 
+                    //set stem slice systemid
+                    tmp.ParentId = x.ID;
 
                 }
                 catch (Exception ex)

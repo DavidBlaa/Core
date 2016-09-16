@@ -37,6 +37,7 @@ namespace BEXIS.Rdb.Helper
         public List<Person> Persons;
         public List<TmpBoundingBox> TmpBoundingBoxes;
         public List<TmpMeasurementHeight> TmpMeasurementHeights;
+        public List<TmpSampleId> TmpSampleIds;
 
         public RdbImportManager()
         {
@@ -45,29 +46,51 @@ namespace BEXIS.Rdb.Helper
 
         public void Load()
         {
+            try
+            {
+                RdbCsvReader reader = new RdbCsvReader();
 
-            RdbCsvReader reader = new RdbCsvReader();
+                //load emp bounding boxes list
+                TmpBoundingBoxes = reader.ReadBoundingBoxesCsv();
 
-            //load emp bounding boxes list
-            TmpBoundingBoxes = reader.ReadBoundingBoxesCsv();
+                //read extra measurementHeights
+                TmpMeasurementHeights = reader.ReadMeasurmentHeightCsv();
 
-            //read extra measurementHeights
-            TmpMeasurementHeights = reader.ReadMeasurmentHeightCsv();
+                //sampleids
+                TmpSampleIds = reader.ReadSampleIds();
 
-            //sites
-            Sites = reader.ReadSiteCsv();
+                //sites
+                Sites = reader.ReadSiteCsv();
 
-            //person
-            Persons = reader.ReadPersonCsv();
+                //person
+                Persons = reader.ReadPersonCsv();
 
-            //plots
-            Plots = reader.ReadPlotCsv();
+                //plots
+                Plots = reader.ReadPlotCsv();
 
-            //projects
-            Projects = reader.ReadProjectCsv();
+                //projects
+                Projects = reader.ReadProjectCsv();
 
-            //trees
-            Trees = reader.ReadTreeCsv();
+                //trees
+                Trees = reader.ReadTreeCsv();
+
+                //SetStemSliceBarcode
+                foreach (Tree t in Trees)
+                {
+                    foreach (var treestemslice in t.TreeStemSlices)
+                    {
+                        treestemslice.Barcode = GetBarcodeForStemSlice(treestemslice.ParentId).ToString();
+                    }
+                }
+
+
+
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
+            
         }
 
         public void ConvertAll()
@@ -346,9 +369,12 @@ namespace BEXIS.Rdb.Helper
                 //tree StemSlice postion
                 destinationXPath =
                     "Metadata/Compartment/CompartmentType/StemSlice/stemSliceType["+index+"]/Position/PositionType";
-
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = treeStemSlice.Treestemsegment;
 
+                //id
+                destinationXPath =
+                    "Metadata/Compartment/CompartmentType/StemSlice/stemSliceType[" + index + "]/Barcode/BarcodeType";
+                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = treeStemSlice.Barcode;
             }
 
             #endregion
@@ -404,6 +430,8 @@ namespace BEXIS.Rdb.Helper
             
         }
 
+        #region helpers
+
         public string GetUsernameOrDefault()
         {
             string username = string.Empty;
@@ -415,6 +443,21 @@ namespace BEXIS.Rdb.Helper
 
             return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
         }
+
+        private long GetBarcodeForStemSlice(long id)
+        {
+            long tmp = -1;
+
+            if (TmpSampleIds.Any(s => s.ParentId.Equals(id)))
+            {
+                tmp = Convert.ToInt64(
+                    TmpSampleIds.Where(s => s.ParentId.Equals(id)).FirstOrDefault().Value);
+            }
+
+            return tmp;
+        }
+
+        #endregion
 
     }
 }

@@ -130,18 +130,14 @@
 
                         bool value = (bool?) Model.Value ?? false;
 
-                        bool value = (bool?)Model.Value ?? false;
+
                         if (!locked)
                         {
 
-                            @Html.CheckBox(Model.DisplayName, value,  new { OnChange = "OnChange(this)", Name = @displayName, Id = @idInput, PackageId = @Model.Parent.Id, Title = @errorMessage });
-                        {
                              @Html.CheckBox(Model.DisplayName, value, new { OnChange = "OnChange(this)", Name = @displayName, Id = @idInput, PackageId = @Model.Parent.Id, Title = @errorMessage });
                         }
                         else
                         {
-                            @Html.CheckBox(Model.DisplayName, value, new { OnChange = "OnChange(this)", disabled="disabled", Name = @displayName, Id = @idInput, PackageId = @Model.Parent.Id, Title = @errorMessage });
-                        { 
                              @Html.CheckBox(Model.DisplayName, value, new { OnChange = "OnChange(this)", disabled="disabled", Name = @displayName, Id = @idInput, PackageId = @Model.Parent.Id, Title = @errorMessage });
                         }
 

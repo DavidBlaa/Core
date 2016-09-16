@@ -172,9 +172,11 @@ namespace BEXIS.Rdb.Entities
     {
  
         public string Treestemsegment { get; set; }
+        public string Barcode { get; set; }
 
         public TreeStemSlice()
         {
+            Barcode = "";
             Treestemsegment = "";
         }
     }
@@ -230,6 +232,11 @@ namespace BEXIS.Rdb.Entities
     {
         public long Id { get; set; }
         public long ParentId { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class TmpSampleId:BaseRdbEntity
+    {
         public string Value { get; set; }
     }
 }
