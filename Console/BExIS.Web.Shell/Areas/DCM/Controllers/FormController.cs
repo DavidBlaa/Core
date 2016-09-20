@@ -2675,7 +2675,7 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
                         if (simpleElement != null && !String.IsNullOrEmpty(simpleElement.Value))
                         {
                             simpleMetadataAttributeModel.Value = simpleElement.Value;
-                            stepModelHelper.Activated = true;
+                            setStepModelActive(stepModelHelper);
                             //Debug.WriteLine(xpath + "   :    " + simpleElement.Value);
                         }
 
@@ -2704,6 +2704,13 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         }
 
         #endregion
+
+        private void setStepModelActive(StepModelHelper model)
+        {
+            model.Activated = true;
+            if (model.Parent != null)
+                setStepModelActive(model.Parent);
+        }
 
         #region Security
 

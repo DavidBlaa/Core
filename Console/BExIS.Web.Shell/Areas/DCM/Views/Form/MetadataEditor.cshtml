@@ -85,7 +85,7 @@
 }
 
 
-<div id="MetadataEditor">
+<div id="MetadataEditor" >
 <div>
     <table>
         <tr>
@@ -198,7 +198,8 @@
     <script>
 
         $(document)
-            .ready(function() {
+            .ready(function () {
+  
                 bindMinimap();
             });
 
@@ -220,10 +221,9 @@
                     $(".minimap").remove();
                 }
 
-
                 if ($('#root')) {
-
-                    var offset = getRatioHeight($('#root').position().top)+0.05;
+                    
+                    var offset = getRatioHeight($('#root').position().top);
                    
                     var previewBody = $('#root')
                         .minimap(
@@ -237,9 +237,13 @@
                             smoothScroll: true,
                             smoothScrollDelay: 200
                         });
+
+                        $('#MetadataEditor').css("width", "90%");
+
                 }
 
             } else {
+
                 if ($(".miniregion")) {
                     $(".miniregion").remove();
                 }
@@ -247,12 +251,12 @@
                 if ($(".minimap")) {
                     $(".minimap").remove();
                 }
+
+                $('#MetadataEditor').css("width", "100%");
             }
         }
 
         function getRatioHeight(containerStart) {
-            alert(containerStart);
-            alert($(window).height());
 
             return (containerStart / $(window).height());
 
