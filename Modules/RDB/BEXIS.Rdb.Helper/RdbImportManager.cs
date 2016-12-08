@@ -31,6 +31,7 @@ namespace BEXIS.Rdb.Helper
         public RdbCsvReader reader;
 
         public List<Tree> Trees;
+        public List<Soil> Soils;
         public List<Plot> Plots;
         public List<Project> Projects;
         public List<Site> Sites;
@@ -70,6 +71,10 @@ namespace BEXIS.Rdb.Helper
 
                 //projects
                 Projects = reader.ReadProjectCsv();
+
+                //soils
+
+                Soils = reader.ReadSoilCsv();
 
                 //trees
                 Trees = reader.ReadTreeCsv();
@@ -275,8 +280,12 @@ namespace BEXIS.Rdb.Helper
                 destinationXPath = "Metadata/Tree/TreeType/Description/DescriptionType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = "ID from old Database: " +tree.Id.ToString();
 
-                //tree name
-                destinationXPath = "Metadata/Tree/TreeType/Name/NameType";
+                //Metadata/Tree/TreeType/Barcode/BarcodeType
+                destinationXPath = "Metadata/Tree/TreeType/Barcode/BarcodeType";
+                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = tree.Id.ToString();
+
+            //tree name
+            destinationXPath = "Metadata/Tree/TreeType/Name/NameType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = tree.ShortName;
 
             //tree TreeSpecies
@@ -379,8 +388,7 @@ namespace BEXIS.Rdb.Helper
 
             #endregion
 
-
-            #region create dataset
+                #region create dataset
 
             ResearchPlanManager researchPlanManager = new ResearchPlanManager();
                 ResearchPlan researchPlan = researchPlanManager.Repo.Get(1);

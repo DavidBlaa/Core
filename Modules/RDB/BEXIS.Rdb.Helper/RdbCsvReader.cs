@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,8 @@ namespace BEXIS.Rdb.Helper
         private string LOCATION_COORDIANTE_CSV = "locationsWithCoordinates2.csv";
         private string MEASUREMENT_HEIGHT_CSV = "MeasrurmentHeight_For_Csv.csv";
         private string SAMPLE_IDS_TXT = "sampleIds.txt"; 
+
+        private string ALL = "QualifierHierarchy_Query_mod.csv";
 
         private string AREA = "RDB";
 
@@ -152,6 +155,53 @@ namespace BEXIS.Rdb.Helper
         }
 
         #endregion
+
+        public List<Soil> ReadSoilCsv()
+        {
+            List<Soil> tmp = new List<Soil>();
+            try
+            {
+               
+
+                string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), ALL);
+                AsciiReader reader = new AsciiReader();
+
+                if (File.Exists(path))
+                {
+                    FileStream stream = reader.Open(path);
+                    AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+                    afri.Seperator = TextSeperator.semicolon;
+                    afri.Variables = 1;
+                    afri.Data = 2;
+
+                    List<List<string>> rowsOfSites = reader.ReadFile(stream, SITE_CSV, afri);
+                    rowList = new List<CsvFileEntity>();
+                    foreach (List<string> row in rowsOfSites)
+                    {
+                        rowList.Add(RowToAccessDBEntities(row));
+                    }
+
+                    var ids = rowList.Where(e => e.VarName == "Soil").Select(e => e.VarId).Distinct();
+
+                    foreach (long id in ids)
+                    {
+                        if (id > 0)
+                            tmp.Add(CreateSoilFromCsvRows(rowList.Where(e => e.ID.Equals(id)).ToList(), id));
+                    }
+                }
+
+                return tmp;
+
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+
+            return tmp;
+        }
 
         public List<Site> ReadSiteCsv()
         {
@@ -386,6 +436,20 @@ namespace BEXIS.Rdb.Helper
             tmp.VarValue = row[6];
             tmp.TypeID = Convert.ToInt64(row[7]);
             tmp.SuperID = Convert.ToInt64(row[8]);
+
+            return tmp;
+        }
+
+        private CsvFileEntity RowToAccessDBEntities(List<string> row)
+        {
+            CsvFileEntity tmp = new CsvFileEntity();
+
+            if(!string.IsNullOrEmpty(row[0]))tmp.ID = Convert.ToInt64(row[0]);
+            if (!string.IsNullOrEmpty(row[1])) tmp.VarId = Convert.ToInt64(row[1]);
+            tmp.VarCat = row[4];
+            tmp.VarName = row[5];
+        
+            tmp.VarValue = row[9];
 
             return tmp;
         }
@@ -650,6 +714,107 @@ namespace BEXIS.Rdb.Helper
             }
 
             return tmp;
+        }
+
+        private Soil CreateSoilFromCsvRows(List<CsvFileEntity> rows, long refId)
+        {
+            Soil tmp = new Soil();
+
+            foreach (var x in rows)
+            {
+                try
+                {
+                    setPropertyToSoil(tmp, x);
+
+                    if (x.VarCat.Equals("Sample"))
+                    {
+
+                        Console.WriteLine(x.VarName);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    throw ex;
+                }
+
+            }
+
+            #region get soilType
+
+            //get SoilType Place = Plot
+            long placeId = rowList.Where(e => e.VarId.Equals(refId)).FirstOrDefault().ID;
+            var placeObj = rowList.Where(e => e.VarId.Equals(placeId)).FirstOrDefault();
+            IEnumerable<CsvFileEntity> plotRows = new List<CsvFileEntity>();
+            //sub-plot
+            if (placeObj!=null && placeObj.VarName.ToLower().Equals("sub-plot"))
+            {
+                long plotId = rowList.Where(e => e.VarId.Equals(placeId)).FirstOrDefault().ID;
+                plotRows = rowList.Where(e => e.ID.Equals(plotId));
+                Debug.WriteLine("--------------------------------");
+                foreach (var row in plotRows)
+                {
+                    setPropertyToSoil(tmp, row);
+                    Debug.WriteLine(row.VarName + " : " + row.VarValue);
+
+                }
+
+            }
+            else
+            {
+                plotRows = rowList.Where(e => e.ID.Equals(placeId));
+                Debug.WriteLine("--------------------------------");
+                foreach (var row in plotRows)
+                {
+                    setPropertyToSoil(tmp, row);
+                    Debug.WriteLine(row.VarName + " : " + row.VarValue);
+
+                }
+            }
+            
+
+            #endregion
+
+
+
+
+            return tmp;
+        }
+
+        private Soil setPropertyToSoil(Soil soil, CsvFileEntity row)
+        {
+            if (row.VarCat.Equals("Value"))
+            {
+                PropertyInfo propertyInfo = soil.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                if (!String.IsNullOrEmpty(row.VarValue))
+                {
+                    if (propertyInfo != null)
+                    {
+                        if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                        {
+                            #region datetime not supported
+
+                            DateTime dt;
+                            if (!DateTime.TryParse(row.VarValue, out dt))
+                            {
+                                propertyInfo.SetValue(soil, dt, null);
+                            }
+
+                            #endregion
+
+                        }
+                        else
+                        {
+                            propertyInfo.SetValue(soil, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                null);
+                        }
+                    }
+
+                }
+            }
+
+            return soil;
         }
 
         private TreeStemSlice CreateTreeStemSlice(List<CsvFileEntity> rows)
