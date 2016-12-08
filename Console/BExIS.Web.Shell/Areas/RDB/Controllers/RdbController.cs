@@ -54,11 +54,6 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
             t.Title = "Trees";
             listOfEntities.Add(t.Title, t);
 
-            //Soils
-            EntitySelectorModel s = BexisModelManager.LoadEntitySelectorModel(importManager.Soils);
-            s.Title = "Soils";
-            listOfEntities.Add(s.Title, s);
-
             RdbTestModel model = new RdbTestModel();
             model.ListOfEntites = listOfEntities;
             model.Trees = importManager.Trees;
