@@ -162,11 +162,11 @@ namespace BExIS.Ddm.Providers.LuceneProvider.Searcher
         /// <returns></returns>
         public static SearchResult search(Query query, List<XmlNode> headerItemXmlNodeList)
         {
-            TopDocs docs = searcher.Search(query, 100000);
+            TopDocs docs = searcher.Search(query, 1000);
             SearchResult sro = new SearchResult();
             sro.PageSize = 10;
             sro.CurrentPage = 1;
-            sro.NumberOfHits = 100000;
+            sro.NumberOfHits = 100;
 
             List<HeaderItem> Header = new List<HeaderItem>();
             List<HeaderItem> DefaultHeader = new List<HeaderItem>();
