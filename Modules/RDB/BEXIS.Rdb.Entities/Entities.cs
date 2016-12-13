@@ -185,7 +185,7 @@ namespace BEXIS.Rdb.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public DateTime SamplingDate { get; set; }
+        public string SamplingDate { get; set; }
         public string SoilType { get; set; }
         public string Vegetation { get; set; }
         public double TotalDepth { get; set; }
@@ -197,16 +197,21 @@ namespace BEXIS.Rdb.Entities
     public class CollectionType
     {
         public long Id { get; set; }
-        public string Name { get; set; }
+        public string ShortName { get; set; }
         public double TotalDepth { get; set; }
         public List<SoilUnderClass> Soils { get; set; }
+
+        public CollectionType()
+        {
+            Soils = new List<SoilUnderClass>();
+        }
     }
 
     public class SoilUnderClass
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public DateTime SamplingDate { get; set; }
+        public string SamplingDate { get; set; }
         public List<MineralSoil> MineralSoils { get; set; }
         public List<OrganicLayer> OrganicLayers { get; set; }
 

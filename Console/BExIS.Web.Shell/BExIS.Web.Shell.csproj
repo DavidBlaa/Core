@@ -1074,7 +1074,6 @@
     <Folder Include="Areas\DIM\Views\Shared\" />
     <Folder Include="Areas\MSM\Views\Shared\" />
     <Folder Include="Areas\RDB\Views\Shared\" />
-    <Folder Include="Areas\RPM\Views\Shared\" />
     <Folder Include="Areas\SAM\Views\Shared\" />
     <Folder Include="Areas\Site\Models\" />
   </ItemGroup>
@@ -1322,6 +1321,10 @@
       <Project>{fbe3101a-791a-4eab-9b8f-f6e071f8dbdc}</Project>
       <Name>BExIS.Ddm.Providers.LuceneProvider</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Modules\DIM\BExIS.Dim.Entities\BExIS.Dim.Entities.csproj">
+      <Project>{34cad2a2-6928-458b-b8dc-af71d55f20cc}</Project>
+      <Name>BExIS.Dim.Entities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Modules\RDB\BEXIS.Rdb.Entities\BEXIS.Rdb.Entities.csproj">
       <Project>{ec2c146a-5619-48d2-9575-2f4876f8dc05}</Project>
       <Name>BEXIS.Rdb.Entities</Name>
@@ -1329,10 +1332,6 @@
     <ProjectReference Include="..\..\Modules\RDB\BEXIS.Rdb.Helper\BEXIS.Rdb.Helper.csproj">
       <Project>{941e15fa-86eb-415c-b457-b05c63eff606}</Project>
       <Name>BEXIS.Rdb.Helper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Modules\DIM\BExIS.Dim.Entities\BExIS.Dim.Entities.csproj">
-      <Project>{34cad2a2-6928-458b-b8dc-af71d55f20cc}</Project>
-      <Name>BExIS.Dim.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Modules\DIM\BExIS.Dim.Helper\BExIS.Dim.Helpers.csproj">
       <Project>{81ef18e8-dced-4980-96f9-e99124075b82}</Project>
