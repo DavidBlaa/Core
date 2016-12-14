@@ -40,3 +40,100 @@
     </ul>
     <hr />
 }
+
+<h1>Soils Stuff</h1>
+
+@foreach (var soil in Model.Soils)
+{
+    <b>Name = @soil.Name</b><br />
+    <b>ID = @soil.Id</b><br />
+    <b>RefID = @soil.RefId</b><br />
+    <b>SoilType = @soil.SoilType</b><br/>
+
+    <ul>
+        @if (soil.Profil != null)
+        {
+            <b>Profil</b>
+            <b>ID = @soil.Profil.Id</b>
+            <br/>
+            <b>totaldepth = @soil.Profil.TotalDepth</b>
+            <br/>
+            <b>name = @soil.Profil.ShortName</b>
+            <br/>
+
+            foreach (var soilunderclass in soil.Profil.Soils)
+            {
+                <li>
+                    <b>soilunderclass</b>
+                    <p>id = @soilunderclass.Id</p>
+                    <p>name = @soilunderclass.Name</p>
+                    <p>date = @soilunderclass.SamplingDate</p>
+
+                    @foreach (var mineralSoil in soilunderclass.MineralSoils)
+                    {
+                        <li>
+                            <b>mineralSoil</b>
+                            <p>id = @mineralSoil.Id</p>
+                            <p>name = @mineralSoil.Name</p>
+                            <p>Layers = @mineralSoil.Layers.Count</p>
+                        </li>
+                    }
+
+                    @foreach (var organicLayer in soilunderclass.OrganicLayers)
+                    {
+                        <li>
+                            <b>organicLayer</b>
+                            <p>id = @organicLayer.Id</p>
+                            <p>name = @organicLayer.Name</p>
+                            <p>density = @organicLayer.Density</p>
+                        </li>
+                    }
+
+                </li>
+            }
+        }
+    </ul>
+    <ul>
+        @if (soil.Bohrer != null)
+        {
+            <b>Bohrer</b>
+            <b>ID = @soil.Bohrer.Id</b>
+            <br />
+            <b>totaldepth = @soil.Bohrer.TotalDepth</b>
+            <br />
+            <b>name = @soil.Bohrer.ShortName</b>
+            <br />
+
+            foreach (var soilunderclass in soil.Bohrer.Soils)
+            {
+                <li>
+                    <b>soilunderclass</b>
+                    <p>id = @soilunderclass.Id</p>
+                    <p>name = @soilunderclass.Name</p>
+                    <p>date = @soilunderclass.SamplingDate</p>
+
+                    @foreach (var mineralSoil in soilunderclass.MineralSoils)
+                    {
+                    <li>
+                        <b>mineralSoil</b>
+                        <p>id = @mineralSoil.Id</p>
+                        <p>name = @mineralSoil.Name</p>
+                        <p>Layers = @mineralSoil.Layers.Count</p>
+                    </li>
+                    }
+
+                    @foreach (var organicLayer in soilunderclass.OrganicLayers)
+                    {
+                        <li>
+                            <b>organicLayer</b>
+                            <p>id = @organicLayer.Id</p>
+                            <p>name = @organicLayer.Name</p>
+                            <p>density = @organicLayer.Density</p>
+                        </li>
+                    }
+
+                    </li>
+            }
+        }
+    </ul>
+}

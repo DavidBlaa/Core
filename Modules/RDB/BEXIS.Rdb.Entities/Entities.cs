@@ -184,6 +184,7 @@ namespace BEXIS.Rdb.Entities
     public class Soil
     {
         public long Id { get; set; }
+        public long RefId { get; set; }
         public string Name { get; set; }
         public string SamplingDate { get; set; }
         public string SoilType { get; set; }
@@ -192,17 +193,31 @@ namespace BEXIS.Rdb.Entities
         public double PitSize { get; set; }
         public CollectionType Profil { get; set; }
         public CollectionType Bohrer { get; set; }
+
+        public Soil()
+        {
+            Name = "";
+            SamplingDate = "";
+            SoilType = "";
+            Vegetation = "";
+            TotalDepth = 0;
+            PitSize = 0;
+        }
+
     }
 
     public class CollectionType
     {
         public long Id { get; set; }
+        public long RefId { get; set; }
         public string ShortName { get; set; }
         public double TotalDepth { get; set; }
         public List<SoilUnderClass> Soils { get; set; }
 
         public CollectionType()
         {
+            ShortName = "";
+            TotalDepth = 0;
             Soils = new List<SoilUnderClass>();
         }
     }
@@ -229,14 +244,15 @@ namespace BEXIS.Rdb.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public DepthInterval DepthInterval { get; set; }
+        public DepthRange DepthRange { get; set; }
+        public double DepthInterval { get; set; }
         public double Density { get; set; }
 
         public OrganicLayer()
         {
             Id = 0;
             Name = "";
-            DepthInterval = new DepthInterval();
+            DepthRange = new DepthRange();
             Density = 0;
         }
 
@@ -246,14 +262,16 @@ namespace BEXIS.Rdb.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public DepthInterval DepthInterval { get; set; }
+        public DepthRange DepthRange { get; set; }
+        public double DepthInterval { get; set; }
+
         public List<Layer> Layers { get; set; }
 
         public MineralSoil()
         {
             Id = 0;
             Name = "";
-            DepthInterval = new DepthInterval();
+            DepthRange = new DepthRange();
             Layers = new List<Layer>();
         }
 
@@ -273,12 +291,12 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class DepthInterval
+    public class DepthRange
     {
         public double Min { get; set; }
         public double Max { get; set; }
 
-        public DepthInterval()
+        public DepthRange()
         {
             Min = 0;
             Max = 0;

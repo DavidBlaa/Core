@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
-namespace BExIS.Web.Shell.Areas.DCM.Models.CreateDataset
+namespace BExIS.Web.Shell.Areas.RDB.Models.CreateDataset
 {
     public class SetupModel
     {
-        [Display(Name = "Dataset")]
+        [Display(Name = "Sample")]
         public long SelectedDatasetId { get; set; }
 
         [Display(Name = "Metadata Structure")]

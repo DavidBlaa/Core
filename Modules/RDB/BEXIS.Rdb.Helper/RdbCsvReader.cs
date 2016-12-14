@@ -737,7 +737,7 @@ namespace BEXIS.Rdb.Helper
         private Soil CreateSoilFromCsvRows(List<CsvFileEntity> rows, long refId)
         {
             Soil tmp = new Soil();
-
+            tmp.RefId = refId;
             foreach (var x in rows)
             {
                 try
@@ -786,7 +786,7 @@ namespace BEXIS.Rdb.Helper
             {
                 IEnumerable<CsvFileEntity> varsForProfil = rowList.Where(e => e.ID.Equals(placeId));
                 CollectionType collectionType = new CollectionType();
-
+                collectionType.RefId = placeId;
                 foreach (var row in varsForProfil)
                 {
                     collectionType = setPropertyToCollectionType(collectionType, row);
@@ -974,6 +974,13 @@ namespace BEXIS.Rdb.Helper
                                 #region datetime not supported
                                 #endregion
 
+                            }else if (propertyInfo.PropertyType.Name.Contains("Min"))
+                            {
+                                tmp.DepthRange.Min = Convert.ToDouble(row.VarValue);
+                            }
+                            else if (propertyInfo.PropertyType.Name.Contains("Max"))
+                            {
+                                tmp.DepthRange.Min = Convert.ToDouble(row.VarValue);
                             }
                             else
                             {

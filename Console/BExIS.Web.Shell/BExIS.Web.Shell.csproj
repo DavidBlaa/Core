@@ -431,7 +431,10 @@
     <Compile Include="Areas\MSM\Models\TreePartialModel.cs" />
     <Compile Include="Areas\MSM\Models\TestModel.cs" />
     <Compile Include="Areas\MSM\MSMAreaRegistration.cs" />
+    <Compile Include="Areas\RDB\Controllers\CreateSampleController.cs" />
     <Compile Include="Areas\RDB\Controllers\RdbController.cs" />
+    <Compile Include="Areas\RDB\Models\ListViewItem.cs" />
+    <Compile Include="Areas\RDB\Models\SetupModel.cs" />
     <Compile Include="Areas\RDB\RDBAreaRegistration.cs" />
     <Compile Include="Areas\RPM\Classes\DataStructureIO.cs" />
     <Compile Include="Areas\RPM\Controllers\DataStructureEditController.cs" />
@@ -701,6 +704,7 @@
     <Content Include="Areas\DCM\Views\ManageMetadataStructure\_editMetadataStructureView.cshtml" />
     <Content Include="Areas\DDM\Views\Data\_fileSizeView.cshtml" />
     <Content Include="Areas\SAM\Views\Dataset\Delete.cshtml" />
+    <Content Include="Areas\RDB\Views\CreateSample\Index.cshtml" />
     <None Include="Properties\PublishProfiles\BEXIS 2.10.pubxml" />
     <None Include="Properties\PublishProfiles\bexis2 Release2.10.pubxml" />
     <None Include="Properties\PublishProfiles\BEXIS2.pubxml" />

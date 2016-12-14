@@ -9,6 +9,7 @@ namespace BExIS.Web.Shell.Areas.RDB.Models
     {
         public Dictionary<string, EntitySelectorModel> ListOfEntites;
         public List<Tree> Trees;
+        public List<Soil> Soils;
 
         public RdbTestModel()
         {
