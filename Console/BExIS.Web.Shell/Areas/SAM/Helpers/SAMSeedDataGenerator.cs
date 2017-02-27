@@ -44,7 +44,7 @@ namespace BExIS.Web.Shell.Areas.SAM.Helpers
             // Entities
             EntityManager entityManager = new EntityManager();
 
-            entityManager.CreateEntity("Dataset", "BExIS.Dlm.Entities.Data.Dataset", "BExIS.Dlm.Entities",true,true);
+            entityManager.CreateEntity("Dataset", "BExIS.Dlm.Entities.Data.Dataset", "BExIS.Dlm.Entities", true, true);
 
             // Subjects
             SubjectManager subjectManager = new SubjectManager();
@@ -103,7 +103,7 @@ namespace BExIS.Web.Shell.Areas.SAM.Helpers
             Feature f12 = featureManager.CreateFeature("Dataset Upload", "Dataset Upload", f10.Id);
             Feature f17 = featureManager.CreateFeature("Metadata Management", "Metadata Management", f10.Id);
             #endregion
-            
+
             #region admin
 
             Feature f2 = featureManager.CreateFeature("Administration", "Administration", f1.Id);
@@ -113,6 +113,12 @@ namespace BExIS.Web.Shell.Areas.SAM.Helpers
             Feature f5 = featureManager.CreateFeature("Data Permissions", "Data Permissions", f2.Id);
             Feature f7 = featureManager.CreateFeature("Search Management", "Search Management", f2.Id);
             Feature f8 = featureManager.CreateFeature("Dataset Maintenance", "Dataset Maintenance", f2.Id);
+
+            #endregion
+
+            #region rdb
+
+            Feature f100 = featureManager.CreateFeature("Sample", "Sample", f1.Id);
 
             #endregion
 
@@ -234,10 +240,17 @@ namespace BExIS.Web.Shell.Areas.SAM.Helpers
             t38.Feature = f17;
             taskManager.UpdateTask(t38);
 
+
+            #region rdb
+            Task t100 = taskManager.CreateTask("RDB", "CreateSample", "*");
+            t100.Feature = f100;
+            taskManager.UpdateTask(t100);
+            #endregion
+
             // Feature Permissions
             PermissionManager permissionManager = new PermissionManager();
             permissionManager.CreateFeaturePermission(g1.Id, f1.Id);
-            //permissionManager.CreateFeaturePermission(everyone.Id, f9.Id);
+            permissionManager.CreateFeaturePermission(everyone.Id, f9.Id);
 
             #endregion Security
         }

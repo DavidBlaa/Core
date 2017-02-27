@@ -1,5 +1,6 @@
 ﻿@using BExIS.Ddm.Model;
 @using BExIS.Web.Shell.Areas.DDM.Helpers;
+@using NHibernate.Type
 
 @model Tuple<SearchModel,IEnumerable<Facet>>
            
@@ -7,7 +8,6 @@
 @(Html.Telerik().TreeView()
        .Name("TreeView")
        .ShowCheckBox(true)
-       .ExpandAll(true)
 
        .ClientEvents(events => events
                            .OnSelect("onSelect")
@@ -18,13 +18,14 @@
 
                        .BindTo<Facet>(Model.Item1.SearchComponent.Facets, (item, facet) =>
                        {
+                           item.Expanded = Model.Item1.SearchComponent.Facets.First().Equals(facet);
 
                            item.Text = facet.DisplayName + " (" + facet.Count + ")";
                            item.Value = facet.Name;
                            item.Enabled = true;
                            item.Checkable = false;
                            item.Checked = false;
-                           item.Expanded = true;
+
                            item.LinkHtmlAttributes["class"] = "searchFacet t-headeritem bx-trunc-child";
                            item.LinkHtmlAttributes["title"] = facet.Text + " (" + facet.Count + ")";
 

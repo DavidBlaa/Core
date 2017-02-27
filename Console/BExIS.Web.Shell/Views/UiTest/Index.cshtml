@@ -255,13 +255,13 @@
     </tr>
     <tr>
         <td>Dropdown</td>
-        <td>@Html.DropDownList("test", new SelectList(testList), new { @class = "bx-dropdown" })</td>
+        <td>@Html.DropDownList("test", new SelectList(testList), new {@class = "bx-dropdown"})</td>
         <td>
             @(Html.Telerik().DropDownList()
-                         .Name("FilterList")
-                         .BindTo(new SelectList(testList))
-                         .ClientEvents(e => e.OnChange("onChange"))
-            )
+                  .Name("FilterList")
+                  .BindTo(new SelectList(testList))
+                  .ClientEvents(e => e.OnChange("onChange"))
+                  )
 
         </td>
         <td>
@@ -298,13 +298,13 @@
         <td></td>
         <td>
             @(Html.Telerik().ComboBox()
-                        .Name("SelectedDatasetId")
-                        .Placeholder("New Dataset")
-                        .Filterable()
-                        .SelectedIndex(0)
-                        .HtmlAttributes(new { @class = "bx-dropdown" })
-                        .BindTo(new SelectList(comboboxList))
-            )
+                  .Name("SelectedDatasetId")
+                  .Placeholder("New Dataset")
+                  .Filterable()
+                  .SelectedIndex(0)
+                  .HtmlAttributes(new {@class = "bx-dropdown"})
+                  .BindTo(new SelectList(comboboxList))
+                  )
         </td>
         <td>
             <select class="comboboxBootstrap">
@@ -321,30 +321,30 @@
     </tr>
     <tr>
         <td>TextBox</td>
-        <td> @Html.TextBox("test", "", new { @class = "bx-input" })</td>
+        <td> @Html.TextBox("test", "", new {@class = "bx-input"})</td>
         <td>
             autocomplete
 
             @(Html.Telerik().AutoComplete()
-                                .Name("autoComplete")
-                                .Encode(false)
+                  .Name("autoComplete")
+                  .Encode(false)
 
-                                .DataBinding(dataBinding => dataBinding
-                                    .Ajax().Select("_AutoCompleteAjaxLoading", "Home")
-                                    .Cache(false))
+                  .DataBinding(dataBinding => dataBinding
+                      .Ajax().Select("_AutoCompleteAjaxLoading", "Home")
+                      .Cache(false))
 
-                                .Filterable(filtering =>
-                                {
-                                    filtering.FilterMode(AutoCompleteFilterMode.Contains);
-                                    filtering.MinimumChars(3);
+                  .Filterable(filtering =>
+                  {
+                      filtering.FilterMode(AutoCompleteFilterMode.Contains);
+                      filtering.MinimumChars(3);
 
-                                })
-            )
+                  })
+                  )
         </td>
     </tr>
     <tr>
         <td>TextArea</td>
-        <td> @Html.TextArea("test", "", new { @class = "bx-textarea" })</td>
+        <td> @Html.TextArea("test", "", new {@class = "bx-textarea"})</td>
         <td></td>
     </tr>
     <tr>
@@ -358,6 +358,25 @@
         <td></td>
     </tr>
 </table>
+
+<h1>DISABLED Dropdowns</h1>
+
+@(Html.Telerik().ComboBox()
+        .Name("SelectedDatasetId")
+        .Placeholder("New Dataset")
+        .Filterable()
+        .SelectedIndex(0)
+        .HtmlAttributes(new { @class = "bx-dropdown" })
+        .InputHtmlAttributes(new {disabled="disabled"})
+        .BindTo(new SelectList(comboboxList))
+)
+
+@(Html.Telerik().DropDownList()
+    .Name("FilterList")
+    .BindTo(new SelectList(testList))
+    .DropDownHtmlAttributes(new { disabled = "disabled", @class="bx-disabled" })
+    .ClientEvents(e => e.OnChange("onChange"))
+)
 
 <div style="padding: 10px; width:800px;">
 

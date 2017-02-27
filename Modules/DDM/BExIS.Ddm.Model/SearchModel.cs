@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 ///
@@ -79,6 +80,26 @@ namespace BExIS.Ddm.Model
         {
 
             this.CriteriaComponent.Update(this.SearchComponent.GetSearchComponent(name, typeOf), values, multiSelect, valueSearchOperation);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="name"></param>
+        /// <param name="values"></param>
+        /// <param name="typeOf"></param>
+        /// <param name="multiSelect"></param>
+        /// <param name="range"></param>
+        /// <param name="valueSearchOperation"></param>
+        public void RemoveSearchCriteria(string name, SearchComponentBaseType typeOf)
+        {
+            SearchComponentBase searchComponentBase = this.SearchComponent.GetSearchComponent(name, typeOf);
+            SearchCriterion searchCriterion = this.CriteriaComponent.SearchCriteriaList.Where(s => s.SearchComponent.Equals(searchComponentBase))
+                .FirstOrDefault();
+
+            this.CriteriaComponent.SearchCriteriaList.Remove(searchCriterion);
         }
 
 

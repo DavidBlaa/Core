@@ -156,6 +156,9 @@ namespace BEXIS.Rdb.Helper
 
         List<Plot> plots = new List<Plot>();
 
+        private double _tmpMIN = 0;
+        private double _tmpMAX = 0;
+
         #endregion
 
         public List<Soil> ReadSoilCsv()
@@ -773,9 +776,9 @@ namespace BEXIS.Rdb.Helper
             if (plotTmp != null)
             {
                 tmp.Vegetation = plotTmp.Vegetation;
-                tmp.PitSize = plotTmp.PitSize;
+                //tmp.PitSize = plotTmp.PitSize;
                 tmp.SoilType = plotTmp.SoilType;
-                tmp.TotalDepth = plotTmp.TotalDepth;
+                //tmp.TotalDepth = plotTmp.TotalDepth;
                 //Todo eventl classiciations 
             }
 
@@ -790,18 +793,24 @@ namespace BEXIS.Rdb.Helper
                 foreach (var row in varsForProfil)
                 {
                     collectionType = setPropertyToCollectionType(collectionType, row);
+                    
                 }
+
+                collectionType.DepthRange.Min = _tmpMIN;
+                collectionType.DepthRange.Max = _tmpMAX;
 
                 //profil
                 if (collectionType.ShortName.Equals("Profil"))
                 {
-                    tmp.Profil = collectionType;
+                    tmp.Profil = new ProfilType(collectionType);
+                    tmp.Profil.TotalDepth = plotTmp.TotalDepth;
                 }
 
                 //bohrer
                 if (collectionType.ShortName.Equals("Bohrer"))
                 {
-                    tmp.Bohrer = collectionType;
+                    tmp.Bohrer = new BohrerType(collectionType);
+                    tmp.Bohrer.PitSize = plotTmp.PitSize;
                 }
 
             }
@@ -899,6 +908,8 @@ namespace BEXIS.Rdb.Helper
             return collectionType;
         }
 
+        
+
         private SoilUnderClass createSoilUnderClass(List<CsvFileEntity> rows)
         {
             SoilUnderClass tmp =  new SoilUnderClass();
@@ -972,20 +983,39 @@ namespace BEXIS.Rdb.Helper
                             if (propertyInfo.PropertyType.Name.Equals("DateTime"))
                             {
                                 #region datetime not supported
-                                #endregion
 
-                            }else if (propertyInfo.PropertyType.Name.Contains("Min"))
-                            {
-                                tmp.DepthRange.Min = Convert.ToDouble(row.VarValue);
-                            }
-                            else if (propertyInfo.PropertyType.Name.Contains("Max"))
-                            {
-                                tmp.DepthRange.Min = Convert.ToDouble(row.VarValue);
+                                #endregion
                             }
                             else
                             {
                                 propertyInfo.SetValue(tmp, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
                                     null);
+                            }
+                        }
+                        //value that is not exiting in the entity
+                        else
+                        {
+                            if (row.VarName.Contains("Min"))
+                            {
+                                if (!string.IsNullOrEmpty(row.VarValue))
+                                {
+                                    _tmpMIN = Convert.ToDouble(row.VarValue);
+                                }
+                                else
+                                {
+                                    _tmpMIN = 0;
+                                }
+                            }
+                            else if (row.VarName.Contains("Max"))
+                            {
+                                if (!string.IsNullOrEmpty(row.VarValue))
+                                {
+                                    _tmpMAX = Convert.ToDouble(row.VarValue);
+                                }
+                                else
+                                {
+                                    _tmpMAX = 0;
+                                }
                             }
                         }
 

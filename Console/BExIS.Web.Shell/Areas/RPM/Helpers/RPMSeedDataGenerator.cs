@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Web;
-using System.Xml;
-using System.Xml.Linq;
-using BExIS.Dlm.Entities.Administration;
+﻿using BExIS.Dlm.Entities.Administration;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Entities.MetadataStructure;
 using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
-using BExIS.Xml.Helpers;
-using BExIS.Xml.Services;
-using Vaiona.Utils.Cfg;
-using System.Data;
-using BExIS.Web.Shell.Areas.DCM.Controllers;
+using BExIS.Security.Services.Objects;
 using BExIS.Xml.Helpers.Mapping;
+using BExIS.Xml.Services;
 using BExISMigration;
-using Remotion.Linq.Parsing;
+using System;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Xml;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Web.Shell.Areas.RPM.Helpers
 {
@@ -63,8 +57,14 @@ namespace BExIS.Web.Shell.Areas.RPM.Helpers
             //createABCD();
 
 
-            ImportSchema("Basic ABCD", "ABCD_2.06.XSD","Dataset","BExIS.Dlm.Entities.Data.Dataset");
+            ImportSchema("Basic ABCD", "ABCD_2.06.XSD", "Dataset", "BExIS.Dlm.Entities.Data.Dataset");
             //ImportSchema("Basic Eml", "eml.xsd","dataset","BExIS.Dlm.Entities.Data.Dataset");
+
+
+            //Add Enities
+            EntityManager entityManager = new EntityManager();
+            entityManager.CreateEntity("Sample", "BEXIS.Rdb.Entities.Sample", "BEXIS.Rdb.Entities", true, true);
+
         }
 
         private static void createResearchPlan()
@@ -257,12 +257,12 @@ namespace BExIS.Web.Shell.Areas.RPM.Helpers
                     mappingFileImport,
                     mappingFileExport);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
                 throw ex;
             }
-            
+
 
         }
 
@@ -289,9 +289,9 @@ namespace BExIS.Web.Shell.Areas.RPM.Helpers
             }
 
             // add title Node
-            xmlDoc = AddReferenceToMetadatStructure(eml, "title", "Metadata/Description/DescriptionEML/Title/Title","xpath", "extra/nodeReferences/nodeRef", xmlDoc);
+            xmlDoc = AddReferenceToMetadatStructure(eml, "title", "Metadata/Description/DescriptionEML/Title/Title", "xpath", "extra/nodeReferences/nodeRef", xmlDoc);
             // add description
-            xmlDoc = AddReferenceToMetadatStructure(eml, "description", "Metadata/Description/DescriptionEML/AdditionalInformation/Information","xpath", "extra/nodeReferences/nodeRef", xmlDoc);
+            xmlDoc = AddReferenceToMetadatStructure(eml, "description", "Metadata/Description/DescriptionEML/AdditionalInformation/Information", "xpath", "extra/nodeReferences/nodeRef", xmlDoc);
 
             // add ConvertReference Mapping file node
             xmlDoc = AddReferenceToMetadatStructure(eml, "eml", "mapping_eml.xml", TransmissionType.mappingFileExport.ToString(), "extra/convertReferences/convertRef", xmlDoc);
@@ -641,9 +641,9 @@ namespace BExIS.Web.Shell.Areas.RPM.Helpers
             }
 
             // add title Node
-            xmlDoc = AddReferenceToMetadatStructure(abcd, "title", "Metadata/Description/Description/Title/Title","xpath", "extra/nodeReferences/nodeRef", xmlDoc);
+            xmlDoc = AddReferenceToMetadatStructure(abcd, "title", "Metadata/Description/Description/Title/Title", "xpath", "extra/nodeReferences/nodeRef", xmlDoc);
             // add Description
-            xmlDoc = AddReferenceToMetadatStructure(abcd, "description", "Metadata/Description/Description/Details/Details","xpath", "extra/nodeReferences/nodeRef", xmlDoc);
+            xmlDoc = AddReferenceToMetadatStructure(abcd, "description", "Metadata/Description/Description/Details/Details", "xpath", "extra/nodeReferences/nodeRef", xmlDoc);
 
 
             // add ConvertReference Mapping file node
@@ -1005,7 +1005,7 @@ namespace BExIS.Web.Shell.Areas.RPM.Helpers
 
         #region helper
 
-        private static XmlDocument AddReferenceToMetadatStructure(MetadataStructure metadataStructure, string nodeName, string nodePath,string nodeType, string destinationPath, XmlDocument xmlDoc)
+        private static XmlDocument AddReferenceToMetadatStructure(MetadataStructure metadataStructure, string nodeName, string nodePath, string nodeType, string destinationPath, XmlDocument xmlDoc)
         {
 
             xmlDoc = XmlDatasetHelper.AddReferenceToXml(xmlDoc, nodeName, nodePath, nodeType, destinationPath);

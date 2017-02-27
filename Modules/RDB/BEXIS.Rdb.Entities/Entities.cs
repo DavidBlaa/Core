@@ -189,10 +189,12 @@ namespace BEXIS.Rdb.Entities
         public string SamplingDate { get; set; }
         public string SoilType { get; set; }
         public string Vegetation { get; set; }
-        public double TotalDepth { get; set; }
-        public double PitSize { get; set; }
-        public CollectionType Profil { get; set; }
-        public CollectionType Bohrer { get; set; }
+        public long Contributor { get; set; }
+
+        //public double TotalDepth { get; set; }
+        //public double PitSize { get; set; }
+        public ProfilType Profil { get; set; }
+        public BohrerType Bohrer { get; set; }
 
         public Soil()
         {
@@ -200,8 +202,9 @@ namespace BEXIS.Rdb.Entities
             SamplingDate = "";
             SoilType = "";
             Vegetation = "";
-            TotalDepth = 0;
-            PitSize = 0;
+            Contributor = 0;
+            //TotalDepth = 0;
+            //PitSize = 0;
         }
 
     }
@@ -211,16 +214,61 @@ namespace BEXIS.Rdb.Entities
         public long Id { get; set; }
         public long RefId { get; set; }
         public string ShortName { get; set; }
-        public double TotalDepth { get; set; }
         public List<SoilUnderClass> Soils { get; set; }
+        public DepthRange DepthRange { get; set; }
 
         public CollectionType()
         {
             ShortName = "";
-            TotalDepth = 0;
             Soils = new List<SoilUnderClass>();
+            DepthRange = new DepthRange();
+
         }
     }
+
+    public class ProfilType:CollectionType
+    {
+
+        public double TotalDepth { get; set; }
+
+        public ProfilType()
+        {
+            TotalDepth = 0;
+        }
+
+        public ProfilType(CollectionType collectionType)
+        {
+            ShortName = collectionType.ShortName;
+            Soils = collectionType.Soils;
+            Id = collectionType.Id;
+            RefId = collectionType.RefId;
+            TotalDepth = 0;
+            DepthRange = collectionType.DepthRange;
+        }
+    }
+
+    public class BohrerType : CollectionType
+    {
+        public double PitSize { get; set; }
+        
+
+        public BohrerType()
+        {
+            PitSize = 0;
+        }
+
+        public BohrerType(CollectionType collectionType)
+        {
+            ShortName = collectionType.ShortName;
+            Soils = collectionType.Soils;
+            Id = collectionType.Id;
+            RefId = collectionType.RefId;
+            PitSize = 0;
+            DepthRange = collectionType.DepthRange;
+        }
+    }
+
+   
 
     public class SoilUnderClass
     {
@@ -244,15 +292,15 @@ namespace BEXIS.Rdb.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public DepthRange DepthRange { get; set; }
-        public double DepthInterval { get; set; }
+        //public DepthRange DepthRange { get; set; }
+        //public double DepthInterval { get; set; }
         public double Density { get; set; }
 
         public OrganicLayer()
         {
             Id = 0;
             Name = "";
-            DepthRange = new DepthRange();
+            //DepthRange = new DepthRange();
             Density = 0;
         }
 
@@ -262,7 +310,7 @@ namespace BEXIS.Rdb.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public DepthRange DepthRange { get; set; }
+        //public DepthRange DepthRange { get; set; }
         public double DepthInterval { get; set; }
 
         public List<Layer> Layers { get; set; }
@@ -271,7 +319,7 @@ namespace BEXIS.Rdb.Entities
         {
             Id = 0;
             Name = "";
-            DepthRange = new DepthRange();
+            //DepthRange = new DepthRange();
             Layers = new List<Layer>();
         }
 

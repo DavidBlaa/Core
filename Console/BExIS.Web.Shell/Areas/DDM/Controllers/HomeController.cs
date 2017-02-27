@@ -349,8 +349,24 @@ namespace BExIS.Web.Shell.Areas.DDM.Controllers
         {
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>() as ISearchProvider;
 
-            UpdatePropertiesDic(node, value);
-            provider.WorkingSearchModel.UpdateSearchCriteria(node, value.ToString(), SearchComponentBaseType.Property);
+            var property =
+                provider.DefaultSearchModel.SearchComponent.Properties.Where(p => p.DataSourceKey.Equals(node)).FirstOrDefault();
+
+            if (property != null && String.IsNullOrEmpty(value))
+            {
+                //remove property
+                if (PropertiesDic.ContainsKey(node))
+                {
+                    PropertiesDic.Remove(node);
+                    provider.WorkingSearchModel.RemoveSearchCriteria(node, SearchComponentBaseType.Property);
+                }
+            }
+            else
+            {
+                UpdatePropertiesDic(node, value);
+                provider.WorkingSearchModel.UpdateSearchCriteria(node, value.ToString(), SearchComponentBaseType.Property);
+            }
+
 
             return PartialView("_searchBreadcrumb", provider.Get(provider.WorkingSearchModel.CriteriaComponent, 10, 1));
         }
@@ -361,9 +377,22 @@ namespace BExIS.Web.Shell.Areas.DDM.Controllers
         public ActionResult FilterByCheckBox(string value, string node, bool isChecked)
         {
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>() as ISearchProvider;
-            UpdatePropertiesDic(node, value);
-            provider.WorkingSearchModel.UpdateSearchCriteria(node, value.ToString(), SearchComponentBaseType.Property);
+            var property = provider.DefaultSearchModel.SearchComponent.Properties.Where(p => p.DataSourceKey.Equals(node)).FirstOrDefault();
 
+            if (property != null && String.IsNullOrEmpty(value))
+            {
+                //remove property
+                if (PropertiesDic.ContainsKey(node))
+                {
+                    PropertiesDic.Remove(node);
+                    provider.WorkingSearchModel.RemoveSearchCriteria(node, SearchComponentBaseType.Property);
+                }
+            }
+            else
+            {
+                UpdatePropertiesDic(node, value);
+                provider.WorkingSearchModel.UpdateSearchCriteria(node, value.ToString(), SearchComponentBaseType.Property);
+            }
             return PartialView("_searchBreadcrumb", provider.Get(provider.WorkingSearchModel.CriteriaComponent));
         }
 

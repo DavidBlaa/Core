@@ -14,8 +14,16 @@
     {
         value = Model.DefaultValue;
     }
-    
- 
+
+    <input type="radio"
+       id="@Model.DataSourceKey"
+       name="@Model.DataSourceKey"
+       runat="server"
+       onclick="confirmSubmit(this)"
+       checked="True"
+       value="" />@Model.DefaultValue
+
+
     @foreach (var itemValue in Model.Values)
     {
         if (value == itemValue.ToString())
@@ -51,10 +59,6 @@
                 $(".searchBreadcrumbNavigation").html(response);
             });
 
-//            $.post('@Url.Action("UpdateContent", "Home", new RouteValueDictionary { { "area", "DDM" } })', {}, function (response) {
-//                $("#resultContent").html(response);
-
-//            })
 
             $.post('@Url.Action("UpdateFacets", "Home", new RouteValueDictionary { { "area", "DDM" } })', {}, function (response) {
                 $("#searchTreeView").html(response);

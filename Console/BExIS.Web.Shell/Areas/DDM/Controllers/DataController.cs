@@ -74,6 +74,7 @@ namespace BExIS.Web.Shell.Areas.DDM.Controllers
             {
                 dsv = dm.GetDatasetLatestVersion(id);
 
+
                 MetadataStructureManager msm = new MetadataStructureManager();
                 dsv.Dataset.MetadataStructure = msm.Repo.Get(dsv.Dataset.MetadataStructure.Id);
 
