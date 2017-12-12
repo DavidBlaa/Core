@@ -6,11 +6,10 @@ using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
-using BExIS.Security.Entities.Objects;
+using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
-using BExIS.Security.Services.Subjects;
 using BExIS.Xml.Helpers;
-using BExIS.Xml.Services;
 using BEXIS.Rdb.Entities;
 using System;
 using System.Collections.Generic;
@@ -35,9 +34,12 @@ namespace BEXIS.Rdb.Helper
         public List<TmpMeasurementHeight> TmpMeasurementHeights;
         public List<TmpSampleId> TmpSampleIds;
 
+        private XmlDatasetHelper xmlDatasetHelper;
+
         public RdbImportManager()
         {
             reader = new RdbCsvReader();
+            xmlDatasetHelper = new XmlDatasetHelper();
         }
 
         public void Load()
@@ -451,15 +453,8 @@ namespace BEXIS.Rdb.Helper
             // add security
             if (GetUsernameOrDefault() != "DEFAULT")
             {
-                PermissionManager pm = new PermissionManager();
-                SubjectManager sm = new SubjectManager();
-
-                BExIS.Security.Entities.Subjects.User user = sm.GetUserByName(GetUsernameOrDefault());
-
-                foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
-                {
-                    pm.CreateDataPermission(user.Id, 1, dataset.Id, rightType);
-                }
+                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), dataset.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
             }
 
             if (datasetManager.IsDatasetCheckedOutFor(dataset.Id, GetUsernameOrDefault()) ||
@@ -469,10 +464,12 @@ namespace BEXIS.Rdb.Helper
 
                 workingCopy.Metadata = XmlMetadataWriter.ToXmlDocument(metadata);
 
-                string title = XmlDatasetHelper.GetInformation(workingCopy, NameAttributeValues.title);
+
 
                 datasetManager.EditDatasetVersion(workingCopy, null, null, null);
                 datasetManager.CheckInDataset(dataset.Id, "Metadata was submited.", GetUsernameOrDefault());
+
+                string title = xmlDatasetHelper.GetInformation(dataset.Id, NameAttributeValues.title);
 
                 ////add to index
                 //// ToDo check which SearchProvider it is, default luceneprovider
@@ -1350,15 +1347,8 @@ namespace BEXIS.Rdb.Helper
             // add security
             if (GetUsernameOrDefault() != "DEFAULT")
             {
-                PermissionManager pm = new PermissionManager();
-                SubjectManager sm = new SubjectManager();
-
-                BExIS.Security.Entities.Subjects.User user = sm.GetUserByName(GetUsernameOrDefault());
-
-                foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
-                {
-                    pm.CreateDataPermission(user.Id, 1, dataset.Id, rightType);
-                }
+                EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), dataset.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
             }
 
             if (datasetManager.IsDatasetCheckedOutFor(dataset.Id, GetUsernameOrDefault()) ||
@@ -1370,13 +1360,15 @@ namespace BEXIS.Rdb.Helper
 
                 workingCopy.Metadata = XmlMetadataWriter.ToXmlDocument(metadata);
 
-                string title = XmlDatasetHelper.GetInformation(workingCopy, NameAttributeValues.title);
+
 
                 Debug.WriteLine("store ");
 
                 datasetManager.EditDatasetVersion(workingCopy, null, null, null);
                 datasetManager.CheckInDataset(dataset.Id, "Metadata was submited.", GetUsernameOrDefault());
                 Debug.WriteLine("stored ");
+
+                string title = xmlDatasetHelper.GetInformation(dataset.Id, NameAttributeValues.title);
 
                 ////add to index
                 //// ToDo check which SearchProvider it is, default luceneprovider

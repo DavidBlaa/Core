@@ -338,24 +338,8 @@ namespace BExIS.Modules.Ddm.UI.Controllers
         {
             ISearchProvider provider = IoCFactory.Container.ResolveForSession<ISearchProvider>();
 
-            var property =
-                provider.DefaultSearchModel.SearchComponent.Properties.Where(p => p.DataSourceKey.Equals(node)).FirstOrDefault();
-
-            if (property != null && String.IsNullOrEmpty(value))
-            {
-                //remove property
-                if (PropertiesDic.ContainsKey(node))
-                {
-                    PropertiesDic.Remove(node);
-                    provider.WorkingSearchModel.RemoveSearchCriteria(node, SearchComponentBaseType.Property);
-                }
-            }
-            else
-            {
-                UpdatePropertiesDic(node, value);
-                provider.WorkingSearchModel.UpdateSearchCriteria(node, value.ToString(), SearchComponentBaseType.Property);
-            }
-
+            UpdatePropertiesDic(node, value);
+            provider.WorkingSearchModel.UpdateSearchCriteria(node, value.ToString(), SearchComponentBaseType.Property);
 
             return PartialView("_searchBreadcrumb", provider.Get(provider.WorkingSearchModel.CriteriaComponent, 10, 1));
         }
