@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Manifest moduleId="rdb" displayName="Research Database Module" version="1.0.0" builtin="true">
+  <Description>
+    DDM provides a sophisticated search facility over registered data sets.
+  </Description>
+  <Assemblies>
+      <Assembly fullName="BExIS.Rdb.Entities" role="" />
+      <Assembly fullName="BExIS.Rdb.Helper" role="" />
+  </Assemblies>
+  <Dependencies>
+    <!--<Dependency moduleId="dcm" version="*.*.*" />-->
+  </Dependencies>
+  <Exports>
+    <Export tag="menubar" id="createSample" order="1"
+             title="Create Sample" description="Create new Sample" icon=""
+             controller="CreateSample" action="index"
+             extends="./menubarRoot/sample" />
+  </Exports>
+  <EntityActions>
+    <EntityAction id="showSample" entity="sample" controller="Sample" action="Show" area="Rdb" modus="show"/>
+  </EntityActions>
+</Manifest>

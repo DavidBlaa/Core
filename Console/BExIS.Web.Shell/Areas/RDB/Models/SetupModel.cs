@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
-namespace BExIS.Web.Shell.Areas.DCM.Models.CreateDataset
+
+namespace BExIS.Modules.Rdb.UI.Models
 {
     public class SetupModel
     {
-        [Display(Name = "Dataset")]
+        [Display(Name = "Samples")]
         public long SelectedDatasetId { get; set; }
 
         [Display(Name = "Metadata Structure")]

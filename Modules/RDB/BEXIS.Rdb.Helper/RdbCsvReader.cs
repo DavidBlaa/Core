@@ -1,21 +1,16 @@
-﻿using System;
+﻿using BExIS.IO;
+using BExIS.IO.Transform.Input;
+using BExIS.Rdb.Entities;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.IO;
-using BExIS.IO.Transform.Input;
-using BEXIS.Rdb.Entities;
 using Vaiona.Utils.Cfg;
 
-namespace BEXIS.Rdb.Helper
+namespace BExIS.Rdb.Helper
 {
     public class RdbCsvReader
     {
@@ -26,7 +21,7 @@ namespace BEXIS.Rdb.Helper
         private string PERSON_CSV = "Person.csv";
         private string LOCATION_COORDIANTE_CSV = "locationsWithCoordinates2.csv";
         private string MEASUREMENT_HEIGHT_CSV = "MeasrurmentHeight_For_Csv.csv";
-        private string SAMPLE_IDS_TXT = "sampleIds.txt"; 
+        private string SAMPLE_IDS_TXT = "sampleIds.txt";
 
         private string ALL = "QualifierHierarchy_Query_mod.csv";
 
@@ -69,7 +64,7 @@ namespace BEXIS.Rdb.Helper
                     {
                         tmp.Add(CreateMeasurementHeightFromCsvRows(bb));
                     }
-                    
+
 
                 }
 
@@ -166,7 +161,7 @@ namespace BEXIS.Rdb.Helper
             List<Soil> tmp = new List<Soil>();
             try
             {
-               
+
 
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), ALL);
                 AsciiReader reader = new AsciiReader();
@@ -191,10 +186,10 @@ namespace BEXIS.Rdb.Helper
                         }
                         catch (Exception ex)
                         {
-                            
+
                             throw ex;
                         }
-                        
+
                     }
 
                     var ids = rowList.Where(e => e.VarName == "Soil").Select(e => e.VarId).Distinct();
@@ -248,7 +243,7 @@ namespace BEXIS.Rdb.Helper
                     foreach (long id in ids)
                     {
                         long parentid = rowList.Where(e => e.ID.Equals(id)).FirstOrDefault().SuperID;
-                        tmp.Add(CreateSiteFromCsvRows(rowList.Where(e => e.ID.Equals(id)).ToList(),id, parentid));
+                        tmp.Add(CreateSiteFromCsvRows(rowList.Where(e => e.ID.Equals(id)).ToList(), id, parentid));
                     }
 
                 }
@@ -381,13 +376,13 @@ namespace BEXIS.Rdb.Helper
                         rowList.Add(RowToTreeFileEntities(row));
                     }
 
-                    var ids = rowList.Where(e => e.Name == "Tree" && e.ID != 0).Select(e=>e.ID).Distinct();
+                    var ids = rowList.Where(e => e.Name == "Tree" && e.ID != 0).Select(e => e.ID).Distinct();
 
                     foreach (long id in ids)
                     {
-                        if(id>0)
-                        //long parentid = rowList.Where(e => e.ID.Equals(id)).FirstOrDefault().SuperID;
-                        tmp.Add(CreateTreeFromCsvRows(rowList.Where(e => e.ID.Equals(id) && e.Name.Equals("Tree")).ToList(), id));
+                        if (id > 0)
+                            //long parentid = rowList.Where(e => e.ID.Equals(id)).FirstOrDefault().SuperID;
+                            tmp.Add(CreateTreeFromCsvRows(rowList.Where(e => e.ID.Equals(id) && e.Name.Equals("Tree")).ToList(), id));
                     }
 
                 }
@@ -421,7 +416,7 @@ namespace BEXIS.Rdb.Helper
                     afri.Variables = 1;
                     afri.Data = 2;
 
-        
+
                     List<List<string>> rowsOfPerson = reader.ReadFile(stream, PERSON_CSV, afri);
                     foreach (List<string> row in rowsOfPerson)
                     {
@@ -462,11 +457,11 @@ namespace BEXIS.Rdb.Helper
         {
             CsvFileEntity tmp = new CsvFileEntity();
 
-            if(!string.IsNullOrEmpty(row[0]))tmp.ID = Convert.ToInt64(row[0]);
+            if (!string.IsNullOrEmpty(row[0])) tmp.ID = Convert.ToInt64(row[0]);
             if (!string.IsNullOrEmpty(row[1])) tmp.VarId = Convert.ToInt64(row[1]);
             tmp.VarCat = row[4];
             tmp.VarName = row[5];
-        
+
             tmp.VarValue = row[9];
 
             return tmp;
@@ -519,12 +514,12 @@ namespace BEXIS.Rdb.Helper
             {
                 tmp.Id = Convert.ToInt64(row.ElementAt(0));
                 tmp.ParentId = Convert.ToInt64(row.ElementAt(1));
-                tmp.Value = row.ElementAt(3).Replace("\"","");
+                tmp.Value = row.ElementAt(3).Replace("\"", "");
             }
             return tmp;
         }
 
-        private Site CreateSiteFromCsvRows(List<CsvFileEntity> rows, long refId,long parentId)
+        private Site CreateSiteFromCsvRows(List<CsvFileEntity> rows, long refId, long parentId)
         {
             Site tmp = new Site();
             tmp.RefId = refId;
@@ -533,23 +528,23 @@ namespace BEXIS.Rdb.Helper
 
             foreach (var x in rows)
             {
-                    //set properties
-                    if (x.VarCat.Equals("V"))
+                //set properties
+                if (x.VarCat.Equals("V"))
+                {
+                    PropertyInfo propertyInfo = tmp.GetType().GetProperty(x.VarName.Replace(" ", ""));
+                    if (!String.IsNullOrEmpty(x.VarValue))
                     {
-                        PropertyInfo propertyInfo = tmp.GetType().GetProperty(x.VarName.Replace(" ", ""));
-                        if (!String.IsNullOrEmpty(x.VarValue))
-                        {
-                            propertyInfo.SetValue(tmp, Convert.ChangeType(x.VarValue, propertyInfo.PropertyType), null);
-                        }
+                        propertyInfo.SetValue(tmp, Convert.ChangeType(x.VarValue, propertyInfo.PropertyType), null);
                     }
+                }
 
-                    if (x.VarCat.Equals("P"))
+                if (x.VarCat.Equals("P"))
+                {
+                    if (x.VarName.Equals("Plot"))
                     {
-                        if (x.VarName.Equals("Plot"))
-                        {
-                            tmp.Plots.Add(x.VarId);
-                        }
+                        tmp.Plots.Add(x.VarId);
                     }
+                }
             }
 
             return tmp;
@@ -704,7 +699,7 @@ namespace BEXIS.Rdb.Helper
                             {
                                 propertyInfo.SetValue(tmp, Convert.ChangeType(x.VarValue, propertyInfo.PropertyType), null);
                             }
-                            
+
                         }
                     }
 
@@ -767,7 +762,7 @@ namespace BEXIS.Rdb.Helper
             var placeObj = rowList.Where(e => e.VarId.Equals(placeId)).FirstOrDefault();
 
             long plotId = 0;
-            if (placeObj!=null && placeObj.VarName.ToLower().Equals("sub-plot"))
+            if (placeObj != null && placeObj.VarName.ToLower().Equals("sub-plot"))
                 plotId = rowList.Where(e => e.VarId.Equals(placeId)).FirstOrDefault().ID;
             else
                 plotId = placeId;
@@ -793,7 +788,7 @@ namespace BEXIS.Rdb.Helper
                 foreach (var row in varsForProfil)
                 {
                     collectionType = setPropertyToCollectionType(collectionType, row);
-                    
+
                 }
 
                 collectionType.DepthRange.Min = _tmpMIN;
@@ -834,10 +829,10 @@ namespace BEXIS.Rdb.Helper
 
                             DateTime dt;
 
-                            string[] formats = { "dd.MM.YYYY",""};
+                            string[] formats = { "dd.MM.YYYY", "" };
 
 
-                            if (DateTime.TryParseExact(row.VarValue, "dd.MM.YYYY", new CultureInfo("de-DE"), DateTimeStyles.None ,out dt))
+                            if (DateTime.TryParseExact(row.VarValue, "dd.MM.YYYY", new CultureInfo("de-DE"), DateTimeStyles.None, out dt))
                             {
                                 Debug.WriteLine(row.VarValue);
                                 dt = DateTime.Parse(row.VarValue);
@@ -846,7 +841,7 @@ namespace BEXIS.Rdb.Helper
                             }
                             else
                             {
-                                Debug.WriteLine("_--->"+row.VarValue);
+                                Debug.WriteLine("_--->" + row.VarValue);
                             }
 
                             #endregion
@@ -901,24 +896,24 @@ namespace BEXIS.Rdb.Helper
             if (row.VarCat.Equals("Sample"))
             {
                 List<CsvFileEntity> soilUnderClassRows = rowList.Where(e => e.ID.Equals(row.VarId)).ToList();
-                if(soilUnderClassRows.Any())
+                if (soilUnderClassRows.Any())
                     collectionType.Soils.Add(createSoilUnderClass(soilUnderClassRows));
             }
 
             return collectionType;
         }
 
-        
+
 
         private SoilUnderClass createSoilUnderClass(List<CsvFileEntity> rows)
         {
-            SoilUnderClass tmp =  new SoilUnderClass();
+            SoilUnderClass tmp = new SoilUnderClass();
 
             foreach (var row in rows)
             {
                 tmp = setPropertytoSoilUnderClass(tmp, row);
             }
-            
+
             return tmp;
         }
 
@@ -1104,7 +1099,7 @@ namespace BEXIS.Rdb.Helper
         private TreeStemSlice CreateTreeStemSlice(List<CsvFileEntity> rows)
         {
             TreeStemSlice tmp = new TreeStemSlice();
-           
+
             foreach (var x in rows)
             {
                 try

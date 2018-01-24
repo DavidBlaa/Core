@@ -1,17 +1,17 @@
-﻿using System;
+﻿using BExIS.Modules.Rdb.UI.Models;
+using BExIS.Rdb.Helper;
+using BExIS.Web.Shell.Helpers;
+using BExIS.Web.Shell.Models;
+using GenCode128;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Web.Mvc;
-using BExIS.Web.Shell.Areas.RDB.Models;
-using BExIS.Web.Shell.Helpers;
-using BExIS.Web.Shell.Models;
-using BEXIS.Rdb.Helper;
-using GenCode128;
 using Vaiona.Utils.Cfg;
 
 
-namespace BExIS.Web.Shell.Areas.RDB.Controllers
+namespace BExIS.Modules.RDB.UI.Controllers
 {
     public class RdbController : Controller
     {

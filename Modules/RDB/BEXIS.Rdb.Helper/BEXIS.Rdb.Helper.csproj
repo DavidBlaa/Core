@@ -7,8 +7,8 @@
     <ProjectGuid>{941E15FA-86EB-415C-B457-B05C63EFF606}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BEXIS.Rdb.Helper</RootNamespace>
-    <AssemblyName>BEXIS.Rdb.Helper</AssemblyName>
+    <RootNamespace>BExIS.Rdb.Helper</RootNamespace>
+    <AssemblyName>BExIS.Rdb.Helper</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -97,9 +97,9 @@
       <Project>{8519eac6-fbf8-48b3-813f-e0b9d3cc4a52}</Project>
       <Name>BExIS.Ddm.Api</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BEXIS.Rdb.Entities\BEXIS.Rdb.Entities.csproj">
+    <ProjectReference Include="..\BEXIS.Rdb.Entities\BExIS.Rdb.Entities.csproj">
       <Project>{ec2c146a-5619-48d2-9575-2f4876f8dc05}</Project>
-      <Name>BEXIS.Rdb.Entities</Name>
+      <Name>BExIS.Rdb.Entities</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

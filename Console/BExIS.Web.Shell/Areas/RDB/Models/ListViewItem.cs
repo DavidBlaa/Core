@@ -1,5 +1,5 @@
 ﻿
-namespace BExIS.Web.Shell.Areas.RDB.Models
+namespace BExIS.Modules.Rdb.UI.Models
 {
     public class ListViewItem
     {
@@ -24,7 +24,7 @@ namespace BExIS.Web.Shell.Areas.RDB.Models
         }
     }
 
-    public class ListViewItemWithType:ListViewItem
+    public class ListViewItemWithType : ListViewItem
     {
         public string Type { get; set; }
 
@@ -33,7 +33,7 @@ namespace BExIS.Web.Shell.Areas.RDB.Models
             Type = "No Type";
         }
 
-        public ListViewItemWithType(long id, string title, string description = "",string type = "")
+        public ListViewItemWithType(long id, string title, string description = "", string type = "")
         {
             Id = id;
             Title = title;

@@ -103,9 +103,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Dim.Services", "Modul
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RDB", "RDB", "{34076FBC-17DB-45C0-91BB-F4EF3E2FBAD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BEXIS.Rdb.Entities", "Modules\RDB\BEXIS.Rdb.Entities\BEXIS.Rdb.Entities.csproj", "{EC2C146A-5619-48D2-9575-2F4876F8DC05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Rdb.Entities", "Modules\RDB\BEXIS.Rdb.Entities\BExIS.Rdb.Entities.csproj", "{EC2C146A-5619-48D2-9575-2F4876F8DC05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BEXIS.Rdb.Helper", "Modules\RDB\BEXIS.Rdb.Helper\BEXIS.Rdb.Helper.csproj", "{941E15FA-86EB-415C-B457-B05C63EFF606}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Rdb.Helper", "Modules\RDB\BEXIS.Rdb.Helper\BExIS.Rdb.Helper.csproj", "{941E15FA-86EB-415C-B457-B05C63EFF606}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.Dim.UI", "Console\BExIS.Web.Shell\Areas\DIM\BExIS.Modules.Dim.UI.csproj", "{9BFFFD11-03C6-47DF-9CC9-F458A9A49377}"
 EndProject
@@ -126,6 +126,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BAM", "BAM", "{DA992FC5-E6EF-4DDA-A868-472F6964852C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.Bam.UI", "Console\BExIS.Web.Shell\Areas\BAM\BExIS.Modules.Bam.UI.csproj", "{4C00A9C4-5A27-485A-BC14-147567B29332}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.Rdb.UI", "Console\BExIS.Web.Shell\Areas\RDB\BExIS.Modules.Rdb.UI.csproj", "{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -609,6 +611,18 @@ Global
 		{4C00A9C4-5A27-485A-BC14-147567B29332}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4C00A9C4-5A27-485A-BC14-147567B29332}.Release|x86.ActiveCfg = Release|Any CPU
 		{4C00A9C4-5A27-485A-BC14-147567B29332}.Release|x86.Build.0 = Release|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Debug|x86.Build.0 = Debug|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|x86.ActiveCfg = Release|Any CPU
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -670,6 +684,7 @@ Global
 		{02239D68-C0FF-4508-AB8A-02E52658CF31} = {6DFE3B65-ABEA-4162-B1BE-C4ED25A43114}
 		{DA992FC5-E6EF-4DDA-A868-472F6964852C} = {692AFF14-3A57-47D8-912F-093EC8F561C4}
 		{4C00A9C4-5A27-485A-BC14-147567B29332} = {DA992FC5-E6EF-4DDA-A868-472F6964852C}
+		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA} = {34076FBC-17DB-45C0-91BB-F4EF3E2FBAD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35

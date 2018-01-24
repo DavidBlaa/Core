@@ -6,11 +6,11 @@ using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
+using BExIS.Rdb.Entities;
 using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Xml.Helpers;
-using BEXIS.Rdb.Entities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +18,7 @@ using System.Linq;
 using System.Web;
 using System.Xml.Linq;
 
-namespace BEXIS.Rdb.Helper
+namespace BExIS.Rdb.Helper
 {
     public class RdbImportManager
     {
@@ -762,16 +762,10 @@ namespace BEXIS.Rdb.Helper
             //destinationXPath = "Metadata/SampleType/soilSampleType/PitSize/PitSizeType";
             //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = "";
 
-
-            //Sampling Type Core/Profil
-            destinationXPath = "Metadata/SampleType/soilSampleType/SamplingType/soilSamplingType";
-            XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = "Profil";
-
-
-
             #region Soil Profil
             if (soil.Profil != null)
             {
+
                 Debug.WriteLine("start Profil Infos");
 
                 ////Soil profil id
@@ -779,17 +773,17 @@ namespace BEXIS.Rdb.Helper
                 //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Profil.Id.ToString();
 
                 //Soil profil name
-                destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/Name/NameType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/Name/NameType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Profil.ShortName;
 
                 //Soil profil total depth
-                destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/TotalDepth/TotalDepthType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/TotalDepth/TotalDepthType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Profil.TotalDepth.ToString();
 
-                destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/DepthRange/depthRangeType/Min/MinType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/DepthRange/depthRangeType/Min/MinType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Profil.DepthRange.Min.ToString();
 
-                destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/DepthRange/depthRangeType/Max/MaxType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/DepthRange/depthRangeType/Max/MaxType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Profil.DepthRange.Max.ToString();
 
                 //soilunderclass
@@ -815,13 +809,11 @@ namespace BEXIS.Rdb.Helper
                         //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soilunderclass.Name;
 
                         //soil sampletype
-                        destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                           "]/SampleType/SampleTypeType";
+                        destinationXPath = "Metadata/SampleType/soilSampleType/SampleType/SampleTypeType";
                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.SoilType;
 
                         //soil sampleDate
-                        destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                           "]/SampleDate/SampleDateType";
+                        destinationXPath = "Metadata/SampleType/soilSampleType/SampleDate/SampleDateType";
                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.SamplingDate;
 
                         #region mineralsoils
@@ -830,48 +822,21 @@ namespace BEXIS.Rdb.Helper
                         {
                             Debug.WriteLine("start mineralsoil");
 
-                            for (int j = 1; j < soilunderclass.MineralSoils.Count; j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                        "]/MineralSoil/mineralSoilType",
-                                        metadata);
-                                XElement newTmp = tmp;
-                                tmp.AddAfterSelf(newTmp);
-                            }
-
-                            XElement parentMS =
-                                XmlUtility.GetXElementByXPath(
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/MineralSoil", metadata);
-                            for (int j = 1; j <= XmlUtility.GetChildren(parentMS).Count(); j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                        "]/MineralSoil/mineralSoilType[" +
-                                        j + "]", metadata);
-                                tmp.SetAttributeValue("number", j);
-                            }
-
                             for (int j = 0; j < soilunderclass.MineralSoils.Count; j++)
                             {
                                 MineralSoil mineralsoil = soilunderclass.MineralSoils.ElementAt(j);
                                 int indexMS = j + 1;
                                 //mineralsoil Barcode
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/MineralSoil/mineralSoilType[" +
-                                    indexMS + "]/Barcode/BarcodeType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Barcode/BarcodeType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     mineralsoil.Id.ToString();
                                 //mineralsoil name
-                                destinationXPath =
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/MineralSoil/mineralSoilType[" +
-                                    indexMS + "]/Name/NameType";
-                                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = mineralsoil.Name;
+                                //destinationXPath =
+                                //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
+                                //    "]/MineralSoil/mineralSoilType[" +
+                                //    indexMS + "]/Name/NameType";
+                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = mineralsoil.Name;
                                 ////mineralsoil DepthInterval min
                                 //destinationXPath =
                                 //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
@@ -881,9 +846,7 @@ namespace BEXIS.Rdb.Helper
                                 //    mineralsoil.DepthRange.Min.ToString();
                                 //mineralsoil DepthInterval max
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/MineralSoil/mineralSoilType[" +
-                                    indexMS + "]/DepthInterval/DepthIntervalType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/DepthInterval/DepthIntervalType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     mineralsoil.DepthInterval.ToString();
 
@@ -891,33 +854,6 @@ namespace BEXIS.Rdb.Helper
 
                                 if (mineralsoil.Layers.Count > 0)
                                 {
-                                    for (int k = 1; k < mineralsoil.Layers.Count; k++)
-                                    {
-                                        Debug.WriteLine("start layer");
-
-                                        XElement tmp =
-                                            XmlUtility.GetXElementByXPath(
-                                                "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                                "]/MineralSoil/mineralSoilType[" + indexMS + "]/Layer/mineralLayerType",
-                                                metadata);
-                                        XElement newTmp = tmp;
-                                        tmp.AddAfterSelf(newTmp);
-                                    }
-
-                                    XElement parentLa =
-                                        XmlUtility.GetXElementByXPath(
-                                            "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType[" + indexMS + "]/Layer",
-                                            metadata);
-                                    for (int k = 1; k <= XmlUtility.GetChildren(parentLa).Count(); k++)
-                                    {
-                                        XElement tmp =
-                                            XmlUtility.GetXElementByXPath(
-                                                "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                                "]/MineralSoil/mineralSoilType[" + indexMS + "]/Layer/mineralLayerType[" +
-                                                k + "]", metadata);
-                                        tmp.SetAttributeValue("number", k);
-                                    }
 
                                     for (int k = 0; k < mineralsoil.Layers.Count; k++)
                                     {
@@ -925,25 +861,25 @@ namespace BEXIS.Rdb.Helper
                                         int indexLa = k + 1;
                                         //layer Barcode
                                         destinationXPath =
-                                            "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType[" + indexMS + "]/Layer/mineralLayerType[" +
-                                            indexLa + "]/Barcode/BarcodeType";
+                                            "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Layer/mineralLayerType/Barcode/BarcodeType";
                                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                             layer.Id.ToString();
                                         //layer horizon
                                         destinationXPath =
-                                            "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType[" + indexMS + "]/Layer/mineralLayerType[" +
-                                            indexLa + "]/Horizon/HorizonType";
+                                            "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Layer/mineralLayerType/Horizon/HorizonType";
                                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = layer.Horizon;
 
                                         //layer Volume
                                         destinationXPath =
-                                            "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType[" + indexMS + "]/Layer/mineralLayerType[" +
-                                            indexLa + "]/Volume/VolumeType";
+                                            "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Layer/mineralLayerType/Volume/VolumeType";
                                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                             layer.Volume.ToString();
+
+
+                                        //create a dataset for each layer
+
+
+                                        createDataset(unStructuredDataStructure, metadataStructure, metadata);
                                     }
                                 }
 
@@ -960,30 +896,7 @@ namespace BEXIS.Rdb.Helper
                         {
                             Debug.WriteLine("start organic layer");
 
-                            for (int j = 1; j < soilunderclass.OrganicLayers.Count; j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                        "]/OrganicLayer/organicLayerType",
-                                        metadata);
-                                XElement newTmp = tmp;
-                                tmp.AddAfterSelf(newTmp);
-                            }
 
-                            XElement parentMS =
-                                XmlUtility.GetXElementByXPath(
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer", metadata);
-                            for (int j = 1; j <= XmlUtility.GetChildren(parentMS).Count(); j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                        "]/OrganicLayer/organicLayerType[" +
-                                        j + "]", metadata);
-                                tmp.SetAttributeValue("number", j);
-                            }
 
                             for (int j = 0; j < soilunderclass.OrganicLayers.Count; j++)
                             {
@@ -991,48 +904,18 @@ namespace BEXIS.Rdb.Helper
                                 int indexOL = j + 1;
                                 //organiclayer Barcode
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer/organicLayerType[" +
-                                    indexOL + "]/Barcode/BarcodeType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/OrganicLayer/organicLayerType/Barcode/BarcodeType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     organicLayer.Id.ToString();
-                                //organiclayer name
-                                destinationXPath =
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer/organicLayerType[" +
-                                    indexOL + "]/Name/NameType";
-                                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = organicLayer.Name;
-
-                                ////organiclayer DepthRange min
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                //    "]/OrganicLayer/organicLayerType[" +
-                                //    indexOL + "]/DepthRange/depthRangeType/Min/MinType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    organicLayer.DepthRange.Min.ToString();
-                                ////organiclayer DepthRange max
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                //    "]/OrganicLayer/organicLayerType[" +
-                                //    indexOL + "]/DepthRange/depthRangeType/Max/MaxType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    organicLayer.DepthRange.Max.ToString();
-
-                                ////organiclayer DepthInterval mx
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                //    "]/OrganicLayer/organicLayerType[" +
-                                //    indexOL + "]/DepthInterval/DepthIntervalType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    organicLayer.DepthRange.Max.ToString();
 
                                 //organiclayer density
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer/organicLayerType[" +
-                                    indexOL + "]/Density/DensityType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/OrganicLayer/organicLayerType/Density/DensityType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     organicLayer.Density.ToString();
+
+
+                                createDataset(unStructuredDataStructure, metadataStructure, metadata);
                             }
 
 
@@ -1048,24 +931,20 @@ namespace BEXIS.Rdb.Helper
             #region Soil Bohrer
             if (soil.Bohrer != null)
             {
-                Debug.WriteLine("start borher layer");
-
+                Debug.WriteLine("start bohrer layer");
                 ////Soil profil id
                 //destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/Barcode/BarcodeType";
                 //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.Id.ToString();
 
                 //Soil profil name
-                destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/Name/NameType";
-                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.ShortName;
-
-                destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/DepthRange/depthRangeType/Min/MinType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/DepthRange/depthRangeType/Min/MinType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.DepthRange.Min.ToString();
 
-                destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/DepthRange/depthRangeType/Max/MaxType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/DepthRange/depthRangeType/Max/MaxType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.DepthRange.Max.ToString();
 
                 //Soil PitSizeType
-                destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/PitSize/PitSizeType";
+                destinationXPath = "Metadata/SampleType/soilSampleType/PitSize/PitSizeType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.PitSize.ToString();
 
                 ////Soil profil total depth / length
@@ -1097,45 +976,18 @@ namespace BEXIS.Rdb.Helper
                         //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soilunderclass.Name;
 
                         //soil sampletype
-                        destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                            "]/SampleType/SampleTypeType";
+                        destinationXPath = "Metadata/SampleType/soilSampleType/SamplingType/SamplingTypeType";
                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.SoilType;
 
                         //soil sampleDate
-                        destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                            "]/SampleDate/SampleDateType";
+                        destinationXPath = "Metadata/SampleType/soilSampleType/SampleDate/SampleDateType";
                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.SamplingDate;
 
                         #region mineralsoils
 
                         if (soilunderclass.MineralSoils.Count > 0)
                         {
-                            Debug.WriteLine("start MineralSoils ");
-
-                            for (int j = 1; j < soilunderclass.MineralSoils.Count; j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                        "]/MineralSoil/mineralSoilType",
-                                        metadata);
-                                XElement newTmp = tmp;
-                                tmp.AddAfterSelf(newTmp);
-                            }
-
-                            XElement parentMS =
-                                XmlUtility.GetXElementByXPath(
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/MineralSoil", metadata);
-                            for (int j = 1; j <= XmlUtility.GetChildren(parentMS).Count(); j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                        "]/MineralSoil/mineralSoilType[" +
-                                        j + "]", metadata);
-                                tmp.SetAttributeValue("number", j);
-                            }
+                            Debug.WriteLine("start mineralsoil");
 
                             for (int j = 0; j < soilunderclass.MineralSoils.Count; j++)
                             {
@@ -1143,35 +995,25 @@ namespace BEXIS.Rdb.Helper
                                 int indexMS = j + 1;
                                 //mineralsoil Barcode
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/MineralSoil/mineralSoilType[" + indexMS + "]/Barcode/BarcodeType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Barcode/BarcodeType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     mineralsoil.Id.ToString();
                                 //mineralsoil name
-                                destinationXPath =
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/MineralSoil/mineralSoilType[" + indexMS + "]/Name/NameType";
-                                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = mineralsoil.Name;
+                                //destinationXPath =
+                                //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
+                                //    "]/MineralSoil/mineralSoilType[" +
+                                //    indexMS + "]/Name/NameType";
+                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = mineralsoil.Name;
                                 ////mineralsoil DepthInterval min
                                 //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                //    "]/MineralSoil/mineralSoilType[" + indexMS +
-                                //    "]/DepthRange/depthRangeType/Min/MinType";
+                                //    "Metadata/Sample/soilSample/Profil/profileType/Soil/soilType2[" + index +
+                                //    "]/MineralSoil/mineralSoilType[" +
+                                //    indexMS + "]/DepthRange/depthRangeType/Min/MinType";
                                 //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                 //    mineralsoil.DepthRange.Min.ToString();
-                                ////mineralsoil DepthInterval max
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                //    "]/MineralSoil/mineralSoilType[" + indexMS +
-                                //    "]/DepthRange/depthRangeType/Max/MaxType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    mineralsoil.DepthRange.Max.ToString();
-
-                                //organiclayer DepthInterval mx
+                                //mineralsoil DepthInterval max
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/MineralSoil/mineralSoilType[" +
-                                    indexMS + "]/DepthInterval/DepthIntervalType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/DepthInterval/DepthIntervalType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     mineralsoil.DepthInterval.ToString();
 
@@ -1179,33 +1021,6 @@ namespace BEXIS.Rdb.Helper
 
                                 if (mineralsoil.Layers.Count > 0)
                                 {
-                                    for (int k = 1; k < mineralsoil.Layers.Count; k++)
-                                    {
-                                        Debug.WriteLine("start layers ");
-
-                                        XElement tmp =
-                                            XmlUtility.GetXElementByXPath(
-                                                "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                                "]/MineralSoil/mineralSoilType/Layer/mineralLayerType",
-                                                metadata);
-                                        XElement newTmp = tmp;
-                                        tmp.AddAfterSelf(newTmp);
-                                    }
-
-                                    XElement parentLa =
-                                        XmlUtility.GetXElementByXPath(
-                                            "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType/Layer",
-                                            metadata);
-                                    for (int k = 1; k <= XmlUtility.GetChildren(parentLa).Count(); k++)
-                                    {
-                                        XElement tmp =
-                                            XmlUtility.GetXElementByXPath(
-                                                "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                                "]/MineralSoil/mineralSoilType/Layer/mineralLayerType[" +
-                                                k + "]", metadata);
-                                        tmp.SetAttributeValue("number", k);
-                                    }
 
                                     for (int k = 0; k < mineralsoil.Layers.Count; k++)
                                     {
@@ -1213,26 +1028,25 @@ namespace BEXIS.Rdb.Helper
                                         int indexLa = k + 1;
                                         //layer Barcode
                                         destinationXPath =
-                                            "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType/Layer/mineralLayerType[" +
-                                            indexLa + "]/Barcode/BarcodeType";
+                                            "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Layer/mineralLayerType/Barcode/BarcodeType";
                                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                             layer.Id.ToString();
                                         //layer horizon
                                         destinationXPath =
-                                            "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType/Layer/mineralLayerType[" +
-                                            indexLa + "]/Horizon/HorizonType";
-                                        XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                            layer.Horizon;
+                                            "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Layer/mineralLayerType/Horizon/HorizonType";
+                                        XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = layer.Horizon;
 
                                         //layer Volume
                                         destinationXPath =
-                                            "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                            "]/MineralSoil/mineralSoilType/Layer/mineralLayerType[" +
-                                            indexLa + "]/Volume/VolumeType";
+                                            "Metadata/SampleType/soilSampleType/Soil/soilType2/MineralSoil/mineralSoilType/Layer/mineralLayerType/Volume/VolumeType";
                                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                             layer.Volume.ToString();
+
+
+                                        //create a dataset for each layer
+
+
+                                        createDataset(unStructuredDataStructure, metadataStructure, metadata);
                                     }
                                 }
 
@@ -1247,32 +1061,9 @@ namespace BEXIS.Rdb.Helper
 
                         if (soilunderclass.OrganicLayers.Count > 0)
                         {
-                            Debug.WriteLine("start OrganicLayers ");
+                            Debug.WriteLine("start organic layer");
 
-                            for (int j = 1; j < soilunderclass.OrganicLayers.Count; j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                        "]/OrganicLayer/organicLayerType",
-                                        metadata);
-                                XElement newTmp = tmp;
-                                tmp.AddAfterSelf(newTmp);
-                            }
 
-                            XElement parentMS =
-                                XmlUtility.GetXElementByXPath(
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer", metadata);
-                            for (int j = 1; j <= XmlUtility.GetChildren(parentMS).Count(); j++)
-                            {
-                                XElement tmp =
-                                    XmlUtility.GetXElementByXPath(
-                                        "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                        "]/OrganicLayer/organicLayerType[" +
-                                        j + "]", metadata);
-                                tmp.SetAttributeValue("number", j);
-                            }
 
                             for (int j = 0; j < soilunderclass.OrganicLayers.Count; j++)
                             {
@@ -1280,44 +1071,18 @@ namespace BEXIS.Rdb.Helper
                                 int indexOL = j + 1;
                                 //organiclayer Barcode
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer/organicLayerType[" + indexOL + "]/Barcode/BarcodeType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/OrganicLayer/organicLayerType/Barcode/BarcodeType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     organicLayer.Id.ToString();
-                                //organiclayer name
-                                destinationXPath =
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer/organicLayerType[" + indexOL + "]/Name/NameType";
-                                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = organicLayer.Name;
-
-                                ////organiclayer DepthInterval min
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                //    "]/OrganicLayer/organicLayerType[" + indexOL +
-                                //    "]/DepthRange/depthRangeType/Min/MinType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    organicLayer.DepthRange.Min.ToString();
-                                ////organiclayer DepthInterval max
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                //    "]/OrganicLayer/organicLayerType[" + indexOL +
-                                //    "]/DepthRange/depthRangeType/Max/MaxType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    organicLayer.DepthRange.Max.ToString();
-
-                                //destinationXPath =
-                                //    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                //    "]/OrganicLayer/organicLayerType[" + indexOL +
-                                //    "]/DepthInterval/DepthIntervalType";
-                                //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
-                                //    organicLayer.DepthInterval.ToString();
 
                                 //organiclayer density
                                 destinationXPath =
-                                    "Metadata/Sample/soilSample/Bohrer/bohrerType/Soil/soilType2[" + index +
-                                    "]/OrganicLayer/organicLayerType[" + indexOL + "]/Density/DensityType";
+                                    "Metadata/SampleType/soilSampleType/Soil/soilType2/OrganicLayer/organicLayerType/Density/DensityType";
                                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value =
                                     organicLayer.Density.ToString();
+
+
+                                createDataset(unStructuredDataStructure, metadataStructure, metadata);
                             }
 
 
@@ -1333,6 +1098,17 @@ namespace BEXIS.Rdb.Helper
             #endregion
 
             #region create dataset
+
+
+
+            #endregion
+
+
+        }
+
+
+        private void createDataset(DataStructure unStructuredDataStructure, MetadataStructure metadataStructure, XDocument metadata)
+        {
             Debug.WriteLine("start create ");
 
             ResearchPlanManager researchPlanManager = new ResearchPlanManager();
@@ -1348,7 +1124,7 @@ namespace BEXIS.Rdb.Helper
             if (GetUsernameOrDefault() != "DEFAULT")
             {
                 EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), dataset.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Sample", typeof(Dataset), dataset.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
             }
 
             if (datasetManager.IsDatasetCheckedOutFor(dataset.Id, GetUsernameOrDefault()) ||
@@ -1365,7 +1141,7 @@ namespace BEXIS.Rdb.Helper
                 Debug.WriteLine("store ");
 
                 datasetManager.EditDatasetVersion(workingCopy, null, null, null);
-                datasetManager.CheckInDataset(dataset.Id, "Metadata was submited.", GetUsernameOrDefault());
+                datasetManager.CheckInDataset(dataset.Id, "Metadata was submited.", GetUsernameOrDefault(), ViewCreationBehavior.None);
                 Debug.WriteLine("stored ");
 
                 string title = xmlDatasetHelper.GetInformation(dataset.Id, NameAttributeValues.title);
@@ -1376,15 +1152,12 @@ namespace BEXIS.Rdb.Helper
                 //    IoCFactory.Container.ResolveForSession<ISearchProvider>() as ISearchProvider;
                 //provider?.UpdateSingleDatasetIndex(dataset.Id, IndexingAction.CREATE);
 
+
             }
 
             Debug.WriteLine("FINISHeD ");
             Debug.WriteLine("******************* ");
-            #endregion
-
-
         }
-
 
         #region helpers
 

@@ -10,15 +10,14 @@ using BExIS.Dlm.Services.Administration;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
-using BExIS.Security.Entities.Objects;
+using BExIS.Modules.Rdb.UI.Models;
+using BExIS.Security.Entities.Authorization;
+using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Subjects;
-using BExIS.Web.Shell.Areas.RDB.Models;
-using BExIS.Web.Shell.Areas.RDB.Models.CreateDataset;
 using BExIS.Web.Shell.Helpers;
 using BExIS.Web.Shell.Models;
 using BExIS.Xml.Helpers;
-using BExIS.Xml.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,11 +29,12 @@ using Vaiona.Logging;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
 
-namespace BExIS.Web.Shell.Areas.RDB.Controllers
+namespace BExIS.Modules.Rdb.UI.Controllers
 {
     public class CreateSampleController : Controller
     {
         private CreateTaskmanager TaskManager;
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
         #region Create a Sample Setup Page
 
@@ -205,7 +205,7 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
                         TaskManager.AddToBus(CreateTaskmanager.RESEARCHPLAN_ID,
                             datasetVersion.Dataset.ResearchPlan.Id);
                         TaskManager.AddToBus(CreateTaskmanager.ENTITY_TITLE,
-                            XmlDatasetHelper.GetInformation(datasetVersion, NameAttributeValues.title));
+                            xmlDatasetHelper.GetInformation(datasetVersion.Dataset.Id, NameAttributeValues.title));
 
                         // set datastructuretype
                         TaskManager.AddToBus(CreateTaskmanager.DATASTRUCTURE_TYPE,
@@ -478,17 +478,11 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
                     datasetId = ds.Id;
 
                     // add security
+                    // add security
                     if (GetUsernameOrDefault() != "DEFAULT")
                     {
-                        PermissionManager pm = new PermissionManager();
-                        SubjectManager sm = new SubjectManager();
-
-                        BExIS.Security.Entities.Subjects.User user = sm.GetUserByName(GetUsernameOrDefault());
-
-                        foreach (RightType rightType in Enum.GetValues(typeof(RightType)).Cast<RightType>())
-                        {
-                            pm.CreateDataPermission(user.Id, 1, ds.Id, rightType);
-                        }
+                        EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
+                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Sample", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                     }
 
                 }
@@ -509,7 +503,7 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
                         workingCopy.Metadata = XmlMetadataWriter.ToXmlDocument(xMetadata);
                     }
 
-                    string title = XmlDatasetHelper.GetInformation(workingCopy, NameAttributeValues.title);
+                    string title = xmlDatasetHelper.GetInformation(datasetId, NameAttributeValues.title);
                     if (String.IsNullOrEmpty(title)) title = "No Title available.";
 
                     TaskManager.AddToBus(CreateTaskmanager.ENTITY_TITLE, title);//workingCopy.Metadata.SelectNodes("Metadata/Description/Description/Title/Title")[0].InnerText);
@@ -705,8 +699,8 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
 
             foreach (MetadataStructure metadataStructure in msm.Repo.Get())
             {
-                if (XmlDatasetHelper.IsActive(metadataStructure.Id) &&
-                    XmlDatasetHelper.HasEntityType(metadataStructure.Id, "BEXIS.Rdb.Entities.Sample"))
+                if (xmlDatasetHelper.IsActive(metadataStructure.Id) &&
+                    xmlDatasetHelper.HasEntityType(metadataStructure.Id, "BExIS.Dlm.Entities.Data.Dataset", "Sample"))
                 {
                     string title = metadataStructure.Name;
 
@@ -744,31 +738,40 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
 
         public List<ListViewItem> LoadDatasetViewList()
         {
-            PermissionManager pm = new PermissionManager();
-            SubjectManager subjectManager = new SubjectManager();
-            DatasetManager datasetManager = new DatasetManager();
             List<ListViewItem> temp = new List<ListViewItem>();
 
+            DatasetManager datasetManager = new DatasetManager();
+            EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
             //get all datasetsid where the current userer has access to
-            long userid = -1;
-            if (subjectManager.ExistsUsername(GetUsernameOrDefault()))
-                userid = subjectManager.GetUserByName(GetUsernameOrDefault()).Id;
+            UserManager userManager = new UserManager();
+            XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
-            if (userid != -1)
+            try
             {
-                foreach (long id in pm.GetAllDataIds(userid, 1, RightType.Update))
+
+                List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), "Dataset",
+                    typeof(Dataset), RightType.Write);
+
+                foreach (long id in datasetIds)
                 {
                     if (datasetManager.IsDatasetCheckedIn(id))
                     {
-                        string title = XmlDatasetHelper.GetInformation(id, NameAttributeValues.title);
-                        string description = XmlDatasetHelper.GetInformation(id, NameAttributeValues.description);
+                        string title = xmlDatasetHelper.GetInformation(id, NameAttributeValues.title);
+                        string description = xmlDatasetHelper.GetInformation(id, NameAttributeValues.description);
 
                         temp.Add(new ListViewItem(id, title, description));
                     }
                 }
-            }
 
-            return temp.OrderBy(p => p.Title).ToList();
+
+                return temp.OrderBy(p => p.Title).ToList();
+            }
+            finally
+            {
+                datasetManager.Dispose();
+                entityPermissionManager.Dispose();
+                userManager.Dispose();
+            }
         }
 
         private void setAdditionalFunctions()

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BEXIS.Rdb.Entities
+namespace BExIS.Rdb.Entities
 {
     public class CsvFileEntity
     {
@@ -39,7 +36,7 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class Project: BaseRdbEntity
+    public class Project : BaseRdbEntity
     {
         public List<long> Campaigns { get; set; }
     }
@@ -49,7 +46,7 @@ namespace BEXIS.Rdb.Entities
         public List<long> Projects { get; set; }
     }
 
-    public class Site: BaseRdbEntity
+    public class Site : BaseRdbEntity
     {
         public BoundingBox BoundingBox { get; set; }
         public long Contributor { get; set; }
@@ -122,7 +119,7 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class Tree:BaseRdbEntity
+    public class Tree : BaseRdbEntity
     {
         public string Age { get; set; }
         public string Volume { get; set; }
@@ -151,12 +148,12 @@ namespace BEXIS.Rdb.Entities
             Volumewithoutbark = "";
             FireScars = "";
 
-            Diameters= new List<DiameterClass>();
+            Diameters = new List<DiameterClass>();
             TreeStemSlices = new List<TreeStemSlice>();
         }
     }
 
-    public class DiameterClass:BaseRdbEntity
+    public class DiameterClass : BaseRdbEntity
     {
         public string Diameter { get; set; }
         public string MeasurementHeight { get; set; }
@@ -168,9 +165,9 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class TreeStemSlice:BaseRdbEntity
+    public class TreeStemSlice : BaseRdbEntity
     {
- 
+
         public string Treestemsegment { get; set; }
         public string Barcode { get; set; }
 
@@ -226,7 +223,7 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class ProfilType:CollectionType
+    public class ProfilType : CollectionType
     {
 
         public double TotalDepth { get; set; }
@@ -250,7 +247,7 @@ namespace BEXIS.Rdb.Entities
     public class BohrerType : CollectionType
     {
         public double PitSize { get; set; }
-        
+
 
         public BohrerType()
         {
@@ -268,7 +265,7 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-   
+
 
     public class SoilUnderClass
     {
@@ -363,12 +360,12 @@ namespace BEXIS.Rdb.Entities
         public string Fax { get; set; }
         public string EMail { get; set; }
         public string Url { get; set; }
-        
+
 
         public Person()
         {
             Id = 0;
-            First_Name  = "";
+            First_Name = "";
             Last_Name = "";
             Second_Name = "";
             Title = "";
@@ -405,7 +402,7 @@ namespace BEXIS.Rdb.Entities
         public string Value { get; set; }
     }
 
-    public class TmpSampleId:BaseRdbEntity
+    public class TmpSampleId : BaseRdbEntity
     {
         public string Value { get; set; }
     }

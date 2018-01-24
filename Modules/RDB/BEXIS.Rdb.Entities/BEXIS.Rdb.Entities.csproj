@@ -7,8 +7,8 @@
     <ProjectGuid>{EC2C146A-5619-48D2-9575-2F4876F8DC05}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BEXIS.Rdb.Entities</RootNamespace>
-    <AssemblyName>BEXIS.Rdb.Entities</AssemblyName>
+    <RootNamespace>BExIS.Rdb.Entities</RootNamespace>
+    <AssemblyName>BExIS.Rdb.Entities</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

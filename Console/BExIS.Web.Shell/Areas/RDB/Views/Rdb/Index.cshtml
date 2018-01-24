@@ -1,4 +1,4 @@
-﻿@model BExIS.Web.Shell.Areas.RDB.Models.RdbTestModel
+﻿@model BExIS.Modules.Rdb.UI.Models.RdbTestModel
 
 <h2>Data from the old research database</h2>
 
@@ -7,7 +7,7 @@
     <h1>@viewmodel.Key</h1>
     <hr />
 
-    @Html.Partial("_EntitySelectorView", viewmodel.Value);
+    @Html.Partial("_EntitySelectorView", viewmodel.Values);
 
     <hr />
 }
