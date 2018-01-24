@@ -10,6 +10,7 @@ using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Utilities;
+using BExIS.UI.Helpers;
 using BExIS.Xml.Helpers;
 using Ionic.Zip;
 using System;
@@ -75,9 +76,9 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
         public ActionResult ShowData(long id)
         {
+
             DatasetManager dm = new DatasetManager();
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-
 
             try
             {
@@ -132,6 +133,52 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 dm.Dispose();
                 entityPermissionManager.Dispose();
+            }
+        }
+
+        public ActionResult Show(long id)
+        {
+
+            //get the researchobject (cuurently called dataset) to get the id of a metadata structure
+            Dataset researcobject = this.GetUnitOfWork().GetReadOnlyRepository<Dataset>().Get(id);
+            long metadataStrutcureId = researcobject.MetadataStructure.Id;
+
+            string entityName = xmlDatasetHelper.GetEntityNameFromMetadatStructure(metadataStrutcureId, new Dlm.Services.MetadataStructure.MetadataStructureManager());
+            string entityType = xmlDatasetHelper.GetEntityTypeFromMetadatStructure(metadataStrutcureId, new Dlm.Services.MetadataStructure.MetadataStructureManager());
+
+
+            //ToDo in the entity table there must be the information
+            EntityManager entityManager = new EntityManager();
+
+            var entity = entityManager.Entities.Where(e => e.Name.Equals(entityName)).FirstOrDefault();
+
+            string moduleId = "";
+            var node = entity.Extra.SelectSingleNode("extra/modules/module");
+
+
+            if (node != null) moduleId = node.Attributes["value"].Value;
+
+            string modus = "show";
+            string defaultAction = "ShowData";
+
+            var action = EntityViewerHelper.GetEntityViewAction(entityName, moduleId, modus);
+            if (action == null) RedirectToAction(defaultAction, new { id });
+
+            try
+            {
+
+                //var view = this.Render(action.Item1, action.Item2, action.Item3, new RouteValueDictionary()
+                //{
+                //    { "id", id }
+                //});
+
+                //return Content(view.ToHtmlString(), "text/html");
+                return RedirectToAction(action.Item3, action.Item2, new { area = action.Item1, id = id });
+            }
+            catch
+            {
+
+                return RedirectToAction(defaultAction, new { id });
             }
         }
 

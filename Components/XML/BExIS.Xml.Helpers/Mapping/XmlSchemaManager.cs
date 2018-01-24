@@ -593,9 +593,11 @@ namespace BExIS.Xml.Helpers.Mapping
                 foreach (XmlSchemaObject obj in Schema.Items)
                 {
                     if (obj is XmlSchemaElement)
+                    {
                         root = (XmlSchemaElement)obj;
-                    //HACK find first xsd element
-                    break;
+                        //HACK find first xsd element
+                        break;
+                    }
                 }
 
 
@@ -734,6 +736,9 @@ namespace BExIS.Xml.Helpers.Mapping
                         //Debug.Writeline("--------------------------");
 
                         string typeName = GetTypeOfName(element.Name);
+
+
+
                         string rootName = ((XmlSchemaElement)root).Name;
 
                         string xpathInternal = "Metadata/" + element.Name + "/" + typeName;
@@ -746,6 +751,13 @@ namespace BExIS.Xml.Helpers.Mapping
                             //Debug.WriteLine("-->" + element.Name);
                             if (package == null)
                             {
+                                //getComplexType
+                                XmlSchemaComplexType ct = XmlSchemaUtility.GetComplextType(element);
+                                //Get TypeName 
+                                if (ct != null && ct.Name != null)
+                                    typeName = ct.Name;
+
+
                                 package = mdpManager.Create(typeName, GetDescription(element.Annotation), true);
                                 createdPackagesDic.Add(package.Id, package.Name);
                             }

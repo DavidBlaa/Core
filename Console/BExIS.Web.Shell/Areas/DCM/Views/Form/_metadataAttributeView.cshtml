@@ -244,18 +244,7 @@
                         {
 
                             int value = 0;
-                            if (Model.Value != null)
-                            {
-                                string[] temp = Model.Value.ToString().Split('.');
-                                if (temp.Length == 2)
-                                {
-                                    value = Convert.ToInt32(value, new CultureInfo("en-US"));
-                                }
-                                else
-                                {
-                                    value = Convert.ToInt32(value, new CultureInfo("de-DE"));
-                                }
-                            }
+                            value = Convert.ToInt32(Model.Value);
 
 
                             @(Html.Telerik().IntegerTextBox()

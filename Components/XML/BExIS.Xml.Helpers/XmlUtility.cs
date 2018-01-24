@@ -443,6 +443,32 @@ namespace BExIS.Xml.Helpers
         /// <seealso cref=""/>
         /// <param name="name"></param>
         /// <returns></returns>
+        public static XElement GetXElementByAttribute(string nodeName, Dictionary<string, string> AttrValueDic, XElement XElement)
+        {
+            string name = nodeName.Replace(" ", "");
+            IEnumerable<XElement> elements = new List<XElement>();
+
+            foreach (KeyValuePair<string, string> keyValuePair in AttrValueDic)
+            {
+                IEnumerable<XElement> newElements = GetXElementsByAttribute(nodeName, keyValuePair.Key, keyValuePair.Value, XElement);
+
+                if (elements.Count() > 0)
+                    elements = elements.Intersect(newElements);
+                else
+                    elements = newElements;
+
+            }
+
+            return elements.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static IEnumerable<XElement> GetXElementsByAttribute(string nodeName, string attrName, string value, XDocument xDoc)
         {
             string name = nodeName.Replace(" ", "");
@@ -495,6 +521,32 @@ namespace BExIS.Xml.Helpers
             foreach (KeyValuePair<string, string> keyValuePair in AttrValueDic)
             {
                 IEnumerable<XElement> newElements = GetXElementsByAttribute(nodeName, keyValuePair.Key, keyValuePair.Value, xDoc);
+
+                if (elements.Count() > 0)
+                    elements = elements.Intersect(newElements);
+                else
+                    elements = newElements;
+
+            }
+
+            return elements;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static IEnumerable<XElement> GetXElementsByAttribute(string nodeName, Dictionary<string, string> AttrValueDic, XElement XElement)
+        {
+            string name = nodeName.Replace(" ", "");
+            IEnumerable<XElement> elements = new List<XElement>();
+
+            foreach (KeyValuePair<string, string> keyValuePair in AttrValueDic)
+            {
+                IEnumerable<XElement> newElements = GetXElementsByAttribute(nodeName, keyValuePair.Key, keyValuePair.Value, XElement);
 
                 if (elements.Count() > 0)
                     elements = elements.Intersect(newElements);

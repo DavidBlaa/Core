@@ -786,8 +786,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             parentStepModelHelper.Model.ConvertInstance((XDocument)(TaskManager.Bus[CreateTaskmanager.METADATA_XML]), parentStepModelHelper.XPath);
 
             return PartialView("_metadataCompoundAttributeView", parentStepModelHelper);
-
-            return null;
         }
 
         public ActionResult AddMetadataAttributeUsage(int id, int parentid, int number, int parentModelNumber, int parentStepId)

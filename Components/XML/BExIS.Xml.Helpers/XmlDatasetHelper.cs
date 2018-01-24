@@ -516,6 +516,38 @@ namespace BExIS.Xml.Helpers
             return false;
         }
 
+        //todo entity extention
+        public bool HasEntityType(long metadataStructureId, string entityClassPath, string entityName)
+        {
+            MetadataStructure metadataStructure = this.GetUnitOfWork().GetReadOnlyRepository<MetadataStructure>().Get(metadataStructureId);
+
+            // get MetadataStructure 
+            if (metadataStructure != null && metadataStructure.Extra != null)
+            {
+                XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)metadataStructure.Extra);
+                IEnumerable<XElement> tmp = XmlUtility.GetXElementByNodeName(nodeNames.entity.ToString(), xDoc);
+                if (tmp.Any())
+                {
+                    string tmpEntityClassPath = "";
+                    string tmpEntityClassName = "";
+
+                    foreach (var entity in tmp)
+                    {
+
+                        if (entity.HasAttributes && entity.Attribute("value") != null)
+                            tmpEntityClassPath = entity.Attribute("value").Value.ToLower();
+
+                        if (entity.HasAttributes && entity.Attribute("name") != null)
+                            tmpEntityClassName = entity.Attribute("name").Value.ToLower();
+
+                        if (tmpEntityClassPath.Equals(entityClassPath.ToLower()) &&
+                            tmpEntityClassName.Equals(entityName.ToLower())) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
 
         #endregion
 
@@ -715,7 +747,8 @@ namespace BExIS.Xml.Helpers
         nodeRef,
         convertRef,
         entity,
-        parameter
+        parameter,
+        module
     }
 
     public enum NameAttributeValues
