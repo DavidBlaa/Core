@@ -53,8 +53,16 @@
                             title = column.Caption;
                         }
 
-                        columns.Bound(column.DataType, column.ColumnName)
-                            .Title(title);
+                        if (title.ToLower().Equals("id"))
+                        {
+                            columns.Bound(column.DataType, column.ColumnName)
+                                .Title(title).Width(80);
+                        }
+                        else
+                        {
+                            columns.Bound(column.DataType, column.ColumnName)
+                                .Title(title);
+                        }
                     }
                     else
                     {

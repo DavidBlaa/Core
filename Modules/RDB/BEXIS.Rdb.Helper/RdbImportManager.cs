@@ -13,7 +13,6 @@ using BExIS.Security.Services.Authorization;
 using BExIS.Xml.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Xml.Linq;
@@ -513,8 +512,8 @@ namespace BExIS.Rdb.Helper
 
         private void createDsFromSoil(Soil soil, XDocument metadata, UnStructuredDataStructure unStructuredDataStructure, MetadataStructure metadataStructure)
         {
-            Debug.WriteLine("-----------------------------------------------");
-            Debug.WriteLine("start create soil");
+            //Debug.WriteLine("-----------------------------------------------");
+            //Debug.WriteLine("start create soil");
 
 
 
@@ -737,7 +736,7 @@ namespace BExIS.Rdb.Helper
 
             #endregion
 
-            Debug.WriteLine("start Soil Infos");
+            //Debug.WriteLine("start Soil Infos");
 
             #region Soil Infos
             //Soil id
@@ -766,7 +765,7 @@ namespace BExIS.Rdb.Helper
             if (soil.Profil != null)
             {
 
-                Debug.WriteLine("start Profil Infos");
+                //Debug.WriteLine("start Profil Infos");
 
                 ////Soil profil id
                 //destinationXPath = "Metadata/Sample/soilSample/Profil/profileType/Barcode/BarcodeType";
@@ -775,6 +774,11 @@ namespace BExIS.Rdb.Helper
                 //Soil profil name
                 destinationXPath = "Metadata/SampleType/soilSampleType/Name/NameType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Profil.ShortName;
+
+
+                //Soil profil type
+                destinationXPath = "Metadata/SampleType/soilSampleType/SamplingType/SamplingTypeType";
+                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = "Profil";
 
                 //Soil profil total depth
                 destinationXPath = "Metadata/SampleType/soilSampleType/TotalDepth/TotalDepthType";
@@ -789,10 +793,10 @@ namespace BExIS.Rdb.Helper
                 //soilunderclass
                 if (soil.Profil.Soils.Count > 0)
                 {
-                    Debug.WriteLine("start soilunderclass");
+                    //Debug.WriteLine("start soilunderclass");
 
                     SoilUnderClass suc = soil.Profil.Soils.Where(s => s.Id.Equals(soil.Id)).FirstOrDefault();
-                    Debug.WriteLine("start soilunderclass ");
+                    //Debug.WriteLine("start soilunderclass ");
 
                     if (suc != null)
                     {
@@ -820,7 +824,7 @@ namespace BExIS.Rdb.Helper
 
                         if (soilunderclass.MineralSoils.Count > 0)
                         {
-                            Debug.WriteLine("start mineralsoil");
+                            //Debug.WriteLine("start mineralsoil");
 
                             for (int j = 0; j < soilunderclass.MineralSoils.Count; j++)
                             {
@@ -894,7 +898,7 @@ namespace BExIS.Rdb.Helper
 
                         if (soilunderclass.OrganicLayers.Count > 0)
                         {
-                            Debug.WriteLine("start organic layer");
+                            //Debug.WriteLine("start organic layer");
 
 
 
@@ -931,14 +935,19 @@ namespace BExIS.Rdb.Helper
             #region Soil Bohrer
             if (soil.Bohrer != null)
             {
-                Debug.WriteLine("start bohrer layer");
+                //Debug.WriteLine("start bohrer layer");
                 ////Soil profil id
                 //destinationXPath = "Metadata/Sample/soilSample/Bohrer/bohrerType/Barcode/BarcodeType";
                 //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.Id.ToString();
 
+                //soil sampling type
+                destinationXPath = "Metadata/SampleType/soilSampleType/SamplingType/SamplingTypeType";
+                XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = "Bohrer";
+
                 //Soil profil name
                 destinationXPath = "Metadata/SampleType/soilSampleType/DepthRange/depthRangeType/Min/MinType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.DepthRange.Min.ToString();
+
 
                 destinationXPath = "Metadata/SampleType/soilSampleType/DepthRange/depthRangeType/Max/MaxType";
                 XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.Bohrer.DepthRange.Max.ToString();
@@ -959,7 +968,7 @@ namespace BExIS.Rdb.Helper
                 if (soil.Bohrer.Soils.Count > 0)
                 {
                     SoilUnderClass suc = soil.Bohrer.Soils.Where(s => s.Id.Equals(soil.Id)).FirstOrDefault();
-                    Debug.WriteLine("start soilunderclass ");
+                    //Debug.WriteLine("start soilunderclass ");
 
                     if (suc != null)
                     {
@@ -975,8 +984,8 @@ namespace BExIS.Rdb.Helper
                         //                    "]/Name/NameType";
                         //XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soilunderclass.Name;
 
-                        //soil sampletype
-                        destinationXPath = "Metadata/SampleType/soilSampleType/SamplingType/SamplingTypeType";
+                        //soil sample type
+                        destinationXPath = "Metadata/SampleType/soilSampleType/SampleType/SampleTypeType";
                         XmlUtility.GetXElementByXPath(destinationXPath, metadata).Value = soil.SoilType;
 
                         //soil sampleDate
@@ -987,7 +996,7 @@ namespace BExIS.Rdb.Helper
 
                         if (soilunderclass.MineralSoils.Count > 0)
                         {
-                            Debug.WriteLine("start mineralsoil");
+                            //Debug.WriteLine("start mineralsoil");
 
                             for (int j = 0; j < soilunderclass.MineralSoils.Count; j++)
                             {
@@ -1061,7 +1070,7 @@ namespace BExIS.Rdb.Helper
 
                         if (soilunderclass.OrganicLayers.Count > 0)
                         {
-                            Debug.WriteLine("start organic layer");
+                            //Debug.WriteLine("start organic layer");
 
 
 
@@ -1109,7 +1118,7 @@ namespace BExIS.Rdb.Helper
 
         private void createDataset(DataStructure unStructuredDataStructure, MetadataStructure metadataStructure, XDocument metadata)
         {
-            Debug.WriteLine("start create ");
+            //Debug.WriteLine("start create ");
 
             ResearchPlanManager researchPlanManager = new ResearchPlanManager();
             ResearchPlan researchPlan = researchPlanManager.Repo.Get(1);
@@ -1118,7 +1127,7 @@ namespace BExIS.Rdb.Helper
             Dataset dataset = datasetManager.CreateEmptyDataset(unStructuredDataStructure, researchPlan,
                 metadataStructure);
 
-            Debug.WriteLine("add security ");
+            //Debug.WriteLine("add security ");
 
             // add security
             if (GetUsernameOrDefault() != "DEFAULT")
@@ -1130,7 +1139,7 @@ namespace BExIS.Rdb.Helper
             if (datasetManager.IsDatasetCheckedOutFor(dataset.Id, GetUsernameOrDefault()) ||
                 datasetManager.CheckOutDataset(dataset.Id, GetUsernameOrDefault()))
             {
-                Debug.WriteLine("IsDatasetCheckedOutFor ");
+                //Debug.WriteLine("IsDatasetCheckedOutFor ");
 
                 DatasetVersion workingCopy = datasetManager.GetDatasetWorkingCopy(dataset.Id);
 
@@ -1138,11 +1147,11 @@ namespace BExIS.Rdb.Helper
 
 
 
-                Debug.WriteLine("store ");
+                //Debug.WriteLine("store ");
 
                 datasetManager.EditDatasetVersion(workingCopy, null, null, null);
                 datasetManager.CheckInDataset(dataset.Id, "Metadata was submited.", GetUsernameOrDefault(), ViewCreationBehavior.None);
-                Debug.WriteLine("stored ");
+                //Debug.WriteLine("stored ");
 
                 string title = xmlDatasetHelper.GetInformation(dataset.Id, NameAttributeValues.title);
 
@@ -1155,8 +1164,8 @@ namespace BExIS.Rdb.Helper
 
             }
 
-            Debug.WriteLine("FINISHeD ");
-            Debug.WriteLine("******************* ");
+            //Debug.WriteLine("FINISHeD ");
+            //Debug.WriteLine("******************* ");
         }
 
         #region helpers
