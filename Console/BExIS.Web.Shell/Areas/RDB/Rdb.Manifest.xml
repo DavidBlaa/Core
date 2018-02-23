@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Manifest moduleId="rdb" displayName="Research Database Module" version="1.0.0" builtin="true">
   <Description>
-    DDM provides a sophisticated search facility over registered data sets.
+    RDB provides a sophisticated search facility over registered data sets.
   </Description>
   <Assemblies>
       <Assembly fullName="BExIS.Rdb.Entities" role="" />

@@ -129,6 +129,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.Bam.UI", "Con
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Modules.Rdb.UI", "Console\BExIS.Web.Shell\Areas\RDB\BExIS.Modules.Rdb.UI.csproj", "{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Rdb.Orm.NH", "Modules\RDB\BExIS.Rdb.Orm.NH\BExIS.Rdb.Orm.NH.csproj", "{440280B0-BECD-460D-BDF8-57AD8F469BCB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BExIS.Rdb.Services", "Modules\RDB\BExIS.Rdb.Services\BExIS.Rdb.Services.csproj", "{6BEB267A-6671-4B49-BF17-6667C94C6309}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -623,6 +627,30 @@ Global
 		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|x86.ActiveCfg = Release|Any CPU
 		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA}.Release|x86.Build.0 = Release|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Debug|x86.Build.0 = Debug|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Release|x86.ActiveCfg = Release|Any CPU
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB}.Release|x86.Build.0 = Release|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Debug|x86.Build.0 = Debug|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Release|x86.ActiveCfg = Release|Any CPU
+		{6BEB267A-6671-4B49-BF17-6667C94C6309}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -685,10 +713,12 @@ Global
 		{DA992FC5-E6EF-4DDA-A868-472F6964852C} = {692AFF14-3A57-47D8-912F-093EC8F561C4}
 		{4C00A9C4-5A27-485A-BC14-147567B29332} = {DA992FC5-E6EF-4DDA-A868-472F6964852C}
 		{C4512044-2380-4AC9-8AC8-7BA23A2C46EA} = {34076FBC-17DB-45C0-91BB-F4EF3E2FBAD4}
+		{440280B0-BECD-460D-BDF8-57AD8F469BCB} = {34076FBC-17DB-45C0-91BB-F4EF3E2FBAD4}
+		{6BEB267A-6671-4B49-BF17-6667C94C6309} = {34076FBC-17DB-45C0-91BB-F4EF3E2FBAD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35
 		SolutionGuid = {38FA1FDE-161F-4F6D-B7E7-30B6045BA8C4}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35
 	EndGlobalSection
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True

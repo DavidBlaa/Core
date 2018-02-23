@@ -21,6 +21,7 @@ namespace BExIS.Modules.Rdb.UI.Helpers
                 // Entities
                 Entity entity = entityManager.Entities.Where(e => e.Name.ToUpperInvariant() == "Sample".ToUpperInvariant()).FirstOrDefault();
 
+               
                 if (entity == null)
                 {
                     entity = new Entity();
