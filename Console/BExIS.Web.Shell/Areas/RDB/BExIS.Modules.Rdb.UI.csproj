@@ -149,11 +149,18 @@
     <Reference Include="Vaiona.Web.Mvc.Modularity">
       <HintPath>..\..\..\..\Libraries\Vaiona\Vaiona.Web.Mvc.Modularity.dll</HintPath>
     </Reference>
+    <Reference Include="zxing, Version=0.16.2.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\ZXing.Net.0.16.2\lib\net45\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.16.2.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\ZXing.Net.0.16.2\lib\net45\zxing.presentation.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\CreateSampleController.cs" />
     <Compile Include="Controllers\RdbController.cs" />
     <Compile Include="Controllers\SampleController.cs" />
+    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Helpers\RdbSeedDataGenerator.cs" />
     <Compile Include="Models\ListViewItem.cs" />
     <Compile Include="Models\RdbTestModel.cs" />
@@ -181,6 +188,7 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Sample\Show.cshtml" />
+    <Content Include="Views\Rdb\BarcodeLabelView.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -190,6 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\" />
+    <Folder Include="Views\Test\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -263,6 +272,14 @@
       <Project>{FBE3101A-791A-4EAB-9B8F-F6E071F8DBDC}</Project>
       <Name>BExIS.Ddm.Providers.LuceneProvider</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Modules\DIM\BExIS.Dim.Entities\BExIS.Dim.Entities.csproj">
+      <Project>{34cad2a2-6928-458b-b8dc-af71d55f20cc}</Project>
+      <Name>BExIS.Dim.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Modules\DIM\BExIS.Dim.Helper\BExIS.Dim.Helpers.csproj">
+      <Project>{81ef18e8-dced-4980-96f9-e99124075b82}</Project>
+      <Name>BExIS.Dim.Helpers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\RDB\BEXIS.Rdb.Entities\BExIS.Rdb.Entities.csproj">
       <Project>{ec2c146a-5619-48d2-9575-2f4876f8dc05}</Project>
       <Name>BExIS.Rdb.Entities</Name>
@@ -270,6 +287,10 @@
     <ProjectReference Include="..\..\..\..\Modules\RDB\BEXIS.Rdb.Helper\BExIS.Rdb.Helper.csproj">
       <Project>{941e15fa-86eb-415c-b457-b05c63eff606}</Project>
       <Name>BExIS.Rdb.Helper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Modules\RDB\BExIS.Rdb.Services\BExIS.Rdb.Services.csproj">
+      <Project>{6beb267a-6671-4b49-bf17-6667c94c6309}</Project>
+      <Name>BExIS.Rdb.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\BExIS.Web.Shell.csproj">
       <Project>{E5128814-4541-45C8-A9E6-6C91A7E3D1E2}</Project>
