@@ -6,7 +6,10 @@
         Description,
         License,
         ProjectTitle,
-        Title
+        Title,
+        Plot, // RDB Module addition,
+        Site, // RDB Module addition,
+        Barcode // RDB Module addition
     }
 
     public enum LinkElementComplexity

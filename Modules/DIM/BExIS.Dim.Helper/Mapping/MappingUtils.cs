@@ -154,6 +154,8 @@ namespace BExIS.Dim.Helpers.Mapping
             return tmp;
         }
 
+
+
         #endregion
 
         #region GET FROM Specific MetadataStructure // Source 
@@ -223,6 +225,74 @@ namespace BExIS.Dim.Helpers.Mapping
         }
 
 
+
+
+        /// <summary>
+        /// return a object with a value and the parent name
+        /// </summary>
+        /// <param name="targetElementId"></param>
+        /// <param name="targetType"></param>
+        /// <param name="sourceRootId"></param>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        public static List<MatchingObject> GetValuesWithParentTypeFromMetadata(long targetElementId, LinkElementType targetType,
+            long sourceRootId, XDocument metadata)
+        {
+
+            //grab values from metadata where targetelementid and targetType is mapped
+            // e.g. get title from metadata
+
+            MappingManager mappingManager = new MappingManager();
+
+            try
+            {
+                List<MatchingObject> tmp = new List<MatchingObject>();
+
+                var mappings = mappingManager.GetMappings().Where(m =>
+                    m.Target.ElementId.Equals(targetElementId) &&
+                    m.Target.Type.Equals(targetType) &&
+                    getRootMapping(m) != null &&
+                    getRootMapping(m).Source.ElementId.Equals(sourceRootId) &&
+                    getRootMapping(m).Source.Type == LinkElementType.MetadataStructure &&
+                    m.Level.Equals(2));
+
+
+                foreach (var m in mappings)
+                {
+
+                    Dictionary<string, string> AttrDic = new Dictionary<string, string>();
+
+                    if (m.Source.Type.Equals(LinkElementType.MetadataAttributeUsage) ||
+                        m.Source.Type.Equals(LinkElementType.MetadataNestedAttributeUsage))
+                    {
+                        AttrDic.Add("id", m.Source.ElementId.ToString());
+                        AttrDic.Add("name", m.Source.Name);
+                        AttrDic.Add("type", "MetadataAttributeUsage");
+
+                        //find sourceelement in xmldocument
+                        IEnumerable<XElement> elements = XmlUtility.GetXElementsByAttribute(AttrDic, metadata);
+
+                        string parentname = "";
+                        if(m.Parent != null && m.Parent.Source!=null) parentname = m.Parent.Source.Name;
+
+                        foreach (var element in elements)
+                        {
+                            tmp.Add(new MatchingObject() { Value = element.Value, Parent = parentname });
+                        }
+                    }
+
+
+
+                }
+
+                return tmp;
+            }
+            finally
+            {
+                mappingManager.Dispose();
+            }
+        }
+
         #endregion
 
 
@@ -279,5 +349,11 @@ namespace BExIS.Dim.Helpers.Mapping
 
         #endregion
 
+    }
+
+    public class MatchingObject
+    {
+        public string Value { get; set; }
+        public string Parent { get; set; }
     }
 }
