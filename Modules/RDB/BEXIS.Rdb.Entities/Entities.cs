@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BEXIS.Rdb.Entities
+namespace BExIS.Rdb.Entities
 {
     public class CsvFileEntity
     {
@@ -39,7 +36,7 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class Project: BaseRdbEntity
+    public class Project : BaseRdbEntity
     {
         public List<long> Campaigns { get; set; }
     }
@@ -49,7 +46,7 @@ namespace BEXIS.Rdb.Entities
         public List<long> Projects { get; set; }
     }
 
-    public class Site: BaseRdbEntity
+    public class Site : BaseRdbEntity
     {
         public BoundingBox BoundingBox { get; set; }
         public long Contributor { get; set; }
@@ -122,7 +119,7 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class Tree:BaseRdbEntity
+    public class Tree : BaseRdbEntity
     {
         public string Age { get; set; }
         public string Volume { get; set; }
@@ -151,12 +148,12 @@ namespace BEXIS.Rdb.Entities
             Volumewithoutbark = "";
             FireScars = "";
 
-            Diameters= new List<DiameterClass>();
+            Diameters = new List<DiameterClass>();
             TreeStemSlices = new List<TreeStemSlice>();
         }
     }
 
-    public class DiameterClass:BaseRdbEntity
+    public class DiameterClass : BaseRdbEntity
     {
         public string Diameter { get; set; }
         public string MeasurementHeight { get; set; }
@@ -168,9 +165,9 @@ namespace BEXIS.Rdb.Entities
         }
     }
 
-    public class TreeStemSlice:BaseRdbEntity
+    public class TreeStemSlice : BaseRdbEntity
     {
- 
+
         public string Treestemsegment { get; set; }
         public string Barcode { get; set; }
 
@@ -178,6 +175,176 @@ namespace BEXIS.Rdb.Entities
         {
             Barcode = "";
             Treestemsegment = "";
+        }
+    }
+
+    public class Soil
+    {
+        public long Id { get; set; }
+        public long RefId { get; set; }
+        public string Name { get; set; }
+        public string SamplingDate { get; set; }
+        public string SoilType { get; set; }
+        public string Vegetation { get; set; }
+        public long Contributor { get; set; }
+
+        //public double TotalDepth { get; set; }
+        //public double PitSize { get; set; }
+        public ProfilType Profil { get; set; }
+        public BohrerType Bohrer { get; set; }
+
+        public Soil()
+        {
+            Name = "";
+            SamplingDate = "";
+            SoilType = "";
+            Vegetation = "";
+            Contributor = 0;
+            //TotalDepth = 0;
+            //PitSize = 0;
+        }
+
+    }
+
+    public class CollectionType
+    {
+        public long Id { get; set; }
+        public long RefId { get; set; }
+        public string ShortName { get; set; }
+        public List<SoilUnderClass> Soils { get; set; }
+        public DepthRange DepthRange { get; set; }
+
+        public CollectionType()
+        {
+            ShortName = "";
+            Soils = new List<SoilUnderClass>();
+            DepthRange = new DepthRange();
+
+        }
+    }
+
+    public class ProfilType : CollectionType
+    {
+
+        public double TotalDepth { get; set; }
+
+        public ProfilType()
+        {
+            TotalDepth = 0;
+        }
+
+        public ProfilType(CollectionType collectionType)
+        {
+            ShortName = collectionType.ShortName;
+            Soils = collectionType.Soils;
+            Id = collectionType.Id;
+            RefId = collectionType.RefId;
+            TotalDepth = 0;
+            DepthRange = collectionType.DepthRange;
+        }
+    }
+
+    public class BohrerType : CollectionType
+    {
+        public double PitSize { get; set; }
+
+
+        public BohrerType()
+        {
+            PitSize = 0;
+        }
+
+        public BohrerType(CollectionType collectionType)
+        {
+            ShortName = collectionType.ShortName;
+            Soils = collectionType.Soils;
+            Id = collectionType.Id;
+            RefId = collectionType.RefId;
+            PitSize = 0;
+            DepthRange = collectionType.DepthRange;
+        }
+    }
+
+
+
+    public class SoilUnderClass
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string SamplingDate { get; set; }
+        public List<MineralSoil> MineralSoils { get; set; }
+        public List<OrganicLayer> OrganicLayers { get; set; }
+
+        public SoilUnderClass()
+        {
+            Id = 0;
+            Name = "";
+            MineralSoils = new List<MineralSoil>();
+            OrganicLayers = new List<OrganicLayer>();
+        }
+
+    }
+
+    public class OrganicLayer
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        //public DepthRange DepthRange { get; set; }
+        //public double DepthInterval { get; set; }
+        public double Density { get; set; }
+
+        public OrganicLayer()
+        {
+            Id = 0;
+            Name = "";
+            //DepthRange = new DepthRange();
+            Density = 0;
+        }
+
+    }
+
+    public class MineralSoil
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        //public DepthRange DepthRange { get; set; }
+        public double DepthInterval { get; set; }
+
+        public List<Layer> Layers { get; set; }
+
+        public MineralSoil()
+        {
+            Id = 0;
+            Name = "";
+            //DepthRange = new DepthRange();
+            Layers = new List<Layer>();
+        }
+
+    }
+
+    public class Layer
+    {
+        public long Id { get; set; }
+        public string Horizon { get; set; }
+        public double Volume { get; set; }
+
+        public Layer()
+        {
+            Id = 0;
+            Horizon = "";
+            Volume = 0;
+        }
+    }
+
+    public class DepthRange
+    {
+        public double Min { get; set; }
+        public double Max { get; set; }
+
+        public DepthRange()
+        {
+            Min = 0;
+            Max = 0;
         }
     }
 
@@ -193,12 +360,12 @@ namespace BEXIS.Rdb.Entities
         public string Fax { get; set; }
         public string EMail { get; set; }
         public string Url { get; set; }
-        
+
 
         public Person()
         {
             Id = 0;
-            First_Name  = "";
+            First_Name = "";
             Last_Name = "";
             Second_Name = "";
             Title = "";
@@ -235,7 +402,7 @@ namespace BEXIS.Rdb.Entities
         public string Value { get; set; }
     }
 
-    public class TmpSampleId:BaseRdbEntity
+    public class TmpSampleId : BaseRdbEntity
     {
         public string Value { get; set; }
     }

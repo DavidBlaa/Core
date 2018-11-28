@@ -1,4 +1,4 @@
-﻿@model BExIS.Ddm.Model.Property
+﻿@model BExIS.Utils.Models.Property
 
 <p><p class="PropertyHeader">@Model.DisplayName</p>
    
@@ -14,8 +14,16 @@
     {
         value = Model.DefaultValue;
     }
-    
- 
+
+    <input type="radio"
+       id="@Model.DataSourceKey"
+       name="@Model.DataSourceKey"
+       runat="server"
+       onclick="confirmSubmit(this)"
+       checked="True"
+       value="" />@Model.DefaultValue
+
+
     @foreach (var itemValue in Model.Values)
     {
         if (value == itemValue.ToString())
@@ -46,17 +54,17 @@
 
         function confirmSubmit(e) {
 
-            $.post('@Url.Action("FilterByCheckBox", "Home", new RouteValueDictionary { { "area", "DDM" } })', { value: e.value, node: e.name, isChecked: e.checked }, function (response) {
+            $.post('@Url.Action("FilterByCheckBox", "Home", new RouteValueDictionary { { "area", "ddm" } })', { value: e.value, node: e.name, isChecked: e.checked }, function (response) {
                 // alert(response);
                 $(".searchBreadcrumbNavigation").html(response);
             });
 
-//            $.post('@Url.Action("UpdateContent", "Home", new RouteValueDictionary { { "area", "DDM" } })', {}, function (response) {
+//            $.post('@Url.Action("UpdateContent", "Home", new RouteValueDictionary { { "area", "ddm" } })', {}, function (response) {
 //                $("#resultContent").html(response);
 
 //            })
 
-            $.post('@Url.Action("UpdateFacets", "Home", new RouteValueDictionary { { "area", "DDM" } })', {}, function (response) {
+            $.post('@Url.Action("UpdateFacets", "Home", new RouteValueDictionary { { "area", "ddm" } })', {}, function (response) {
                 $("#searchTreeView").html(response);
             })
         

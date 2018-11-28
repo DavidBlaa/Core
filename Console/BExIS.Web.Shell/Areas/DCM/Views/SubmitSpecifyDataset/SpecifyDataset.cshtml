@@ -1,7 +1,7 @@
-﻿@model BExIS.Web.Shell.Areas.DCM.Models.ChooseDatasetViewModel
+﻿@model BExIS.Modules.Dcm.UI.Models.ChooseDatasetViewModel
 @using Telerik.Web.Mvc.UI;
 @using Telerik.Web.Mvc.Resources;
-@using BExIS.Web.Shell.Areas.DCM.Models;
+@using BExIS.Modules.Dcm.UI.Models;
 
 @{
     if (this.ViewContext.FormContext == null)
@@ -16,6 +16,7 @@
         selectedListeViewitem.Title = Model.DatasetTitle;
     }
 }
+
 
 <div id="Step3" class="uploadWizardStep">
 
@@ -34,7 +35,7 @@
             <table>
 
                 <tr><td>
-                    @Html.DropDownListFor(m => m.SelectedDatasetId, new SelectList(Model.DatasetsViewList,"Id","Title",selectedListeViewitem),"Select")
+                    @Html.DropDownListFor(m => m.SelectedDatasetId, new SelectList(Model.DatasetsViewList,"Id","DisplayName",selectedListeViewitem),"Select")
                 
     
                 </td><td>Select an existing dataset to attach your file with.</td></tr>

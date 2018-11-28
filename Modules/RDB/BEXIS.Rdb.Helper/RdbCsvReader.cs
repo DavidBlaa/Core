@@ -1,20 +1,16 @@
-﻿using System;
+﻿using BExIS.IO;
+using BExIS.IO.Transform.Input;
+using BExIS.Rdb.Entities;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.IO;
-using BExIS.IO.Transform.Input;
-using BEXIS.Rdb.Entities;
 using Vaiona.Utils.Cfg;
 
-namespace BEXIS.Rdb.Helper
+namespace BExIS.Rdb.Helper
 {
     public class RdbCsvReader
     {
@@ -25,7 +21,9 @@ namespace BEXIS.Rdb.Helper
         private string PERSON_CSV = "Person.csv";
         private string LOCATION_COORDIANTE_CSV = "locationsWithCoordinates2.csv";
         private string MEASUREMENT_HEIGHT_CSV = "MeasrurmentHeight_For_Csv.csv";
-        private string SAMPLE_IDS_TXT = "sampleIds.txt"; 
+        private string SAMPLE_IDS_TXT = "sampleIds.txt";
+
+        private string ALL = "QualifierHierarchy_Query_mod.csv";
 
         private string AREA = "RDB";
 
@@ -66,7 +64,7 @@ namespace BEXIS.Rdb.Helper
                     {
                         tmp.Add(CreateMeasurementHeightFromCsvRows(bb));
                     }
-                    
+
 
                 }
 
@@ -151,7 +149,70 @@ namespace BEXIS.Rdb.Helper
             }
         }
 
+        List<Plot> plots = new List<Plot>();
+
+        private double _tmpMIN = 0;
+        private double _tmpMAX = 0;
+
         #endregion
+
+        public List<Soil> ReadSoilCsv()
+        {
+            List<Soil> tmp = new List<Soil>();
+            try
+            {
+
+
+                string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), ALL);
+                AsciiReader reader = new AsciiReader();
+
+                if (File.Exists(path))
+                {
+                    FileStream stream = reader.Open(path);
+                    AsciiFileReaderInfo afri = new AsciiFileReaderInfo();
+                    afri.Seperator = TextSeperator.semicolon;
+                    afri.Variables = 1;
+                    afri.Data = 2;
+
+                    List<List<string>> rowsOfSites = reader.ReadFile(stream, ALL, afri);
+                    rowList = new List<CsvFileEntity>();
+                    int i = 0;
+                    foreach (List<string> row in rowsOfSites)
+                    {
+                        i++;
+                        try
+                        {
+                            rowList.Add(RowToAccessDBEntities(row));
+                        }
+                        catch (Exception ex)
+                        {
+
+                            throw ex;
+                        }
+
+                    }
+
+                    var ids = rowList.Where(e => e.VarName == "Soil").Select(e => e.VarId).Distinct();
+
+                    foreach (long id in ids)
+                    {
+                        if (id > 0)
+                            tmp.Add(CreateSoilFromCsvRows(rowList.Where(e => e.ID.Equals(id)).ToList(), id));
+                    }
+                }
+
+                return tmp;
+
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+
+            return tmp;
+        }
 
         public List<Site> ReadSiteCsv()
         {
@@ -182,7 +243,7 @@ namespace BEXIS.Rdb.Helper
                     foreach (long id in ids)
                     {
                         long parentid = rowList.Where(e => e.ID.Equals(id)).FirstOrDefault().SuperID;
-                        tmp.Add(CreateSiteFromCsvRows(rowList.Where(e => e.ID.Equals(id)).ToList(),id, parentid));
+                        tmp.Add(CreateSiteFromCsvRows(rowList.Where(e => e.ID.Equals(id)).ToList(), id, parentid));
                     }
 
                 }
@@ -231,6 +292,8 @@ namespace BEXIS.Rdb.Helper
                     }
 
                 }
+
+                plots = tmp;
 
                 return tmp;
             }
@@ -313,13 +376,13 @@ namespace BEXIS.Rdb.Helper
                         rowList.Add(RowToTreeFileEntities(row));
                     }
 
-                    var ids = rowList.Where(e => e.Name == "Tree" && e.ID != 0).Select(e=>e.ID).Distinct();
+                    var ids = rowList.Where(e => e.Name == "Tree" && e.ID != 0).Select(e => e.ID).Distinct();
 
                     foreach (long id in ids)
                     {
-                        if(id>0)
-                        //long parentid = rowList.Where(e => e.ID.Equals(id)).FirstOrDefault().SuperID;
-                        tmp.Add(CreateTreeFromCsvRows(rowList.Where(e => e.ID.Equals(id) && e.Name.Equals("Tree")).ToList(), id));
+                        if (id > 0)
+                            //long parentid = rowList.Where(e => e.ID.Equals(id)).FirstOrDefault().SuperID;
+                            tmp.Add(CreateTreeFromCsvRows(rowList.Where(e => e.ID.Equals(id) && e.Name.Equals("Tree")).ToList(), id));
                     }
 
                 }
@@ -353,7 +416,7 @@ namespace BEXIS.Rdb.Helper
                     afri.Variables = 1;
                     afri.Data = 2;
 
-        
+
                     List<List<string>> rowsOfPerson = reader.ReadFile(stream, PERSON_CSV, afri);
                     foreach (List<string> row in rowsOfPerson)
                     {
@@ -386,6 +449,20 @@ namespace BEXIS.Rdb.Helper
             tmp.VarValue = row[6];
             tmp.TypeID = Convert.ToInt64(row[7]);
             tmp.SuperID = Convert.ToInt64(row[8]);
+
+            return tmp;
+        }
+
+        private CsvFileEntity RowToAccessDBEntities(List<string> row)
+        {
+            CsvFileEntity tmp = new CsvFileEntity();
+
+            if (!string.IsNullOrEmpty(row[0])) tmp.ID = Convert.ToInt64(row[0]);
+            if (!string.IsNullOrEmpty(row[1])) tmp.VarId = Convert.ToInt64(row[1]);
+            tmp.VarCat = row[4];
+            tmp.VarName = row[5];
+
+            tmp.VarValue = row[9];
 
             return tmp;
         }
@@ -437,12 +514,12 @@ namespace BEXIS.Rdb.Helper
             {
                 tmp.Id = Convert.ToInt64(row.ElementAt(0));
                 tmp.ParentId = Convert.ToInt64(row.ElementAt(1));
-                tmp.Value = row.ElementAt(3).Replace("\"","");
+                tmp.Value = row.ElementAt(3).Replace("\"", "");
             }
             return tmp;
         }
 
-        private Site CreateSiteFromCsvRows(List<CsvFileEntity> rows, long refId,long parentId)
+        private Site CreateSiteFromCsvRows(List<CsvFileEntity> rows, long refId, long parentId)
         {
             Site tmp = new Site();
             tmp.RefId = refId;
@@ -451,23 +528,23 @@ namespace BEXIS.Rdb.Helper
 
             foreach (var x in rows)
             {
-                    //set properties
-                    if (x.VarCat.Equals("V"))
+                //set properties
+                if (x.VarCat.Equals("V"))
+                {
+                    PropertyInfo propertyInfo = tmp.GetType().GetProperty(x.VarName.Replace(" ", ""));
+                    if (!String.IsNullOrEmpty(x.VarValue))
                     {
-                        PropertyInfo propertyInfo = tmp.GetType().GetProperty(x.VarName.Replace(" ", ""));
-                        if (!String.IsNullOrEmpty(x.VarValue))
-                        {
-                            propertyInfo.SetValue(tmp, Convert.ChangeType(x.VarValue, propertyInfo.PropertyType), null);
-                        }
+                        propertyInfo.SetValue(tmp, Convert.ChangeType(x.VarValue, propertyInfo.PropertyType), null);
                     }
+                }
 
-                    if (x.VarCat.Equals("P"))
+                if (x.VarCat.Equals("P"))
+                {
+                    if (x.VarName.Equals("Plot"))
                     {
-                        if (x.VarName.Equals("Plot"))
-                        {
-                            tmp.Plots.Add(x.VarId);
-                        }
+                        tmp.Plots.Add(x.VarId);
                     }
+                }
             }
 
             return tmp;
@@ -505,7 +582,10 @@ namespace BEXIS.Rdb.Helper
                         {
                             tmp.Trees.Add(x.VarId);
                         }
+                    }
 
+                    if (x.VarCat.Equals("P"))
+                    {
                         if (x.VarName.Equals("Sub-Plot"))
                         {
                             tmp.Plots.Add(x.VarId);
@@ -514,10 +594,10 @@ namespace BEXIS.Rdb.Helper
                 }
                 catch (Exception ex)
                 {
-                    
+
                     throw ex;
                 }
-                
+
             }
 
             return tmp;
@@ -619,7 +699,7 @@ namespace BEXIS.Rdb.Helper
                             {
                                 propertyInfo.SetValue(tmp, Convert.ChangeType(x.VarValue, propertyInfo.PropertyType), null);
                             }
-                            
+
                         }
                     }
 
@@ -652,10 +732,374 @@ namespace BEXIS.Rdb.Helper
             return tmp;
         }
 
+        private Soil CreateSoilFromCsvRows(List<CsvFileEntity> rows, long refId)
+        {
+            Soil tmp = new Soil();
+            tmp.RefId = refId;
+            foreach (var x in rows)
+            {
+                try
+                {
+                    setPropertyToSoil(tmp, x);
+
+                    if (x.VarCat.Equals("Sample"))
+                    {
+                        Console.WriteLine(x.VarName);
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    throw ex;
+                }
+
+            }
+
+            #region load parameters from plot and set it to the soil sample
+
+            //get SoilType Place = Plot
+            long placeId = rowList.Where(e => e.VarId.Equals(refId)).FirstOrDefault().ID;
+            var placeObj = rowList.Where(e => e.VarId.Equals(placeId)).FirstOrDefault();
+
+            long plotId = 0;
+            if (placeObj != null && placeObj.VarName.ToLower().Equals("sub-plot"))
+                plotId = rowList.Where(e => e.VarId.Equals(placeId)).FirstOrDefault().ID;
+            else
+                plotId = placeId;
+
+            Plot plotTmp = plots.Single(p => p.RefId.Equals(plotId));
+            if (plotTmp != null)
+            {
+                tmp.Vegetation = plotTmp.Vegetation;
+                //tmp.PitSize = plotTmp.PitSize;
+                tmp.SoilType = plotTmp.SoilType;
+                //tmp.TotalDepth = plotTmp.TotalDepth;
+                //Todo eventl classiciations 
+            }
+
+            #endregion
+
+            //subplots
+            if (placeObj != null && placeObj.VarName.ToLower().Equals("sub-plot"))
+            {
+                IEnumerable<CsvFileEntity> varsForProfil = rowList.Where(e => e.ID.Equals(placeId));
+                CollectionType collectionType = new CollectionType();
+                collectionType.RefId = placeId;
+                foreach (var row in varsForProfil)
+                {
+                    collectionType = setPropertyToCollectionType(collectionType, row);
+
+                }
+
+                collectionType.DepthRange.Min = _tmpMIN;
+                collectionType.DepthRange.Max = _tmpMAX;
+
+                //profil
+                if (collectionType.ShortName.Equals("Profil"))
+                {
+                    tmp.Profil = new ProfilType(collectionType);
+                    tmp.Profil.TotalDepth = plotTmp.TotalDepth;
+                }
+
+                //bohrer
+                if (collectionType.ShortName.Equals("Bohrer"))
+                {
+                    tmp.Bohrer = new BohrerType(collectionType);
+                    tmp.Bohrer.PitSize = plotTmp.PitSize;
+                }
+
+            }
+
+
+            return tmp;
+        }
+
+        private Soil setPropertyToSoil(Soil soil, CsvFileEntity row)
+        {
+            if (row.VarCat.Equals("Value"))
+            {
+                PropertyInfo propertyInfo = soil.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                if (!String.IsNullOrEmpty(row.VarValue))
+                {
+                    if (propertyInfo != null)
+                    {
+                        if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                        {
+                            #region datetime not supported
+
+                            DateTime dt;
+
+                            string[] formats = { "dd.MM.YYYY", "" };
+
+
+                            if (DateTime.TryParseExact(row.VarValue, "dd.MM.YYYY", new CultureInfo("de-DE"), DateTimeStyles.None, out dt))
+                            {
+                                Debug.WriteLine(row.VarValue);
+                                dt = DateTime.Parse(row.VarValue);
+                                propertyInfo.SetValue(soil, dt, null);
+
+                            }
+                            else
+                            {
+                                Debug.WriteLine("_--->" + row.VarValue);
+                            }
+
+                            #endregion
+
+                        }
+                        else
+                        {
+                            propertyInfo.SetValue(soil, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                null);
+                        }
+                    }
+
+                }
+            }
+
+            return soil;
+        }
+
+        private CollectionType setPropertyToCollectionType(CollectionType collectionType, CsvFileEntity row)
+        {
+            if (row.VarCat.Equals("Value"))
+            {
+                PropertyInfo propertyInfo = collectionType.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                if (!String.IsNullOrEmpty(row.VarValue))
+                {
+                    if (propertyInfo != null)
+                    {
+                        if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                        {
+                            #region datetime not supported
+
+                            DateTime dt;
+                            if (!DateTime.TryParse(row.VarValue, out dt))
+                            {
+                                propertyInfo.SetValue(collectionType, dt, null);
+                            }
+
+                            #endregion
+
+                        }
+                        else
+                        {
+                            propertyInfo.SetValue(collectionType, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                null);
+                        }
+                    }
+
+                }
+            }
+
+            //get soil underclasses
+            if (row.VarCat.Equals("Sample"))
+            {
+                List<CsvFileEntity> soilUnderClassRows = rowList.Where(e => e.ID.Equals(row.VarId)).ToList();
+                if (soilUnderClassRows.Any())
+                    collectionType.Soils.Add(createSoilUnderClass(soilUnderClassRows));
+            }
+
+            return collectionType;
+        }
+
+
+
+        private SoilUnderClass createSoilUnderClass(List<CsvFileEntity> rows)
+        {
+            SoilUnderClass tmp = new SoilUnderClass();
+
+            foreach (var row in rows)
+            {
+                tmp = setPropertytoSoilUnderClass(tmp, row);
+            }
+
+            return tmp;
+        }
+
+        private SoilUnderClass setPropertytoSoilUnderClass(SoilUnderClass obj, CsvFileEntity row)
+        {
+            if (row.VarCat.Equals("Value"))
+            {
+                PropertyInfo propertyInfo = obj.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                if (!String.IsNullOrEmpty(row.VarValue))
+                {
+                    if (propertyInfo != null)
+                    {
+                        if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                        {
+                            #region datetime not supported
+                            #endregion
+
+                        }
+                        else
+                        {
+                            propertyInfo.SetValue(obj, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                null);
+                        }
+                    }
+
+                }
+            }
+
+            if (row.VarCat.Equals("Sample"))
+            {
+                if (row.VarName.Equals("Mineral Soil"))
+                {
+                    IEnumerable<CsvFileEntity> mineralSoilChildrens = rowList.Where(r => r.ID.Equals(row.VarId));
+                    MineralSoil mineralSoil = createMineralSoil(mineralSoilChildrens);
+                    obj.MineralSoils.Add(mineralSoil);
+                }
+                else if (row.VarName.Equals("Organic Layer"))
+                {
+                    IEnumerable<CsvFileEntity> organicLayerChildrens = rowList.Where(r => r.ID.Equals(row.VarId));
+                    OrganicLayer organicLayer = createOrganicLayer(organicLayerChildrens);
+                    obj.OrganicLayers.Add(organicLayer);
+
+                }
+            }
+
+            return obj;
+        }
+
+        private MineralSoil createMineralSoil(IEnumerable<CsvFileEntity> rows)
+        {
+            MineralSoil tmp = new MineralSoil();
+
+            foreach (var row in rows)
+            {
+                if (row.VarCat.Equals("Value"))
+                {
+                    PropertyInfo propertyInfo = tmp.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                    if (!String.IsNullOrEmpty(row.VarValue))
+                    {
+                        if (propertyInfo != null)
+                        {
+                            if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                            {
+                                #region datetime not supported
+
+                                #endregion
+                            }
+                            else
+                            {
+                                propertyInfo.SetValue(tmp, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                    null);
+                            }
+                        }
+                        //value that is not exiting in the entity
+                        else
+                        {
+                            if (row.VarName.Contains("Min"))
+                            {
+                                if (!string.IsNullOrEmpty(row.VarValue))
+                                {
+                                    _tmpMIN = Convert.ToDouble(row.VarValue);
+                                }
+                                else
+                                {
+                                    _tmpMIN = 0;
+                                }
+                            }
+                            else if (row.VarName.Contains("Max"))
+                            {
+                                if (!string.IsNullOrEmpty(row.VarValue))
+                                {
+                                    _tmpMAX = Convert.ToDouble(row.VarValue);
+                                }
+                                else
+                                {
+                                    _tmpMAX = 0;
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                if (row.VarCat.Equals("Sample"))
+                {
+                    IEnumerable<CsvFileEntity> layerChildrens = rowList.Where(r => r.ID.Equals(row.VarId));
+                    Layer layer = createLayer(layerChildrens);
+                    tmp.Layers.Add(layer);
+                }
+            }
+
+            return tmp;
+        }
+
+        private OrganicLayer createOrganicLayer(IEnumerable<CsvFileEntity> rows)
+        {
+            OrganicLayer tmp = new OrganicLayer();
+
+            foreach (var row in rows)
+            {
+                if (row.VarCat.Equals("Value"))
+                {
+                    PropertyInfo propertyInfo = tmp.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                    if (!String.IsNullOrEmpty(row.VarValue))
+                    {
+                        if (propertyInfo != null)
+                        {
+                            if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                            {
+                                #region datetime not supported
+
+                                #endregion
+
+                            }
+                            else
+                            {
+                                propertyInfo.SetValue(tmp, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                    null);
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+            return tmp;
+        }
+
+        private Layer createLayer(IEnumerable<CsvFileEntity> rows)
+        {
+            Layer tmp = new Layer();
+
+            foreach (var row in rows)
+            {
+                if (row.VarCat.Equals("Value"))
+                {
+                    PropertyInfo propertyInfo = tmp.GetType().GetProperty(row.VarName.Replace(" ", ""));
+                    if (!String.IsNullOrEmpty(row.VarValue))
+                    {
+                        if (propertyInfo != null)
+                        {
+                            if (propertyInfo.PropertyType.Name.Equals("DateTime"))
+                            {
+                                #region datetime not supported
+
+                                #endregion
+                            }
+                            else
+                            {
+                                propertyInfo.SetValue(tmp, Convert.ChangeType(row.VarValue, propertyInfo.PropertyType),
+                                    null);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            return tmp;
+        }
+
         private TreeStemSlice CreateTreeStemSlice(List<CsvFileEntity> rows)
         {
             TreeStemSlice tmp = new TreeStemSlice();
-           
+
             foreach (var x in rows)
             {
                 try

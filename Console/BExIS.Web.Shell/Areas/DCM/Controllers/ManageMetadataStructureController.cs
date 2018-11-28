@@ -1,69 +1,232 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using BExIS.Ddm.Model;
-using BExIS.Ddm.Providers.LuceneProvider;
-using BExIS.Dlm.Entities.MetadataStructure;
+﻿using BExIS.Dlm.Entities.MetadataStructure;
 using BExIS.Dlm.Services.MetadataStructure;
+using BExIS.IO.Transform.Output;
+using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Services.Objects;
-using BExIS.Web.Shell.Areas.DCM.Models;
-using BExIS.Xml.Services;
-using Telerik.Web.Mvc;
+using BExIS.Utils.Models;
+using BExIS.Xml.Helpers;
+using BExIS.Xml.Helpers.Mapping;
+using Ionic.Zip;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web.Mvc;
+using System.Xml;
+using Telerik.Web.Mvc.Extensions;
+using Vaiona.Utils.Cfg;
+using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc.Models;
 
-namespace BExIS.Web.Shell.Areas.DCM.Controllers
+namespace BExIS.Modules.Dcm.UI.Controllers
 {
     public class ManageMetadataStructureController : Controller
     {
+        private XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
+
+        public ActionResult Delete(long id)
+        {
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+
+
+            try
+            {
+                MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(id);
+                // delete local files
+                if (XmlSchemaManager.Delete(metadataStructure))
+                {
+                    metadataStructureManager.Delete(metadataStructure);
+                }
+
+                if (metadataStructureManager.Repo.Get(id) == null) return Json(true);
+
+                return Json(false);
+
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+            finally
+            {
+                metadataStructureManager.Dispose();
+            }
+        }
+
+        public ActionResult DownloadSchema(long id)
+        {
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+
+            try
+            {
+
+                MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(id);
+                string name = metadataStructure.Name;
+
+                string path = OutputMetadataManager.GetSchemaDirectoryPathFromMetadataStructure(id, metadataStructureManager);
+
+                ZipFile zip = new ZipFile();
+                if (Directory.Exists(path))
+                    zip.AddDirectory(path);
+
+                MemoryStream stream = new MemoryStream();
+                zip.Save(stream);
+                stream.Position = 0;
+                var result = new FileStreamResult(stream, "application/zip")
+                { FileDownloadName = name + ".zip" };
+
+                return result;
+            }
+            finally
+            {
+                metadataStructureManager.Dispose();
+            }
+        }
+
+        public ActionResult Edit(long id)
+        {
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
+
+            try
+            {
+                MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(id);
+
+                MetadataStructureModel model = convertToMetadataStructureModel(metadataStructure, metadataStructureManager);
+
+                return PartialView("_editMetadataStructureView", model);
+            }
+            finally
+            {
+                metadataStructureManager.Dispose();
+            }
+
+        }
+
         // GET: DCM/ManageMetadataStructure
         public ActionResult Index()
         {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Metadata Structure", this.Session.GetTenant());
+
             return View(GetDefaultModel());
         }
 
-        [HttpPost]
-        [GridAction]
-        public ActionResult Update(string id)
+        public ActionResult Save(MetadataStructureModel metadataStructureModel)
         {
+            MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
 
-            return View(new GridModel(GetDefaultModel().MetadataStructureModels));
+            try
+            {
+                if (ModelState.IsValid)
+                {
+
+
+
+                    MetadataStructure metadataStructure = metadataStructureManager.Repo.Get(metadataStructureModel.Id);
+                    metadataStructure = updateMetadataStructure(metadataStructure, metadataStructureModel);
+                    metadataStructureManager.Update(metadataStructure);
+
+
+                    return Json(true);
+                }
+
+                return Json(false);
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+            finally
+            {
+                metadataStructureManager.Dispose();
+            }
+
         }
 
         private MetadataStructureManagerModel GetDefaultModel()
         {
-            MetadataStructureManagerModel tmp = new MetadataStructureManagerModel();
-
-           //load all metadatastructure
             MetadataStructureManager metadataStructureManager = new MetadataStructureManager();
-            IEnumerable<MetadataStructure> metadataStructures = metadataStructureManager.Repo.Get();
 
-            foreach (var metadataStructure in metadataStructures)
+            try
             {
-                tmp.MetadataStructureModels.Add(ConvertToMetadataStructureModel(metadataStructure));
+
+                MetadataStructureManagerModel tmp = new MetadataStructureManagerModel();
+
+                //load all metadatastructure
+                IEnumerable<MetadataStructure> metadataStructures = metadataStructureManager.Repo.Get();
+
+                foreach (var metadataStructure in metadataStructures)
+                {
+                    tmp.MetadataStructureModels.Add(convertToMetadataStructureModel(metadataStructure, metadataStructureManager));
+                }
+
+                if (tmp.MetadataStructureModels.Any())
+                {
+                    tmp.MetadataStructureModels = tmp.MetadataStructureModels.OrderBy(m => m.Id).ToList();
+                }
+
+                return tmp;
             }
-
-
-            return tmp;
+            finally
+            {
+                metadataStructureManager.Dispose();
+            }
         }
 
         #region helper
 
-        private MetadataStructureModel ConvertToMetadataStructureModel(MetadataStructure metadataStructure)
+        private MetadataStructureModel convertToMetadataStructureModel(MetadataStructure metadataStructure, MetadataStructureManager metadataStructureManager)
         {
             MetadataStructureModel metadataStructureModel = new MetadataStructureModel();
             metadataStructureModel.Id = metadataStructure.Id;
             metadataStructureModel.Name = metadataStructure.Name;
 
-            //get all informaions from xml
-            metadataStructureModel.EntityClassPath = XmlDatasetHelper.GetEntityTypeFromMetadatStructure(metadataStructure.Id);
-            metadataStructureModel.TitlePath = XmlDatasetHelper.GetInformationPath(metadataStructure,
-                NameAttributeValues.title);
-            metadataStructureModel.DescriptionClassPath = XmlDatasetHelper.GetInformationPath(metadataStructure,
-                NameAttributeValues.description);
+            try
+            {
+                metadataStructureModel.MetadataNodes = GetAllXPath(metadataStructure.Id);
 
-            metadataStructureModel.MetadataNodes = GetAllXPath(metadataStructureModel.Id);
-            metadataStructureModel.EnitiesClassPaths = GetEntityClassPathList();
+                //get all informaions from xml
+                metadataStructureModel.EntityClasses = GetEntityModelList();
+                string EntityClassName = xmlDatasetHelper.GetEntityNameFromMetadatStructure(metadataStructure.Id, metadataStructureManager);
+
+                var entityModel =
+                    metadataStructureModel.EntityClasses.Where(e => e.Name.Equals(EntityClassName))
+                        .FirstOrDefault();
+                if (entityModel != null) metadataStructureModel.Entity = entityModel;
+
+                string xpath = xmlDatasetHelper.GetInformationPath(metadataStructure.Id, NameAttributeValues.title);
+
+                var searchMetadataNode =
+                    metadataStructureModel.MetadataNodes.Where(e => e.XPath.Equals(xpath)).FirstOrDefault();
+                if (searchMetadataNode != null)
+                    metadataStructureModel.TitleNode =
+                        searchMetadataNode.DisplayName;
+
+                xpath = xmlDatasetHelper.GetInformationPath(metadataStructure.Id,
+                    NameAttributeValues.description);
+
+                //check if xsd exist
+                string schemapath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("DCM"), "Metadata",
+                    metadataStructure.Name);
+
+                if (Directory.Exists(schemapath) && Directory.GetFiles(schemapath).Length > 0)
+                    metadataStructureModel.HasSchema = true;
+
+                var firstOrDefault =
+                    metadataStructureModel.MetadataNodes.Where(e => e.XPath.Equals(xpath)).FirstOrDefault();
+                if (firstOrDefault != null)
+                    metadataStructureModel.DescriptionNode =
+                        firstOrDefault.DisplayName;
+
+                metadataStructureModel.MetadataNodes = GetAllXPath(metadataStructureModel.Id);
+
+                metadataStructureModel.Active = xmlDatasetHelper.IsActive(metadataStructure.Id);
+            }
+            catch (Exception exception)
+            {
+                metadataStructureModel = new MetadataStructureModel();
+                metadataStructureModel.Id = metadataStructure.Id;
+                metadataStructureModel.Name = metadataStructure.Name;
+            }
 
             return metadataStructureModel;
         }
@@ -75,22 +238,121 @@ namespace BExIS.Web.Shell.Areas.DCM.Controllers
         /// <returns></returns>
         private List<SearchMetadataNode> GetAllXPath(long metadatastructureId)
         {
-            SearchDesigner searchDesigner = new SearchDesigner();
-            return searchDesigner.GetAllXPathsOfSimpleAttributes(metadatastructureId);
+            //XmlMetadataHelper.GetAllXPathsOfSimpleAttributes(metadatastructureId);
+            XmlMetadataHelper xmlMetadataHelper = new XmlMetadataHelper();
+
+            return xmlMetadataHelper.GetAllXPathsOfSimpleAttributes(metadatastructureId);
         }
 
-        private List<string> GetEntityClassPathList()
+        // Improvement: [Sven] Vereinfachung der Abfrage, ggfs. muss alte Version wiederhergestellt werden, falls es nicht korrekt funktioniert.  
+        private List<EntityModel> GetEntityModelList()
         {
             EntityManager entityManager = new EntityManager();
 
-            IEnumerable<string> tmp = entityManager.GetAllEntities().Select(e => e.ClassPath);
-
-            return tmp.ToList();
+            return entityManager.Entities.Where(e => e.UseMetadata).ToList().Select(e =>
+                      new EntityModel()
+                      {
+                          Name = e.Name,
+                          ClassPath = e.EntityType.FullName
+                      }
+                  ).ToList();
         }
 
-        #endregion
+        private MetadataStructure updateMetadataStructure(MetadataStructure metadataStructure,
+                            MetadataStructureModel metadataStructureModel)
+        {
+            if (metadataStructure.Id.Equals(metadataStructureModel.Id))
+            {
+                metadataStructure.Name = metadataStructureModel.Name;
+                XmlDocument xmlDocument = new XmlDocument();
+                if (metadataStructure.Extra != null)
+                {
 
+                    if (metadataStructure.Extra as XmlDocument != null)
+                        xmlDocument = metadataStructure.Extra as XmlDocument;
+                    else
+                    {
+                        xmlDocument.AppendChild(metadataStructure.Extra);
+                    }
+                }
+                else
+                {
+                    xmlDocument = new XmlDocument();
+                }
 
+                metadataStructureModel.MetadataNodes = GetAllXPath(metadataStructure.Id);
 
+                //set title & description
+                string titleXPath =
+                    metadataStructureModel.MetadataNodes
+                        .Where(e => e.DisplayName.Equals(metadataStructureModel.TitleNode))
+                        .FirstOrDefault()
+                        .XPath;
+
+                XmlNode tmp = null;
+                try
+                {
+                    tmp = XmlUtility.GetXmlNodeByAttribute(xmlDocument.DocumentElement,
+                    nodeNames.nodeRef.ToString(), AttributeNames.name.ToString(),
+                    NameAttributeValues.title.ToString());
+                    tmp.Attributes[AttributeNames.value.ToString()].Value = titleXPath;
+                }
+                catch
+                {
+                    xmlDocument = xmlDatasetHelper.AddReferenceToXml(xmlDocument, NameAttributeValues.title.ToString(),
+                        titleXPath, AttributeType.xpath.ToString(), "extra/nodeReferences/nodeRef");
+                }
+
+                string descriptionXPath =
+                    metadataStructureModel.MetadataNodes
+                        .Where(e => e.DisplayName.Equals(metadataStructureModel.DescriptionNode))
+                        .FirstOrDefault()
+                        .XPath;
+
+                try
+                {
+                    tmp = XmlUtility.GetXmlNodeByAttribute(xmlDocument.DocumentElement, nodeNames.nodeRef.ToString(),
+                    AttributeNames.name.ToString(), NameAttributeValues.description.ToString());
+                    tmp.Attributes[AttributeNames.value.ToString()].Value = descriptionXPath;
+                }
+                catch
+                {
+                    xmlDocument = xmlDatasetHelper.AddReferenceToXml(xmlDocument, NameAttributeValues.description.ToString(),
+                        descriptionXPath, AttributeType.xpath.ToString(), "extra/nodeReferences/nodeRef");
+                }
+
+                //set entity
+                tmp = XmlUtility.GetXmlNodeByName(xmlDocument.DocumentElement, nodeNames.entity.ToString());
+                if (tmp != null)
+                {
+                    tmp.Attributes[AttributeNames.value.ToString()].Value = metadataStructureModel.Entity.ClassPath;
+                    tmp.Attributes[AttributeNames.name.ToString()].Value = metadataStructureModel.Entity.Name;
+                }
+                else
+                {
+                    xmlDocument = xmlDatasetHelper.AddReferenceToXml(xmlDocument, nodeNames.entity.ToString(),
+                        metadataStructureModel.Entity.ClassPath, AttributeType.entity.ToString(), "extra/entity");
+                }
+
+                //set active
+                tmp = XmlUtility.GetXmlNodeByAttribute(xmlDocument.DocumentElement, nodeNames.parameter.ToString(),
+                    AttributeNames.name.ToString(), NameAttributeValues.active.ToString());
+                if (tmp != null)
+                    tmp.Attributes[AttributeNames.value.ToString()].Value = metadataStructureModel.Active.ToString();
+                else
+                {
+                    xmlDocument = xmlDatasetHelper.AddReferenceToXml(xmlDocument,
+                        NameAttributeValues.active.ToString(),
+                        metadataStructureModel.Active.ToString(), AttributeType.parameter.ToString(),
+                        "extra/parameters/parameter");
+                }
+
+                metadataStructure.Extra = xmlDocument;
+
+            }
+            return metadataStructure;
+        }
+
+        #endregion helper
     }
 }

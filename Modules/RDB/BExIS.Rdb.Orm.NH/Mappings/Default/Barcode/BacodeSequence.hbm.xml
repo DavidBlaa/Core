@@ -1,0 +1,10 @@
+﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="BExIS.Rdb.Entities" namespace="BExIS.Rdb.Entities.Barcode">
+  <class xmlns="urn:nhibernate-mapping-2.2" name="BarcodeSequence" table="BarcodeSequences">
+    <!-- Mapping BaseEntity properties -->
+
+    <id name="Id" type="Int64">
+      <column name="Id" />
+      <generator class="native" />
+    </id>
+  </class>
+</hibernate-mapping>

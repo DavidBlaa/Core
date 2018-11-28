@@ -1,17 +1,24 @@
-﻿using System;
+﻿using BExIS.Dim.Entities.Mapping;
+using BExIS.Dim.Helpers.Mapping;
+using BExIS.Dlm.Entities.Data;
+using BExIS.Dlm.Services.Data;
+using BExIS.Modules.Rdb.UI.Models;
+using BExIS.Rdb.Helper;
+using BExIS.Web.Shell.Helpers;
+using BExIS.Web.Shell.Models;
+using BExIS.Xml.Helpers;
+using GenCode128;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Web.Mvc;
-using BExIS.Web.Shell.Areas.RDB.Models;
-using BExIS.Web.Shell.Helpers;
-using BExIS.Web.Shell.Models;
-using BEXIS.Rdb.Helper;
-using GenCode128;
 using Vaiona.Utils.Cfg;
+using System.Linq;
+using ZXing;
+using System.Text;
 
-
-namespace BExIS.Web.Shell.Areas.RDB.Controllers
+namespace BExIS.Modules.RDB.UI.Controllers
 {
     public class RdbController : Controller
     {
@@ -57,11 +64,12 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
             RdbTestModel model = new RdbTestModel();
             model.ListOfEntites = listOfEntities;
             model.Trees = importManager.Trees;
+            model.Soils = importManager.Soils;
 
             return View(model);
         }
 
-        public ActionResult Convert()
+        public ActionResult ConvertTo()
         {
             RdbImportManager importManager = new RdbImportManager();
             importManager.Load();
@@ -99,34 +107,241 @@ namespace BExIS.Web.Shell.Areas.RDB.Controllers
             t.Title = "Trees";
             listOfEntities.Add(t.Title, t);
 
+            //Soils
+            EntitySelectorModel s = BexisModelManager.LoadEntitySelectorModel(importManager.Soils);
+            s.Title = "Soils";
+            listOfEntities.Add(s.Title, s);
+
             RdbTestModel model = new RdbTestModel();
             model.ListOfEntites = listOfEntities;
             model.Trees = importManager.Trees;
-
+            model.Soils = importManager.Soils;
             return View("Index", model);
         }
 
-        public ActionResult GenerateBarCode()
+        public ActionResult GenerateBarCode(long id)
         {
-            string filepath;
-            Image barcodeImage;
+
+            DatasetManager datasetManager = new DatasetManager();
+
+            //e.g.http://localhost:63530/rdb/Sample/Show/
+            var link = Path.Combine(Request.Url.Authority, "rdb/Sample/Show/");
+
+            List<BarCodeLabelModel> model = new List<BarCodeLabelModel>();
             try
             {
-                filepath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), "test.jpg");
-                string test = "123456";
-                barcodeImage = Code128Rendering.MakeBarcodeImage(test, 2, true);
-                barcodeImage.Save(filepath);
 
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+
+                var titles = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Title), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var authors = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Author), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var barcodes = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Barcode), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var matchingObj = MappingUtils.GetValuesWithParentTypeFromMetadata(Convert.ToInt64(Key.Barcode), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+
+                var plots = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Plot), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+
+                var sites = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Site), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                //MappingUtils.GetAllMatchesInSystem()
+
+                string firstTitle = titles.FirstOrDefault();
+                string firstAuthor = authors.FirstOrDefault();
+                string plot = plots.FirstOrDefault();
+                string site = sites.FirstOrDefault();
+
+                IBarcodeWriter writer = new BarcodeWriter
+                {
+                    Format = BarcodeFormat.QR_CODE
+                };
+
+                string url = Path.Combine(link, id.ToString());
+
+                var result = writer.Write(url);
+                var barcodeBitmap = new Bitmap(result);
+                Image qrcodeImage;
+                qrcodeImage = barcodeBitmap;
+
+
+                foreach (var bc in matchingObj)
+                {
+                    string filepath;
+                    Image barcodeImage;
+
+                    string barcodeName = "";
+                    string type = bc.Parent;
+
+                    int l = bc.Value.ToString().Length;
+                    if (l < 8)
+                    {
+                        int x = 8 - l;
+                        for (int i = 0; i < x; i++)
+                        {
+                            barcodeName += "0";
+                        }
+
+                    }
+                    barcodeName += bc.Value;
+
+                    barcodeImage = Code128Rendering.MakeBarcodeImage(barcodeName, 2, false);
+
+
+
+                    BarCodeLabelModel child = new BarCodeLabelModel();
+                    child.BarCode = barcodeImage;
+                    child.QRCode = qrcodeImage;
+                    child.Id = id;
+                    child.BarCodeText = barcodeName;
+                    child.Owner = firstAuthor;
+                    child.Input = firstTitle;
+                    child.Plot = plot;
+                    child.Site = site;
+                    child.Date = DateTime.Now.ToString();
+                    child.Type = type;
+
+
+
+                    model.Add(child);
+                }
+
+                return PartialView("BarcodeGeneratorView", model);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+            finally
+            {
+                datasetManager.Dispose();
+            }
+        }
 
-            BarCodeModel model = new BarCodeModel();
-            model.Image = barcodeImage;
+        public ActionResult GenerateQRCode(long id)
+        {
 
-            return View("BarcodeGeneratorView", model);
+            DatasetManager datasetManager = new DatasetManager();
+
+            //e.g.http://localhost:63530/rdb/Sample/Show/
+            var link = Request.Url.Authority+"/rdb/Sample/Show/";
+
+            List<BarCodeLabelModel> model = new List<BarCodeLabelModel>();
+            try
+            {
+
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+
+                var titles = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Title), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var authors = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Author), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var barcodes = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Barcode), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var matchingObj = MappingUtils.GetValuesWithParentTypeFromMetadata(Convert.ToInt64(Key.Barcode), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+
+                var plots = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Plot), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+
+                var sites = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Site), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                //MappingUtils.GetAllMatchesInSystem()
+
+                string firstTitle = titles.FirstOrDefault();
+                string firstAuthor = authors.FirstOrDefault();
+                string plot = plots.FirstOrDefault();
+                string site = sites.FirstOrDefault();
+
+                IBarcodeWriter writer = new BarcodeWriter
+                {
+                    Format = BarcodeFormat.QR_CODE
+                };
+
+                string url = Path.Combine(link, id.ToString());
+
+                // create string for qrcode
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(firstTitle);
+                sb.AppendLine(firstAuthor);
+                sb.AppendLine(plot);
+                sb.AppendLine(site);
+                sb.AppendLine();
+                sb.AppendLine(url);
+
+
+
+                var result = writer.Write(sb.ToString());
+                var barcodeBitmap = new Bitmap(result);
+                Image qrcodeImage;
+                qrcodeImage = barcodeBitmap;
+
+
+                foreach (var bc in matchingObj)
+                {
+                    string filepath;
+                    //Image barcodeImage;
+
+                    string barcodeName = "";
+                    string type = bc.Parent;
+
+                    int l = bc.Value.ToString().Length;
+                    if (l < 8)
+                    {
+                        int x = 8 - l;
+                        for (int i = 0; i < x; i++)
+                        {
+                            barcodeName += "0";
+                        }
+
+                    }
+                    barcodeName += bc.Value;
+
+                    //barcodeImage = Code128Rendering.MakeBarcodeImage(barcodeName, 2, false);
+
+
+
+                    BarCodeLabelModel child = new BarCodeLabelModel();
+                    child.BarCode = null;
+                    child.QRCode = qrcodeImage;
+                    child.Id = id;
+                    child.BarCodeText = barcodeName;
+                    child.Owner = firstAuthor;
+                    child.Input = firstTitle;
+                    child.Plot = plot;
+                    child.Site = site;
+                    child.Date = DateTime.Now.ToString();
+                    child.Type = type;
+
+
+
+                    model.Add(child);
+                }
+
+                return PartialView("BarcodeGeneratorView", model);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datasetManager.Dispose();
+            }
         }
 
     }

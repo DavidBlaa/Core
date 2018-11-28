@@ -1,4 +1,4 @@
-﻿@model BExIS.Web.Shell.Areas.DCM.Models.SummaryModel
+﻿@model BExIS.Modules.Dcm.UI.Models.SummaryModel
 
 
 <div id="Step6" class="uploadWizardStep">
@@ -40,7 +40,7 @@
                         @Model.DataStructureId
                     </td>
                 </tr>
-                <tr>
+                @*<tr>
                     <td>
                         <b>@Html.LabelFor(m=>m.ResearchPlanTitle)</b>
 
@@ -48,8 +48,8 @@
                     <td>
                         @Model.ResearchPlanTitle
                     </td>
-                </tr>
-                 <tr>
+                </tr>*@
+                 @*<tr>
                     <td>
                         <b>@Html.LabelFor(m=>m.ResearchPlanId) :</b>
 
@@ -57,7 +57,7 @@
                     <td>
                         @Model.ResearchPlanId
                     </td>
-                </tr>
+                </tr>*@
               @*   <tr>
                     <td>
                         <b>@Html.LabelFor(m=>m.NumOfVars) :</b>
@@ -131,7 +131,7 @@
 
     <div class="uploadWizardStep_Success stepper">
         <div id="progress"></div>
-    <//div>
+    </div>
     <div class="uploadWizardStep_Error stepper">
         @if (Model != null)
         {

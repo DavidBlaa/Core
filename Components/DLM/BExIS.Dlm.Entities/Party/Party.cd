@@ -64,7 +64,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAQAAAAAIgAAAAAAACAIQAAAAAAAAiAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAQAAAAAIgAAAAgAACAIQAAAAAAQAiAAAAAAAAAAA=</HashCode>
       <FileName>Party\PartyCustomAttribute.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -86,7 +86,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <HashCode>AEAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
       <FileName>Party\PartyCustomAttributeValue.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -161,7 +161,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAAIAAAAAgAEAAAAAAAAAAAAAAAAAAACAAAAAIAAA=</HashCode>
+      <HashCode>AAAAAIEAAAAgAEAAAAAAAAAAAAAAAQAAACAAAAAIAAA=</HashCode>
       <FileName>Party\PartyType.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
@@ -170,7 +170,7 @@
       <Property Name="StatusTypes" />
     </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="BExIS.Dlm.Entities.Party.PartyTypePair" Collapsed="true">
+  <Class Name="BExIS.Dlm.Entities.Party.PartyTypePair">
     <Position X="12.5" Y="2" Width="1.5" />
     <AssociationLine Name="AlowedSource" Type="BExIS.Dlm.Entities.Party.PartyType">
       <MemberNameLabel ManuallyPlaced="true">
@@ -184,8 +184,8 @@
     </AssociationLine>
     <AssociationLine Name="PartyRelationshipType" Type="BExIS.Dlm.Entities.Party.PartyRelationshipType" FixedFromPoint="true">
       <Path>
-        <Point X="12.5" Y="2.438" />
-        <Point X="8.25" Y="2.438" />
+        <Point X="12.5" Y="2.903" />
+        <Point X="8.25" Y="2.903" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="0.475" Y="-0.096" />
@@ -201,12 +201,12 @@
       <Property Name="PartyRelationshipType" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="BExIS.Dlm.Entities.Party.PartyRelationshipType" Collapsed="true">
+  <Class Name="BExIS.Dlm.Entities.Party.PartyRelationshipType">
     <Position X="6.5" Y="2" Width="1.75" />
     <AssociationLine Name="AssociatedPairs" Type="BExIS.Dlm.Entities.Party.PartyTypePair" FixedFromPoint="true">
       <Path>
-        <Point X="8.25" Y="2.188" />
-        <Point X="12.5" Y="2.188" />
+        <Point X="8.25" Y="2.668" />
+        <Point X="12.5" Y="2.668" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="0.308" Y="-0.065" />
@@ -226,7 +226,7 @@
       <Property Name="PartyRelationships" />
     </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="BExIS.Dlm.Entities.Party.PartyRelationship" Collapsed="true">
+  <Class Name="BExIS.Dlm.Entities.Party.PartyRelationship">
     <Position X="6.5" Y="7.25" Width="1.5" />
     <AssociationLine Name="PartyRelationshipType" Type="BExIS.Dlm.Entities.Party.PartyRelationshipType">
       <MemberNameLabel ManuallyPlaced="true">
@@ -235,11 +235,12 @@
     </AssociationLine>
     <AssociationLine Name="FirstParty" Type="BExIS.Dlm.Entities.Party.Party" FixedFromPoint="true">
       <Path>
-        <Point X="8" Y="7.688" />
-        <Point X="12.5" Y="7.688" />
+        <Point X="8" Y="8.519" />
+        <Point X="13.281" Y="8.519" />
+        <Point X="13.281" Y="7.941" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.37" Y="-0.086" />
+        <Position X="-0.086" Y="0.37" />
       </MemberNameLabel>
     </AssociationLine>
     <AssociationLine Name="SecondParty" Type="BExIS.Dlm.Entities.Party.Party">

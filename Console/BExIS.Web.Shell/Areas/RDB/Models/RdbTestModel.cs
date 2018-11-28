@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using BExIS.Rdb.Entities;
 using BExIS.Web.Shell.Models;
-using BEXIS.Rdb.Entities;
+using System.Collections.Generic;
+using System.Drawing;
 
-namespace BExIS.Web.Shell.Areas.RDB.Models
+namespace BExIS.Modules.Rdb.UI.Models
 {
     public class RdbTestModel
     {
         public Dictionary<string, EntitySelectorModel> ListOfEntites;
         public List<Tree> Trees;
+        public List<Soil> Soils;
 
         public RdbTestModel()
         {
@@ -16,10 +17,18 @@ namespace BExIS.Web.Shell.Areas.RDB.Models
         }
     }
 
-    public class BarCodeModel
+    public class BarCodeLabelModel
     {
+        public long Id;
         public string Input;
-        public Image Image;
+        public Image BarCode;
+        public Image QRCode;
+        public string BarCodeText;
+        public string Owner;
+        public string Plot;
+        public string Site;
+        public string Date;
+        public string Type;
 
     }
 

@@ -1,0 +1,200 @@
+﻿@model BExIS.Modules.Rdb.UI.Models.ShowModel
+
+@using Telerik.Web.Mvc.UI;
+@using Vaiona.Web.Mvc.Modularity
+
+@section Information
+{
+    This is a detailed view on all parts of a sample. 
+
+   <p>
+    @*<a href="~/rdb/Help/Index/#_overview" class="bx-informationLink" title="go to help" target="_blank">More</a>*@
+</p>
+
+}
+
+@{
+    @*<script src="@Url.Content("~/Scripts/DCM/Form.js")" type="text/javascript"></script>*@
+}
+
+
+
+<div>
+    <table>
+        <tr>
+            <td>
+                <h2>@Model.Title ( @Model.Id )</h2>
+            </td>
+            <td>
+                <div id="preloaderContainer"/>
+            </td>
+        </tr>
+    </table>
+</div>
+
+@if(@Model != null)
+{
+    if (ViewData.ModelState.IsValid)
+    {
+
+        @(Html.Telerik().TabStrip()
+              .Name("ShowDataTabStrip")
+              .SelectedIndex(0)
+              .Items(tabs =>
+              {
+
+                  //ToDo Recator Modularity -> load metadata from from dcm
+
+                  tabs.Add()
+                      .Text("Metadata")
+                      .LoadContentFrom("ShowMetadata", "Sample", new {area = "rdb", entityId = @Model.Id, title = @Model.Title, metadatastructureId = @Model.MetadataStructureId, datastructureId = @Model.DataStructureId, researchplanId = @Model.ResearchPlanId, sessionKeyForMetadata = "ShowDataMetadata"})
+                      .HtmlAttributes(new {id = "metadata"})
+                      .Enabled(false);
+
+                  //tabs.Add()
+                  //    .Text("Primary Data")
+                  //    .LoadContentFrom("ShowPrimaryData", "Data", new {area = "ddm", datasetID = @Model.Id})
+                  //    .Enabled(@Model.ViewAccess)
+                  //    .HtmlAttributes(new {id = "primarydata"})
+                  //    .Enabled(false);
+
+                  //tabs.Add()
+                  //    .Text("Data Structure")
+                  //    .LoadContentFrom("ShowPreviewDataStructure", "Data", new {area = "ddm", datasetID = @Model.Id})
+                  //    .HtmlAttributes(new {id = "datastructure"})
+                  //    .Enabled(false);
+
+
+                  //tabs.Add()
+                  //    .Text("Dataset Permissions")
+                  //    .LoadContentFrom("DatasetPermissions", "Data", new { area = "ddm", datasetId = @Model.Id })
+                  //    .Enabled(false)
+                  //    .HtmlAttributes(new { id = "datapermissions" });
+
+
+                  //tabs.Add()
+                  //    .Text("Publish")
+                  //    //.Content(@Html.Render("dim", "Submission", "getPublishDataPartialView", new RouteValueDictionary { { "datasetid", @Model.Id } }).ToHtmlString())
+                  //      .LoadContentFrom("getPublishDataPartialView", "Submission", new { area = "dim", datasetId = @Model.Id })
+                  //      .Enabled(false)
+                  //      .HtmlAttributes(new { id = "prepare" });
+
+
+              })
+              .ClientEvents(e => e.OnSelect("OnSelectShowDataTabStrip")))
+    }
+    else
+    {
+        @Html.ValidationSummary(true);
+    }
+}
+
+
+<script type="text/javascript">
+    function grid_subjects_onDataBound() {
+        addTooltips();
+        resetAllTelerikIconTitles();
+
+        $("#grid_subjects tbody input:checkbox").click(function () {
+            if ($(this).is(':checked')) {
+                $.post('@Url.Action("AddRightToEntityPermission", "UserPermissions", new { area = "sam"})',
+                    { SubjectId: $(this).data('subjectid'), EntityId: $(this).data('entityid'), InstanceId: $(this).data('instanceid'), RightType: $(this).data('righttype') },
+                    function () {
+                        $("#grid_subjects .t-refresh").trigger('click');
+                    });
+            } else {
+                $.post('@Url.Action("RemoveRightFromEntityPermission", "UserPermissions", new { area = "sam" })',
+                    { SubjectId: $(this).data('subjectid'), EntityId: $(this).data('entityid'), InstanceId: $(this).data('instanceid'), RightType: $(this).data('righttype') },
+                    function () {
+                        $("#grid_subjects .t-refresh").trigger('click');
+                    });
+            }
+        });
+    }
+
+    $("#MetadataEditor").ready(function() {
+
+
+    });
+
+    $(document).ready(function () {
+
+        $("#preloaderContainer").preloader(20, "Loading...");
+        resetAllTelerikIconTitles();
+
+        $(document).bind("MetadataFormIsReady", function () {
+            //alert("m is ready");
+            var viewAccess = '@Model.ViewAccess';
+            var grantAccess = '@Model.GrantAccess';
+
+            var tabStrip = $(".t-tabstrip");
+            //console.log(tabStrip);
+            //console.log(viewAccess);
+            //console.log(grantAccess);
+
+
+            $("li#datastructure").removeClass("t-state-disabled");
+            //console.log($(tabStrip).find("li #datastructure"));
+
+            if (viewAccess === "True") {
+                $("li#primarydata").removeClass("t-state-disabled");
+                $("li#prepare").removeClass("t-state-disabled");
+            }
+
+            if (grantAccess === "True") {
+                $(tabStrip).find("li#datapermissions").removeClass("t-state-disabled");
+            }
+
+            //console.log($("li", tabStrip.element));
+            var items = $("li", tabStrip.element);
+            //console.log(items);
+            //tabStrip.enable(items);
+
+            $("#preloaderContainer").removePreloader();
+        });
+
+    });
+
+
+    function existsRightType(rights, rightType) {
+        if (jQuery.inArray(rightType, rights) != -1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    function OnSelectShowDataTabStrip(e) {
+        if (e.item.id == "metadata") {
+
+            setTimeout(function () {
+                bindMinimap(true);
+
+                $(window).resize(function () {
+
+                        setTimeout(function () {
+                            //alert("r");
+                            bindMinimap();
+                        }, 120);
+                    });
+
+            }, 120);
+
+            
+        }
+        else {
+            $(".miniregion").remove();
+            $(".minimap").remove();
+
+            $(window).off('resize');
+        }
+
+        if (e.item.id == "prepare") {
+
+            var tabStrip = $("#ShowDataTabStrip").data("tTabStrip");
+            tabStrip.reload($("#" + e.item.id));
+        }
+    }
+
+</script>

@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using BExIS.IO.Transform.Input;
-using BExIS.Dlm.Entities.Data;
+﻿using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
-using System.Security.Cryptography;
-using BExIS.DCM.UploadWizard;
-using Vaiona.Logging;
+using BExIS.IO.Transform.Input;
+using System;
 using System.Collections;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Xml;
-using System.Xml.Linq;
-using BExIS.Xml.Helpers;
-using Vaiona.Logging.Aspects;
-using System.Threading.Tasks;
+using Vaiona.Model.MTnt;
+using Vaiona.Persistence.Api;
 
 /// <summary>
 ///
@@ -43,141 +36,145 @@ namespace BExIS.Dcm.UploadWizard
         /// <param name="workingCopy"></param>
         /// <returns></returns>
         /// //original version
-        public static Dictionary<string, List<DataTuple>> GetSplitDatatuples2(DataTuple[] newDatatuples, List<long> primaryKeys, DatasetVersion workingCopy, ref List<AbstractTuple> datatuplesFromDatabase)
+        public Dictionary<string, List<DataTuple>> GetSplitDatatuples2(List<DataTuple> newDatatuples, List<long> primaryKeys, DatasetVersion workingCopy, ref List<AbstractTuple> datatuplesFromDatabase)
         {
 
-            Dictionary<string, List<DataTuple>> data = new Dictionary<string, List<DataTuple>>();
-            List<DataTuple> newDtList = new List<DataTuple>();
-            List<DataTuple> editDtList = new List<DataTuple>();
-            List<DataTuple> deleteDtList = new List<DataTuple>();
-
-            DatasetManager datasetManager = new DatasetManager();
-
-            DataTuple sourceDt;
-            Dictionary<long, string> PkValues;
-
-            // load datatuples from db
-            // later packagesize
-
-            for (int j = 0; j < newDatatuples.Count(); j++)
+            using (IUnitOfWork unitOfWork = this.GetIsolatedUnitOfWork())
             {
-                DataTuple newDt = newDatatuples[j];
 
-                if (!IsEmpty(newDt))
+                Dictionary<string, List<DataTuple>> data = new Dictionary<string, List<DataTuple>>();
+                List<DataTuple> newDtList = new List<DataTuple>();
+                List<DataTuple> editDtList = new List<DataTuple>();
+                List<DataTuple> deleteDtList = new List<DataTuple>();
+
+
+                DataTuple sourceDt;
+                Dictionary<long, string> PkValues;
+
+                // load datatuples from db
+                // later packagesize
+
+                for (int j = 0; j < newDatatuples.Count(); j++)
                 {
-                    PkValues = getPrimaryKeyValues(newDt, primaryKeys);
+                    DataTuple newDt = newDatatuples.ElementAt(j);
 
-                    bool exist = false;
-
-                    for (int i = 0; i < datatuplesFromDatabase.Count; i++)
+                    if (!IsEmpty(newDt))
                     {
-                        sourceDt = (DataTuple)datatuplesFromDatabase.ElementAt(i);
+                        PkValues = getPrimaryKeyValues(newDt, primaryKeys);
 
-                        if (sourceDt != null && sameDatatuple(sourceDt, PkValues))
+                        bool exist = false;
+
+                        for (int i = 0; i < datatuplesFromDatabase.Count; i++)
                         {
-                            // check for edit
-                            exist = true;
-                            if (!Equal2(newDt, sourceDt))
-                            {
-                                //sourceDt.Materialize();
-                                editDtList.Add(Merge(newDt, sourceDt));
+                            IReadOnlyRepository<DataTuple> repo = unitOfWork.GetReadOnlyRepository<DataTuple>();
+                            sourceDt = repo.Get(datatuplesFromDatabase.ElementAt(i).Id);
+                            repo.LoadIfNot(sourceDt.VariableValues);
 
+                            if (sourceDt != null && sameDatatuple(sourceDt, PkValues))
+                            {
+                                // check for edit
+                                exist = true;
+                                if (!Equal2(newDt, sourceDt))
+                                {
+                                    //sourceDt.Materialize();
+                                    editDtList.Add(Merge(newDt, sourceDt));
+
+                                }
+
+                                if (datatuplesFromDatabase.Count > 0)
+                                {
+                                    datatuplesFromDatabase.RemoveAt(i);
+                                }
+
+                                break;
                             }
 
-                            if (datatuplesFromDatabase.Count > 0)
-                            {
-                                datatuplesFromDatabase.RemoveAt(i);
-                            }
-
-                            break;
                         }
 
+                        if (!exist)
+                            newDtList.Add(newDt);
+
                     }
-
-                    if (!exist)
-                        newDtList.Add(newDt);
-
                 }
+                //}
+
+                data.Add("new", newDtList);
+                data.Add("edit", editDtList);
+
+
+                return data;
             }
-            //}
-
-            data.Add("new", newDtList);
-            data.Add("edit", editDtList);
-
-
-            return data;
 
         }
 
         //temporary solution: norman :GetSplitDatatuples2
-        public static Dictionary<string, List<DataTuple>> GetSplitDatatuples(List<DataTuple> newDatatuples, List<long> primaryKeys, DatasetVersion workingCopy, ref List<long> datatuplesFromDatabaseIds)
+        public Dictionary<string, List<DataTuple>> GetSplitDatatuples(List<DataTuple> incomingDatatuples, List<long> primaryKeys, DatasetVersion workingCopy, ref List<long> datatuplesFromDatabaseIds)
         {
-
-            Dictionary<string, List<DataTuple>> data = new Dictionary<string, List<DataTuple>>();
-            List<DataTuple> newDtList = new List<DataTuple>();
-            List<DataTuple> editDtList = new List<DataTuple>();
-            List<DataTuple> deleteDtList = new List<DataTuple>();
-
             DatasetManager datasetManager = new DatasetManager();
 
-            DataTuple sourceDt;
-            Dictionary<long, string> PkValues;
+            Dictionary<string, List<DataTuple>> data = new Dictionary<string, List<DataTuple>>();
+            Dictionary<string, DataTuple> newDtList = new Dictionary<string, DataTuple>();
+            Dictionary<string, DataTuple> editDtList = new Dictionary<string, DataTuple>();
+            List<DataTuple> deleteDtList = new List<DataTuple>();
 
-            // load datatuples from db
-            // later packagesize
 
 
-            for (int j = 0; j < newDatatuples.Count(); j++)
+            DataTupleIterator tupleIterator = new DataTupleIterator(datatuplesFromDatabaseIds, datasetManager, false);
+            // Keep the DB loop outer to reduce the number of DB queries
+            foreach (var existingTuple in tupleIterator)
             {
-                DataTuple newDt = newDatatuples[j];
-
-                if (!IsEmpty(newDt))
+                if (existingTuple == null || existingTuple.Id < 0) // it is unlikely to happen, but just to reinforce it.
+                    continue;
+                // iterating over the in-memory newDataTuples is faster
+                for (int counter = 0; counter < incomingDatatuples.Count(); counter++)
+                //foreach (var incomingTuple in newDatatuples)
                 {
-                    string keysValueNewDataTuple = getPrimaryKeysAsString(newDt, primaryKeys);
-
-                    bool exist = false;
-
-                    for (int i = 0; i < datatuplesFromDatabaseIds.Count; i++)
+                    DataTuple incomingTuple = incomingDatatuples[counter];
+                    if (!IsEmpty(incomingTuple))
                     {
-                        long id = datatuplesFromDatabaseIds.ElementAt(i);
-                        sourceDt = datasetManager.DataTupleRepo.Query( dt => dt.Id.Equals(id)).FirstOrDefault();
-
-                        string keysValueSourceDatatuple = getPrimaryKeysAsStringFromXml(sourceDt, primaryKeys);
-
-                        if (sourceDt != null && keysValueNewDataTuple.Equals(keysValueSourceDatatuple))
+                        // we first assume that any incoming tuple is new, and then try to check if it is not.
+                        // this reduces the iterations of the inner loop.
+                        // because the search takes the DB tuple and lloks for it in the coming tuples, it is posssible for an incoming tuple to be added more than once.
+                        // So they are added to a dictionary to avoid duplicates
+                        string keysValueNewDataTuple = getPrimaryKeysAsString(incomingTuple, primaryKeys);
+                        if (!newDtList.ContainsKey(keysValueNewDataTuple))
                         {
-                            // check for edit
-                            exist = true;
-                            if (!Equal(newDt, sourceDt))
-                            {
-                                //sourceDt.Materialize();
-                                editDtList.Add(Merge(newDt, sourceDt));
-
-                            }
-
-                            if (datatuplesFromDatabaseIds.Count > 0)
-                            {
-                                datatuplesFromDatabaseIds.RemoveAt(i);
-                            }
-
-                            break;
+                            newDtList.Add(keysValueNewDataTuple, incomingTuple); // by default, assume that the incoming tuple is new (not in the DB)
                         }
-
+                        string keysValueSourceDatatuple = getPrimaryKeysAsStringFromXml(existingTuple, primaryKeys);
+                        if (keysValueNewDataTuple.Equals(keysValueSourceDatatuple)) // the incoming tuple exists in the DB
+                        {
+                            if (!Equal(incomingTuple, existingTuple)) // the incoming tuple is a changed version of an existing one
+                            {
+                                // the incoming tuple is found in the DB and brings some changes, therefore not NEW!
+                                newDtList.Remove(keysValueNewDataTuple);
+                                if (!editDtList.ContainsKey(keysValueNewDataTuple))
+                                {
+                                    // apply the changes to the exisiting one and register is an edited tuple
+                                    editDtList.Add(keysValueNewDataTuple, Merge(incomingTuple, (DataTuple)existingTuple));
+                                    // remove the current incoming item to shorten the list for the next round
+                                    incomingDatatuples.RemoveAt(counter);
+                                }
+                                // the decision is made, hence break the inner loop
+                                break;
+                            }
+                            else // the incoming tuple is found in the BD, but introduces no change., hence no action is needed.
+                            {
+                                // remove the incoming tuple from the list and from the new ones.
+                                newDtList.Remove(keysValueNewDataTuple);
+                                incomingDatatuples.RemoveAt(counter);
+                            }
+                        }
+                        else // the incoming tuple does not match the PK, so it should be a new tuple, which is already added to the list.
+                        { // DO NOTHING
+                        }
                     }
-
-                    if (!exist)
-                        newDtList.Add(newDt);
-
                 }
             }
-            //}
 
-            data.Add("new", newDtList);
-            data.Add("edit", editDtList);
-
-
+            data.Add("new", newDtList.Values.ToList());
+            data.Add("edit", editDtList.Values.ToList());
             return data;
-
         }
 
         /// <summary>
@@ -187,11 +184,11 @@ namespace BExIS.Dcm.UploadWizard
         /// <seealso cref=""/>
         /// <param name="dataTuple"></param>
         /// <returns></returns>
-        private static bool IsEmpty(DataTuple dataTuple)
+        private bool IsEmpty(DataTuple dataTuple)
         {
-            foreach(VariableValue variableValue in dataTuple.VariableValues)
+            foreach (VariableValue variableValue in dataTuple.VariableValues)
             {
-                if (variableValue.Value!=null) return false;
+                if (variableValue.Value != null) return false;
             }
 
             return true;
@@ -205,7 +202,7 @@ namespace BExIS.Dcm.UploadWizard
         /// <param name="newDatatuple"></param>
         /// <param name="sourceDatatuple"></param>
         /// <returns></returns>
-        private static DataTuple Merge(DataTuple newDatatuple, DataTuple sourceDatatuple)
+        private DataTuple Merge(DataTuple newDatatuple, DataTuple sourceDatatuple)
         {
             sourceDatatuple.VariableValues = newDatatuple.VariableValues;
 
@@ -221,10 +218,10 @@ namespace BExIS.Dcm.UploadWizard
         /// <param name="sourceDatatuple"></param>
         /// <returns></returns>
         //temporary solution: norman :Equal2
-        private static bool Equal(DataTuple newDatatuple, DataTuple sourceDatatuple)
+        private bool Equal(AbstractTuple newDatatuple, AbstractTuple sourceDatatuple)
         {
 
-            foreach(VariableValue newVariableValue in newDatatuple.VariableValues )
+            foreach (VariableValue newVariableValue in newDatatuple.VariableValues)
             {
                 long varID = newVariableValue.VariableId;
 
@@ -239,14 +236,14 @@ namespace BExIS.Dcm.UploadWizard
             return true;
         }
 
-        private static bool Equal2(DataTuple newDatatuple, DataTuple sourceDatatuple)
+        private bool Equal2(DataTuple newDatatuple, DataTuple sourceDatatuple)
         {
 
-            foreach(VariableValue newVariableValue in newDatatuple.VariableValues )
+            foreach (VariableValue newVariableValue in newDatatuple.VariableValues)
             {
-                foreach(VariableValue sourceVariableValue in sourceDatatuple.VariableValues )
+                foreach (VariableValue sourceVariableValue in sourceDatatuple.VariableValues)
                 {
-                    if(newVariableValue.VariableId.Equals(sourceVariableValue.VariableId))
+                    if (newVariableValue.VariableId.Equals(sourceVariableValue.VariableId))
                     {
                         if (!newVariableValue.Value.Equals(sourceVariableValue.Value))
                             return false;
@@ -259,7 +256,7 @@ namespace BExIS.Dcm.UploadWizard
             return true;
         }
 
-        
+
 
         /// <summary>
         /// 
@@ -269,9 +266,9 @@ namespace BExIS.Dcm.UploadWizard
         /// <param name="dt"></param>
         /// <param name="pks"></param>
         /// <returns></returns>
-        private static Dictionary<long, string> getPrimaryKeyValues(DataTuple dt, List<long> pks)
+        private Dictionary<long, string> getPrimaryKeyValues(DataTuple dt, List<long> pks)
         {
-            Dictionary<long, string> temp = new Dictionary<long,string>();
+            Dictionary<long, string> temp = new Dictionary<long, string>();
 
             foreach (long k in pks)
             {
@@ -293,7 +290,7 @@ namespace BExIS.Dcm.UploadWizard
         /// <param name="dt"></param>
         /// <param name="pksVs"></param>
         /// <returns></returns>
-        private static bool sameDatatuple(DataTuple dt, Dictionary<long, string> pksVs)
+        private bool sameDatatuple(DataTuple dt, Dictionary<long, string> pksVs)
         {
             bool IsSame = true;
 
@@ -333,181 +330,185 @@ namespace BExIS.Dcm.UploadWizard
 
         #region identifier
 
-            /// <summary>
-            /// test unique of primary keys in a FileStream
-            /// </summary>
-            /// <remarks></remarks>
-            /// <seealso cref=""/>
-            /// <param name="taskManager"></param>
-            /// <param name="datasetId"></param>
-            /// <param name="primaryKeys"></param>
-            /// <param name="ext"></param>
-            /// <param name="filename"></param>
-            /// <returns></returns>
-            public static bool IsUnique(TaskManager taskManager, long datasetId, List<long> primaryKeys, string ext, string filename)
+        /// <summary>
+        /// test unique of primary keys in a FileStream
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="taskManager"></param>
+        /// <param name="datasetId"></param>
+        /// <param name="primaryKeys"></param>
+        /// <param name="ext"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public bool IsUnique(TaskManager taskManager, long datasetId, List<long> primaryKeys, string ext, string filename)
+        {
+
+            Hashtable hashtable = new Hashtable();
+            Hashtable test = new Hashtable();
+            List<string> testString = new List<string>();
+
+            List<string> primaryValuesAsOneString = new List<string>();
+
+            TaskManager TaskManager = taskManager;
+            int packageSize = 1000;
+            int position = 1;
+
+            if (ext.Equals(".txt") || ext.Equals(".csv"))
             {
-
-                Hashtable hashtable = new Hashtable();
-                Hashtable test = new Hashtable();
-                List<string> testString = new List<string>();
-
-                List<string> primaryValuesAsOneString = new List<string>();
-
-                TaskManager TaskManager = taskManager;
-                int packageSize = 1000;
-                int position = 1;
-
-                if (ext.Equals(".txt") || ext.Equals(".csv"))
+                #region csv
+                do
                 {
-                    #region csv
-                    do
+                    primaryValuesAsOneString = new List<string>();
+
+                    AsciiReader reader = new AsciiReader();
+                    reader.Position = position;
+                    Stream stream = reader.Open(TaskManager.Bus["FilePath"].ToString());
+
+                    AsciiFileReaderInfo afri = (AsciiFileReaderInfo)TaskManager.Bus["FileReaderInfo"];
+
+                    DataStructureManager datastructureManager = new DataStructureManager();
+                    StructuredDataStructure sds = datastructureManager.StructuredDataStructureRepo.Get(Convert.ToInt64(TaskManager.Bus["DataStructureId"].ToString()));
+                    // get a list of values for each row
+                    // e.g.
+                    // primarky keys id, name
+                    // 1 [1][David]
+                    // 2 [2][Javad]
+                    List<List<string>> tempList = reader.ReadValuesFromFile(stream, filename, afri, sds, datasetId, primaryKeys, packageSize);
+
+                    // convert List of Lists to list of strings
+                    // 1 [1][David] = 1David
+                    // 2 [2][Javad] = 2Javad
+                    foreach (List<string> l in tempList)
                     {
-                        primaryValuesAsOneString = new List<string>();
-
-                        AsciiReader reader = new AsciiReader();
-                        reader.Position = position;
-                        Stream stream = reader.Open(TaskManager.Bus["FilePath"].ToString());
-
-                        AsciiFileReaderInfo afri = (AsciiFileReaderInfo)TaskManager.Bus["FileReaderInfo"];
-
-                        DataStructureManager datastructureManager = new DataStructureManager();
-                        StructuredDataStructure sds = datastructureManager.StructuredDataStructureRepo.Get(Convert.ToInt64(TaskManager.Bus["DataStructureId"].ToString()));
-                        // get a list of values for each row
-                        // e.g.
-                        // primarky keys id, name
-                        // 1 [1][David]
-                        // 2 [2][Javad]
-                        List<List<string>> tempList = reader.ReadValuesFromFile(stream, filename, afri, sds, datasetId, primaryKeys, packageSize);
-
-                        // convert List of Lists to list of strings
-                        // 1 [1][David] = 1David
-                        // 2 [2][Javad] = 2Javad
-                        foreach (List<string> l in tempList)
+                        string tempString = "";
+                        foreach (string s in l)
                         {
-                            string tempString = "";
-                            foreach (string s in l)
-                            {
-                                tempString += s;
-                            }
-                            if (!String.IsNullOrEmpty(tempString)) primaryValuesAsOneString.Add(tempString);
+                            tempString += s;
                         }
+                        if (!String.IsNullOrEmpty(tempString)) primaryValuesAsOneString.Add(tempString);
+                    }
 
-                        // add all primary keys pair into the hasttable
-                        foreach (string pKey in primaryValuesAsOneString)
-                        {
-                            if (pKey != "")
-                            {
-
-                                try
-                                {
-                                    hashtable.Add(Utility.ComputeKey(pKey), "pKey");
-                                }
-                                catch
-                                {
-                                    return false;
-                                }
-                            }
-
-                        }
-
-
-                        position = reader.Position + 1;
-                        stream.Close();
-
-                    } while (primaryValuesAsOneString.Count > 0);
-
-                    #endregion
-                }
-
-
-                if (ext.Equals(".xlsm") )
-                {
-                    #region excel template
-
-                    do
+                    // add all primary keys pair into the hasttable
+                    foreach (string pKey in primaryValuesAsOneString)
                     {
-                        //reset
-                        primaryValuesAsOneString = new List<string>();
-
-                        ExcelReader reader = new ExcelReader();
-                        reader.Position = position;
-                        Stream stream = reader.Open(TaskManager.Bus["FilePath"].ToString());
-
-                        DataStructureManager datastructureManager = new DataStructureManager();
-                        StructuredDataStructure sds = datastructureManager.StructuredDataStructureRepo.Get(Convert.ToInt64(TaskManager.Bus["DataStructureId"].ToString()));
-                        // get a list of values for each row
-                        // e.g.
-                        // primarky keys id, name
-                        // 1 [1][David]
-                        // 2 [2][Javad]
-                        List<List<string>> tempList = reader.ReadValuesFromFile(stream, filename, sds, datasetId, primaryKeys, packageSize);
-
-                        // convert List of Lists to list of strings
-                        // 1 [1][David] = 1David
-                        // 2 [2][Javad] = 2Javad
-                        foreach (List<string> l in tempList)
+                        if (pKey != "")
                         {
-                            string tempString = "";
-                            foreach (string s in l)
+
+                            try
                             {
-                                tempString += s;
+                                hashtable.Add(Utility.ComputeKey(pKey), "pKey");
                             }
-                            if (!String.IsNullOrEmpty(tempString)) primaryValuesAsOneString.Add(tempString);
+                            catch
+                            {
+                                return false;
+                            }
                         }
 
-                        // add all primary keys pair into the hasttable
-                        foreach (string pKey in primaryValuesAsOneString)
-                        {
-                            if (pKey != "")
-                            {
-
-                                try
-                                {
-                                    hashtable.Add(Utility.ComputeKey(pKey), pKey);
-                                }
-                                catch
-                                {
-                                    stream.Close();
-                                    return false;
-                                }
-                            }
-
-                        }
+                    }
 
 
-                        position = reader.Position + 1;
-                        stream.Close();
+                    position = reader.Position + 1;
+                    stream.Close();
 
-                    } while (primaryValuesAsOneString.Count > 0);
+                } while (primaryValuesAsOneString.Count > 0);
 
-
-                    #endregion
-                }
-
-                return true;
+                #endregion
             }
 
 
-            /// <summary>
-            /// test unique of primary keys on a dataset
-            /// </summary>
-            /// <remarks></remarks>
-            /// <seealso cref=""/>
-            /// <param name="datasetId"></param>
-            /// <param name="primaryKeys"></param>
-            /// <returns></returns>
-            ////[MeasurePerformance]
-            public static Boolean IsUnique(long datasetId, List<long> primaryKeys)
+            if (ext.Equals(".xlsm"))
             {
+                #region excel template
+
+                do
+                {
+                    //reset
+                    primaryValuesAsOneString = new List<string>();
+
+                    ExcelReader reader = new ExcelReader();
+                    reader.Position = position;
+                    Stream stream = reader.Open(TaskManager.Bus["FilePath"].ToString());
+
+                    DataStructureManager datastructureManager = new DataStructureManager();
+                    StructuredDataStructure sds = datastructureManager.StructuredDataStructureRepo.Get(Convert.ToInt64(TaskManager.Bus["DataStructureId"].ToString()));
+                    // get a list of values for each row
+                    // e.g.
+                    // primarky keys id, name
+                    // 1 [1][David]
+                    // 2 [2][Javad]
+                    List<List<string>> tempList = reader.ReadValuesFromFile(stream, filename, sds, datasetId, primaryKeys, packageSize);
+
+                    // convert List of Lists to list of strings
+                    // 1 [1][David] = 1David
+                    // 2 [2][Javad] = 2Javad
+                    foreach (List<string> l in tempList)
+                    {
+                        string tempString = "";
+                        foreach (string s in l)
+                        {
+                            tempString += s;
+                        }
+                        if (!String.IsNullOrEmpty(tempString)) primaryValuesAsOneString.Add(tempString);
+                    }
+
+                    // add all primary keys pair into the hasttable
+                    foreach (string pKey in primaryValuesAsOneString)
+                    {
+                        if (pKey != "")
+                        {
+
+                            try
+                            {
+                                hashtable.Add(Utility.ComputeKey(pKey), pKey);
+                            }
+                            catch
+                            {
+                                stream.Close();
+                                return false;
+                            }
+                        }
+
+                    }
+
+
+                    position = reader.Position + 1;
+                    stream.Close();
+
+                } while (primaryValuesAsOneString.Count > 0);
+
+
+                #endregion
+            }
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// test unique of primary keys on a dataset
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="datasetId"></param>
+        /// <param name="primaryKeys"></param>
+        /// <returns></returns>
+        ////[MeasurePerformance]
+        public Boolean IsUnique(long datasetId, List<long> primaryKeys)
+        {
+            DatasetManager datasetManager = new DatasetManager();
+            try
+            {
+
 
                 Hashtable hashtable = new Hashtable();
 
-                 // load data
-                DatasetManager datasetManager = new DatasetManager();
+                // load data
+
                 Dataset dataset = datasetManager.GetDataset(datasetId);
                 DatasetVersion datasetVersion;
-                
-        
+
+
                 List<long> dataTupleIds = new List<long>();
 
                 if (datasetManager.IsDatasetCheckedIn(datasetId))
@@ -523,7 +524,7 @@ namespace BExIS.Dcm.UploadWizard
 
                     do
                     {
-                        dataTuples = datasetManager.GetDatasetVersionEffectiveTuples(datasetVersion,counter,size);
+                        dataTuples = datasetManager.GetDatasetVersionEffectiveTuples(datasetVersion, counter, size);
 
                         //byte[] pKey;
                         string pKey;
@@ -531,7 +532,7 @@ namespace BExIS.Dcm.UploadWizard
                         {
                             //pKey = getPrimaryKeysAsByteArray(dt, primaryKeys);
                             pKey = getPrimaryKeysAsString(dt, primaryKeys);
-                            
+
 
                             if (pKey.Count() > 0)
                             {
@@ -552,11 +553,11 @@ namespace BExIS.Dcm.UploadWizard
                         counter++;
                     }
                     while (dataTuples.Count() >= (size * counter));
-                        
 
 
-                        #endregion
-                    
+
+                    #endregion
+
                 }
                 else
                 {
@@ -565,23 +566,30 @@ namespace BExIS.Dcm.UploadWizard
 
                 return true;
             }
-
-            /// <summary>
-            /// test unique of primary keys on a dataset
-            /// </summary>
-            /// <remarks></remarks>
-            /// <seealso cref=""/>
-            /// <param name="datasetId"></param>
-            /// <param name="primaryKeys"></param>
-            /// <returns></returns>
-            ////[MeasurePerformance]
-            public static Boolean IsUnique2(long datasetId, List<long> primaryKeys)
+            finally
             {
+                datasetManager.Dispose();
+            }
+        }
 
+        /// <summary>
+        /// test unique of primary keys on a dataset
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="datasetId"></param>
+        /// <param name="primaryKeys"></param>
+        /// <returns></returns>
+        ////[MeasurePerformance]
+        public Boolean IsUnique2(long datasetId, List<long> primaryKeys)
+        {
+            DatasetManager datasetManager = new DatasetManager();
+
+            try
+            {
                 Hashtable hashtable = new Hashtable();
 
                 // load data
-                DatasetManager datasetManager = new DatasetManager();
                 Dataset dataset = datasetManager.GetDataset(datasetId);
                 DatasetVersion datasetVersion;
 
@@ -607,7 +615,7 @@ namespace BExIS.Dcm.UploadWizard
                         string pKey;
                         foreach (long dtId in currentIds)
                         {
-                            dt = datasetManager.DataTupleRepo.Query(d=>d.Id.Equals(dtId)).FirstOrDefault(); 
+                            dt = datasetManager.DataTupleRepo.Query(d => d.Id.Equals(dtId)).FirstOrDefault();
 
                             //pKey = getPrimaryKeysAsByteArray(dt, primaryKeys);
                             pKey = pKey = getPrimaryKeysAsStringFromXml(dt, primaryKeys);
@@ -644,139 +652,149 @@ namespace BExIS.Dcm.UploadWizard
 
                 return true;
             }
-
-            
-            /// <summary>
-            ///  convert primary keys to string
-            ///  returns null if a emtpy string is inside
-            /// </summary>
-            /// <remarks></remarks>
-            /// <seealso cref=""/>
-            /// <param name="datatuple"></param>
-            /// <param name="primaryKeys"></param>
-            /// <returns></returns>
-
-            private static string getPrimaryKeysAsString(DataTuple datatuple, List<long> primaryKeys)
+            finally
             {
-                string value = "";
+                datasetManager.Dispose();
+            }
+        }
 
-                foreach (long t in primaryKeys)
-                {
-                    // empty means not equals value
-                    // so if value is empty add timestamp millisec
-                    //datatuple.Materialize();
-                    object v = datatuple.VariableValues.Where(p => p.VariableId.Equals(t)).First().Value;
-                    if (v != null)
-                        //if (!String.IsNullOrEmpty(v.ToString()))
-                        if (!String.IsNullOrEmpty((string)v))
-                            value += ";"+v;
-                        else
-                            return "";
+
+        /// <summary>
+        ///  convert primary keys to string
+        ///  returns null if a emtpy string is inside
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="datatuple"></param>
+        /// <param name="primaryKeys"></param>
+        /// <returns></returns>
+
+        private string getPrimaryKeysAsString(DataTuple datatuple, List<long> primaryKeys)
+        {
+            string value = "";
+
+            foreach (long t in primaryKeys)
+            {
+                // empty means not equals value
+                // so if value is empty add timestamp millisec
+                //datatuple.Materialize();
+                object v = datatuple.VariableValues.Where(p => p.VariableId.Equals(t)).First().Value;
+                if (v != null)
+                    //if (!String.IsNullOrEmpty(v.ToString()))
+                    if (!String.IsNullOrEmpty((string)v))
+                        value += ";" + v;
                     else
                         return "";
-                }
-                return value;
+                else
+                    return "";
             }
+            return value;
+        }
 
-            /// <summary>
-            ///  convert primary keys to string
-            ///  returns null if a emtpy string is inside
-            /// </summary>
-            /// <remarks></remarks>
-            /// <seealso cref=""/>
-            /// <param name="datatuple"></param>
-            /// <param name="primaryKeys"></param>
-            /// <returns></returns>
-    
-            private static string getPrimaryKeysAsStringFromXml(DataTuple datatuple, List<long> primaryKeys)
+        /// <summary>
+        ///  convert primary keys to string
+        ///  returns null if a emtpy string is inside
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="datatuple"></param>
+        /// <param name="primaryKeys"></param>
+        /// <returns></returns>
+
+        private string getPrimaryKeysAsStringFromXml(AbstractTuple datatuple, List<long> primaryKeys)
+        {
+            string value = "";
+
+            foreach (long t in primaryKeys)
             {
-                string value = "";
-
-                foreach (long t in primaryKeys)
-                {
-                    // empty means not equals value
-                    // so if value is empty add timestamp millisec
-                    //datatuple.Materialize();
-                    object v = GetValueXmlDocument(datatuple.XmlVariableValues, t);
-                    if (v != null)
-                        //if (!String.IsNullOrEmpty(v.ToString()))
-                        if (!String.IsNullOrEmpty((string)v))
-                            value += ";" + v;
-                        else
-                            return "";
+                // empty means not equals value
+                // so if value is empty add timestamp millisec
+                //datatuple.Materialize();
+                object v = GetValueXmlDocument(datatuple.XmlVariableValues, t);
+                if (v != null)
+                    //if (!String.IsNullOrEmpty(v.ToString()))
+                    if (!String.IsNullOrEmpty((string)v))
+                        value += ";" + v;
                     else
                         return "";
-                }
-                return value;
+                else
+                    return "";
             }
+            return value;
+        }
 
-            private static object GetValueXmlDocument(XmlDocument xmlDoc, long variableId)
+        private object GetValueXmlDocument(XmlDocument xmlDoc, long variableId)
+        {
+
+            string xpath = "/Content/Item/Property[@Name='VariableId' and @value='" + variableId.ToString() + "']";
+            string xpathValue = "Property[@Name='Value']";
+
+            XmlNode element = xmlDoc.SelectNodes(xpath).Item(0);
+            string v = "";
+            if (element != null)
             {
-
-                string xpath = "/Content/Item/Property[@Name='VariableId' and @value='" + variableId.ToString() + "']";
-                string xpathValue = "Property[@Name='Value']";
-
-                XmlNode element = xmlDoc.SelectNodes(xpath).Item(0);
-                string v = "";
-                if (element != null)
-                {
-                    XmlNode value = element.ParentNode.SelectSingleNode(xpathValue);
-                    v = value.Attributes["value"].Value;
-                }
-
-                return v;
+                XmlNode value = element.ParentNode.SelectSingleNode(xpathValue);
+                v = value.Attributes["value"].Value;
             }
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <remarks></remarks>
-            /// <seealso cref=""/>
-            /// <param name="type"></param>
-            /// <returns></returns>
-            public static List<string> GetExtentionList(DataStructureType type)
-            { 
-                if(type.Equals(DataStructureType.Structured))
-                {
-                    return new List<string>()
+            return v;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks></remarks>
+        /// <seealso cref=""/>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static List<string> GetExtentionList(DataStructureType type, Tenant tenant = null)
+        {
+
+            if (type.Equals(DataStructureType.Structured))
+            {
+                return new List<string>()
                     {
                         ".xlsm",
                         ".txt",
                         ".csv"
                     };
-                }
-
-                if (type.Equals(DataStructureType.Unstructured))
-                {
-                    return new List<string>()
-                    {
-                        ".avi",
-                        ".bmp",
-                        ".csv",
-                        ".dbf",
-                        ".doc",
-                        ".docx",
-                        ".gif",
-                        ".jpg",
-                        ".jpeg",
-                        ".mp3",
-                        ".mp4",
-                        ".pdf",
-                        ".png",
-                        ".shp",
-                        ".shx",
-                        ".tif",
-                        ".txt",
-                        ".xls",
-                        ".xlsm",
-                        ".xlsx",
-                        ".xsd",
-                        ".zip"
-                    };
-                }
-
-                return new List<string>();
             }
+
+            if (type.Equals(DataStructureType.Unstructured))
+            {
+                if (tenant != null) return tenant.AllowedFileExtensions;
+
+                //Info
+                // is not used anymore: list came from the this.Session.GetTenant().AllowedFileExtensions
+                return new List<string>()
+                {
+                    //".avi",
+                    //".bmp",
+                    //".csv",
+                    //".dbf",
+                    //".doc",
+                    //".docx",
+                    //".gif",
+                    //".jpg",
+                    //".jpeg",
+                    //".mp3",
+                    //".mp4",
+                    //".pdf",
+                    //".png",
+                    //".shp",
+                    //".shx",
+                    //".tif",
+                    //".txt",
+                    //".xls",
+                    //".xlsm",
+                    //".xlsx",
+                    //".xsd",
+                    //".zip"
+                };
+            }
+
+            return new List<string>();
+        }
 
         #endregion
 

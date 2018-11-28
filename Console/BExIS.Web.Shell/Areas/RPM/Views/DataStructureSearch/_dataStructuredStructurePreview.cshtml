@@ -1,13 +1,13 @@
 ﻿@using Telerik.Web.Mvc.UI
 
-@using BExIS.Web.Shell.Areas.RPM.Models
+@using BExIS.Modules.Rpm.UI.Models
 @model long
 
 
 @{
-    Html.Telerik().Grid<VariablePreviewStruct>()
-        .Name("dataStructurePreviewGrid" + Model)
-        .HtmlAttributes(new { @class = "bx-rpm-previewGrid" })
+    Html.Telerik().Grid<VariablePreview>()
+        .Name(Model + "_dataStructurePreviewGrid")
+        .HtmlAttributes(new { @class = "bx-rpm-previewGrid", @style="display:none;"})
         .DataBinding(dataBinding => dataBinding
             .Ajax()
             .Select("_dataStructurePreviewGridBinding", "DataStructureSearch", new { area = "RPM", datastructureId = Model })

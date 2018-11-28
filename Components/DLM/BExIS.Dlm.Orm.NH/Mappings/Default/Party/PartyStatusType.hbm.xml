@@ -20,8 +20,8 @@
       <column name="Name"  />
     </property>
 
-    <property name="Description" type="String" >
-      <column name="Description"  />
+    <property name="Description" type="StringClob" >
+      <column name="Description" sql-type="text"/>
     </property>
 
     <property name="DisplayOrder" type="int" >
@@ -30,7 +30,7 @@
     
     <many-to-one name="PartyType" class="BExIS.Dlm.Entities.Party.PartyType" not-null="true" column="PartyTypeRef"/>
     
-    <set name="Statuses" table="PartyStatuses" lazy="true">
+    <set name="Statuses" table="PartyStatuses" lazy="true" >
       <key column="PartyStatusTypeRef"/>
       <one-to-many class="PartyStatus"/>
     </set>
