@@ -16,6 +16,7 @@ using System.Web.Mvc;
 using Vaiona.Utils.Cfg;
 using System.Linq;
 using ZXing;
+using System.Text;
 
 namespace BExIS.Modules.RDB.UI.Controllers
 {
@@ -203,6 +204,124 @@ namespace BExIS.Modules.RDB.UI.Controllers
 
                     BarCodeLabelModel child = new BarCodeLabelModel();
                     child.BarCode = barcodeImage;
+                    child.QRCode = qrcodeImage;
+                    child.Id = id;
+                    child.BarCodeText = barcodeName;
+                    child.Owner = firstAuthor;
+                    child.Input = firstTitle;
+                    child.Plot = plot;
+                    child.Site = site;
+                    child.Date = DateTime.Now.ToString();
+                    child.Type = type;
+
+
+
+                    model.Add(child);
+                }
+
+                return PartialView("BarcodeGeneratorView", model);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datasetManager.Dispose();
+            }
+        }
+
+        public ActionResult GenerateQRCode(long id)
+        {
+
+            DatasetManager datasetManager = new DatasetManager();
+
+            //e.g.http://localhost:63530/rdb/Sample/Show/
+            var link = Request.Url.Authority+"/rdb/Sample/Show/";
+
+            List<BarCodeLabelModel> model = new List<BarCodeLabelModel>();
+            try
+            {
+
+                DatasetVersion datasetVersion = datasetManager.GetDatasetLatestVersion(id);
+
+                var titles = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Title), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var authors = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Author), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var barcodes = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Barcode), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                var matchingObj = MappingUtils.GetValuesWithParentTypeFromMetadata(Convert.ToInt64(Key.Barcode), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+
+                var plots = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Plot), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+
+                var sites = MappingUtils.GetValuesFromMetadata(Convert.ToInt64(Key.Site), LinkElementType.Key,
+                        datasetVersion.Dataset.MetadataStructure.Id, XmlUtility.ToXDocument(datasetVersion.Metadata));
+
+                //MappingUtils.GetAllMatchesInSystem()
+
+                string firstTitle = titles.FirstOrDefault();
+                string firstAuthor = authors.FirstOrDefault();
+                string plot = plots.FirstOrDefault();
+                string site = sites.FirstOrDefault();
+
+                IBarcodeWriter writer = new BarcodeWriter
+                {
+                    Format = BarcodeFormat.QR_CODE
+                };
+
+                string url = Path.Combine(link, id.ToString());
+
+                // create string for qrcode
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(firstTitle);
+                sb.AppendLine(firstAuthor);
+                sb.AppendLine(plot);
+                sb.AppendLine(site);
+                sb.AppendLine();
+                sb.AppendLine(url);
+
+
+
+                var result = writer.Write(sb.ToString());
+                var barcodeBitmap = new Bitmap(result);
+                Image qrcodeImage;
+                qrcodeImage = barcodeBitmap;
+
+
+                foreach (var bc in matchingObj)
+                {
+                    string filepath;
+                    //Image barcodeImage;
+
+                    string barcodeName = "";
+                    string type = bc.Parent;
+
+                    int l = bc.Value.ToString().Length;
+                    if (l < 8)
+                    {
+                        int x = 8 - l;
+                        for (int i = 0; i < x; i++)
+                        {
+                            barcodeName += "0";
+                        }
+
+                    }
+                    barcodeName += bc.Value;
+
+                    //barcodeImage = Code128Rendering.MakeBarcodeImage(barcodeName, 2, false);
+
+
+
+                    BarCodeLabelModel child = new BarCodeLabelModel();
+                    child.BarCode = null;
                     child.QRCode = qrcodeImage;
                     child.Id = id;
                     child.BarCodeText = barcodeName;

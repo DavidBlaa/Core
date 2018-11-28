@@ -40,7 +40,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Vaiona.Persistence.Api">
-      <HintPath>..\..\..\..\..\BEXIS APP\GIT\Code\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
+      <HintPath>..\..\..\Libraries\Vaiona\Vaiona.Persistence.Api.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
