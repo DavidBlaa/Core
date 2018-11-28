@@ -18,7 +18,6 @@ namespace BExIS.Web.Shell.Controllers
     {
         //
         // GET: /Account/ConfirmEmail
-
         public async Task<ActionResult> ConfirmEmail(long userId, string code)
         {
             var identityUserService = new IdentityUserService();
@@ -36,7 +35,14 @@ namespace BExIS.Web.Shell.Controllers
                 var user = await identityUserService.FindByIdAsync(userId);
                 await signInManager.SignInAsync(user, false, false);
 
-                return this.IsAccessibale("bam", "PartyService", "UserRegistration")
+                var es = new EmailService();
+                es.Send(MessageHelper.GetRegisterUserHeader(),
+                    MessageHelper.GetRegisterUserMessage(user.Id, user.Name, user.Email),
+                    ConfigurationManager.AppSettings["SystemEmail"]
+                    );
+
+
+                return this.IsAccessible("bam", "PartyService", "UserRegistration")
                     ? RedirectToAction("UserRegistration", "PartyService", new { area = "bam" })
                     : RedirectToAction("Index", "Home");
             }
@@ -54,9 +60,9 @@ namespace BExIS.Web.Shell.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ExternalLogin(string provider, string returnUrl)
         {
+            //ControllerContext.HttpContext.Session.RemoveAll();
             // Umleitung an den externen Anmeldeanbieter anfordern
-            return new ChallengeResult(provider,
-                Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl }));
+            return new ChallengeResult(provider, Url.Action("ExternalLogin", "Account", new { ReturnUrl = returnUrl }));
         }
 
         //
@@ -75,8 +81,7 @@ namespace BExIS.Web.Shell.Controllers
                 }
 
                 // Benutzer mit diesem externen Anmeldeanbieter anmelden, wenn der Benutzer bereits eine Anmeldung besitzt
-
-                var result = await signInManager.ExternalSignInAsync(loginInfo, false);
+                var result = await signInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
                 switch (result)
                 {
                     case SignInStatus.Success:
@@ -85,12 +90,15 @@ namespace BExIS.Web.Shell.Controllers
                     case SignInStatus.LockedOut:
                         return View("Lockout");
 
+                    case SignInStatus.RequiresVerification:
+                        return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = false });
+
+                    case SignInStatus.Failure:
                     default:
                         // Benutzer auffordern, ein Konto zu erstellen, wenn er kein Konto besitzt
                         ViewBag.ReturnUrl = returnUrl;
                         ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
-                        return View("ExternalLoginConfirmation",
-                            new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
+                        return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel() { Email = loginInfo.Email });
                 }
             }
             finally
@@ -226,8 +234,6 @@ namespace BExIS.Web.Shell.Controllers
                     return View(model);
                 }
 
-                HttpContext.Items.Add("Test", 1);
-
                 // Require the user to have a confirmed email before they can log on.
 
                 var user = await identityUserService.FindByNameAsync(model.UserName);
@@ -235,7 +241,7 @@ namespace BExIS.Web.Shell.Controllers
                 {
                     if (!await identityUserService.IsEmailConfirmedAsync(user.Id))
                     {
-                        ViewBag.errorMessage = "You must have a confirmed email to log in.";
+                        ViewBag.errorMessage = "You must have a confirmed email address to log in.";
                         return View("Error");
                     }
                 }
@@ -262,8 +268,6 @@ namespace BExIS.Web.Shell.Controllers
             {
                 identityUserService.Dispose();
             }
-
-
         }
 
         //
@@ -308,15 +312,16 @@ namespace BExIS.Web.Shell.Controllers
                     // Weitere Informationen zum Aktivieren der Kontobestätigung und Kennwortzurücksetzung finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=320771".
                     // E-Mail-Nachricht mit diesem Link senden
                     var code = await identityUserService.GenerateEmailConfirmationTokenAsync(user.Id);
-                    await SendEmailConfirmationTokenAsync(user.Id, "Confirm your account");
+                    await SendEmailConfirmationTokenAsync(user.Id, "BEXIS Account registration - Verify your email address");
 
-                    //var es = new EmailService();
-                    //es.Send(MessageHelper.GetRegisterUserHeader(),
-                    //    MessageHelper.GetRegisterUserMessage(user.Id, user.Name, user.Email),
-                    //    ConfigurationManager.AppSettings["SystemEmail"]
-                    //    );
+                    var es = new EmailService();
+                    es.Send(MessageHelper.GetTryToRegisterUserHeader(),
+                        MessageHelper.GetTryToRegisterUserMessage(user.Id, user.Name, user.Email),
+                        ConfigurationManager.AppSettings["SystemEmail"]
+                        );
 
-                    ViewBag.Message = "Check your email and confirm your account, you must be confirmed before you can log in.";
+
+                    ViewBag.Message = "Before you can log in to complete your registration please check your email and verify your email address.";
 
                     return View("Info");
                 }
@@ -396,7 +401,15 @@ namespace BExIS.Web.Shell.Controllers
                 var code = await identityUserService.GenerateEmailConfirmationTokenAsync(userId);
                 var callbackUrl = Url.Action("ConfirmEmail", "Account",
                    new { userId, code }, Request.Url.Scheme);
-                await identityUserService.SendEmailAsync(userId, subject, $"Please confirm your account by clicking <a href=\"{callbackUrl}\">here</a>");
+
+                var policyUrl = Url.Action("Index", "PrivacyPolicy", null, Request.Url.Scheme);
+                var termsUrl = Url.Action("Index", "TermsAndConditions", null, Request.Url.Scheme);
+
+                await identityUserService.SendEmailAsync(userId, subject,
+                    $"<p>please confirm your mail address and complete your registration by clicking <a href=\"{callbackUrl}\">here</a>." +
+                    $" Once you finished the registration a system administrator will decide based on your provided information about your assigned permissions. " +
+                    $"This process can take up to 3 days.</p>" +
+                    $"<p>You agreed on our <a href=\"{policyUrl}\">data policy</a> and <a href=\"{termsUrl}\">terms and conditions</a>.</p>");
 
                 return callbackUrl;
             }
@@ -404,8 +417,35 @@ namespace BExIS.Web.Shell.Controllers
             {
                 identityUserService.Dispose();
             }
+        }
 
+        public async Task<ActionResult> Profile()
+        {
+            var identityUserService = new IdentityUserService();
+            var userManager = new UserManager();
 
+            try
+            {
+                long userId = 0;
+                long.TryParse(this.User.Identity.GetUserId(), out userId);
+
+                var user = identityUserService.FindById(userId);
+
+                if (string.IsNullOrEmpty(user.Token))
+                {
+                    await userManager.SetTokenAsync(user);
+                }
+
+                user = identityUserService.FindById(userId);
+                var token = await userManager.GetTokenAsync(user);
+
+                return View(model: token);
+            }
+            finally
+            {
+                identityUserService.Dispose();
+                userManager.Dispose();
+            }
         }
 
         #region Hilfsprogramme

@@ -26,9 +26,13 @@ namespace BExIS.Xml.Helpers
             DatasetManager dm = new DatasetManager();
             try
             {
-                DatasetVersion datasetVersion = dm.GetDatasetLatestVersion(datasetid);
+                //DatasetVersion datasetVersion = dm.GetDatasetLatestVersion(datasetid);
+                var datasetIds = new List<long>() { datasetid };
 
-                return GetInformationFromVersion(datasetVersion.Id, name);
+                var version = dm.GetDatasetLatestVersions(datasetIds, true).FirstOrDefault();
+
+                if (version == null) return string.Empty;
+                return GetInformationFromVersion(version.Id, name);
             }
             finally
             {
@@ -487,6 +491,22 @@ namespace BExIS.Xml.Helpers
                     return tmp.First().Attribute("name").Value;
             }
 
+
+            return string.Empty;
+        }
+
+        public string GetEntityNameFromMetadatStructure(long metadataStructureId, MetadataStructureManager metadataStructureManager)
+        {
+            MetadataStructure metadataStructure = this.GetUnitOfWork().GetReadOnlyRepository<MetadataStructure>().Get(metadataStructureId);
+
+            // get MetadataStructure 
+            if (metadataStructure != null && metadataStructure.Extra != null)
+            {
+                XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)metadataStructure.Extra);
+                IEnumerable<XElement> tmp = XmlUtility.GetXElementByNodeName(nodeNames.entity.ToString(), xDoc);
+                if (tmp.Any())
+                    return tmp.First().Attribute("name").Value;
+            }
 
             return string.Empty;
         }
