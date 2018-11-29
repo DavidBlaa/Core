@@ -206,7 +206,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             //ToDo in the entity table there must be the information
             EntityManager entityManager = new EntityManager();
 
-            var entity = entityManager.Entities.Where(e => e.Name.Equals(entityName)).FirstOrDefault();
+            var entity = entityManager.Entities.Where(e => e.Name.ToLower().Equals(entityName.ToLower())).FirstOrDefault();
 
             string moduleId = "";
             var node = entity.Extra.SelectSingleNode("extra/modules/module");

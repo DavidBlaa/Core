@@ -1,4 +1,4 @@
-BEGIN TRANSACTION;  
+﻿BEGIN TRANSACTION;  
 -- ROLLBACK TRANSACTION;
 
 -- update system type of a party type
@@ -26,4 +26,4 @@ INSERT INTO public.operations(
 -- add token to users table
 ALTER TABLE public.users ADD token character varying;
 
---COMMIT;
+COMMIT;

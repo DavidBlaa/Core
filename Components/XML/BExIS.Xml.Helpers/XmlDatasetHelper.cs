@@ -433,7 +433,7 @@ namespace BExIS.Xml.Helpers
                 // get MetadataStructure 
                 if (dataset != null)
                 {
-                    return GetEntityTypeFromMetadatStructure(dataset.MetadataStructure.Id, metadataStructureManager);
+                    return GetEntityNameFromMetadatStructure(dataset.MetadataStructure.Id, metadataStructureManager);
                 }
                 return string.Empty;
             }
@@ -461,21 +461,7 @@ namespace BExIS.Xml.Helpers
             return string.Empty;
         }
 
-        //public string GetEntityNameFromMetadatStructure(long metadataStructureId, MetadataStructureManager metadataStructureManager)
-        //{
-        //    MetadataStructure metadataStructure = this.GetUnitOfWork().GetReadOnlyRepository<MetadataStructure>().Get(metadataStructureId);
 
-        //    // get MetadataStructure 
-        //    if (metadataStructure != null && metadataStructure.Extra != null)
-        //    {
-        //        XDocument xDoc = XmlUtility.ToXDocument((XmlDocument)metadataStructure.Extra);
-        //        IEnumerable<XElement> tmp = XmlUtility.GetXElementByNodeName(nodeNames.entity.ToString(), xDoc);
-        //        if (tmp.Any())
-        //            return tmp.First().Attribute("name").Value;
-        //    }
-
-        //    return string.Empty;
-        //}
 
         //todo entity extention
         public string GetEntityNameFromMetadatStructure(long metadataStructureId)
