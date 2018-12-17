@@ -13,6 +13,8 @@ namespace BExIS.Modules.Rdb.UI.Helpers
         public static void GenerateSeedData()
         {
             EntityManager entityManager = new EntityManager();
+            FeatureManager featureManager = new FeatureManager();
+            OperationManager operationManager = new OperationManager();
 
             try
             {
@@ -21,7 +23,7 @@ namespace BExIS.Modules.Rdb.UI.Helpers
                 // Entities
                 Entity entity = entityManager.Entities.Where(e => e.Name.ToUpperInvariant() == "Sample".ToUpperInvariant()).FirstOrDefault();
 
-               
+
                 if (entity == null)
                 {
                     entity = new Entity();
@@ -45,10 +47,54 @@ namespace BExIS.Modules.Rdb.UI.Helpers
 
                 #endregion
 
+                #region SECURITY
+                //workflows = größere sachen, vielen operation
+                //operations = einzelne actions
+
+                //1.controller-> 1.Operation
+
+
+
+
+                Feature Sample = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Sample"));
+                if (Sample == null) Sample = featureManager.Create("Sample", "Sample");
+
+                Feature Search = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Search"));
+                if (Search == null) Search = featureManager.Create("Search", "Search", Sample);
+
+                Feature Management = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Management"));
+                if (Management == null) Management = featureManager.Create("Management", "Management", Sample);
+
+
+
+                #region Help Workflow
+
+                //operationManager.Create("DCM", "Help", "*");
+
+                #endregion
+
+                #region Search
+
+                operationManager.Create("RDB", "Sample", "*", Search);
+
+
+                #endregion
+
+                #region Management
+
+                operationManager.Create("RDB", "CreateSample", "*", Management);
+                operationManager.Create("RDB", "RDB", "*", Management);
+
+                #endregion
+
+                #endregion
+
             }
             finally
             {
                 entityManager.Dispose();
+                featureManager.Dispose();
+                operationManager.Dispose();
             }
 
         }

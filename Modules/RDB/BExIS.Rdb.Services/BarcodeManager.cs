@@ -1,14 +1,10 @@
 ﻿using BExIS.Rdb.Entities.Barcode;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Vaiona.Persistence.Api;
 
 namespace BExIS.Rdb.Services
 {
-    public class BarcodeManager:IDisposable
+    public class BarcodeManager : IDisposable
     {
         private IUnitOfWork guow = null;
         public BarcodeManager()

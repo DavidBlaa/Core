@@ -1,0 +1,7 @@
+﻿BEGIN TRANSACTION;  
+-- ROLLBACK TRANSACTION;
+
+ALTER TABLE public.partyrelationships ADD COLUMN partyrelationshiptypepairref int8 NULL;
+ALTER TABLE public.partyrelationships ADD CONSTRAINT partyrelationships_partytypepairs_fk FOREIGN KEY (id) REFERENCES public.partytypepairs(id);
+
+COMMIT;

@@ -176,6 +176,9 @@
     <Content Include="Rdb.Manifest.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Scripts\minimap\minimap.js" />
+    <Content Include="Scripts\minimap\minimap.min.css" />
+    <Content Include="Scripts\minimap\minimap.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -189,6 +192,7 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Sample\Show.cshtml" />
     <Content Include="Views\Rdb\BarcodeLabelView.cshtml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

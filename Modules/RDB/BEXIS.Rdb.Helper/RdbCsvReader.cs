@@ -48,7 +48,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), MEASUREMENT_HEIGHT_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -57,6 +57,8 @@ namespace BExIS.Rdb.Helper
                     afri.Seperator = TextSeperator.semicolon;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
                     List<List<string>> rowsOfBB = reader.ReadFile(stream, LOCATION_COORDIANTE_CSV, afri);
 
@@ -84,7 +86,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), LOCATION_COORDIANTE_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = new AsciiReader(null, null);
 
                 if (File.Exists(path))
                 {
@@ -120,7 +122,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), SAMPLE_IDS_TXT);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = new AsciiReader(null, null);
 
                 if (File.Exists(path))
                 {
@@ -164,7 +166,7 @@ namespace BExIS.Rdb.Helper
 
 
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), ALL);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -173,6 +175,8 @@ namespace BExIS.Rdb.Helper
                     afri.Seperator = TextSeperator.semicolon;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
                     List<List<string>> rowsOfSites = reader.ReadFile(stream, ALL, afri);
                     rowList = new List<CsvFileEntity>();
@@ -221,7 +225,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), SITE_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -230,6 +234,8 @@ namespace BExIS.Rdb.Helper
                     afri.Seperator = TextSeperator.semicolon;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
                     List<List<string>> rowsOfSites = reader.ReadFile(stream, SITE_CSV, afri);
                     rowList = new List<CsvFileEntity>();
@@ -266,7 +272,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), PLOT_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -275,6 +281,8 @@ namespace BExIS.Rdb.Helper
                     afri.Seperator = TextSeperator.semicolon;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
                     List<List<string>> rowsOfSites = reader.ReadFile(stream, SITE_CSV, afri);
                     rowList = new List<CsvFileEntity>();
@@ -313,7 +321,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), PROJECT_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -322,6 +330,8 @@ namespace BExIS.Rdb.Helper
                     afri.Seperator = TextSeperator.semicolon;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
                     List<List<string>> rowsOfSites = reader.ReadFile(stream, SITE_CSV, afri);
                     rowList = new List<CsvFileEntity>();
@@ -358,7 +368,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), TREE_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -368,6 +378,8 @@ namespace BExIS.Rdb.Helper
                     afri.Decimal = DecimalCharacter.point;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
                     List<List<string>> rowsOfSites = reader.ReadFile(stream, SITE_CSV, afri);
                     rowList = new List<CsvFileEntity>();
@@ -405,7 +417,7 @@ namespace BExIS.Rdb.Helper
             try
             {
                 string path = Path.Combine(AppConfiguration.GetModuleWorkspacePath("RDB"), PERSON_CSV);
-                AsciiReader reader = new AsciiReader();
+                AsciiReader reader = null;
 
                 if (File.Exists(path))
                 {
@@ -415,6 +427,8 @@ namespace BExIS.Rdb.Helper
                     afri.Decimal = DecimalCharacter.point;
                     afri.Variables = 1;
                     afri.Data = 2;
+
+                    reader = new AsciiReader(null, afri);
 
 
                     List<List<string>> rowsOfPerson = reader.ReadFile(stream, PERSON_CSV, afri);

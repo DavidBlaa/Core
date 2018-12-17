@@ -12,11 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Web.Mvc;
-using Vaiona.Utils.Cfg;
 using System.Linq;
-using ZXing;
 using System.Text;
+using System.Web.Mvc;
+using ZXing;
 
 namespace BExIS.Modules.RDB.UI.Controllers
 {
@@ -232,7 +231,7 @@ namespace BExIS.Modules.RDB.UI.Controllers
             DatasetManager datasetManager = new DatasetManager();
 
             //e.g.http://localhost:63530/rdb/Sample/Show/
-            var link = Request.Url.Authority+"/rdb/Sample/Show/";
+            var link = Request.Url.Authority + "/rdb/Sample/Show/";
 
             List<BarCodeLabelModel> model = new List<BarCodeLabelModel>();
             try
