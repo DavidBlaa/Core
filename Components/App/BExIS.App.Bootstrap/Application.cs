@@ -1,5 +1,4 @@
-﻿using BExIS.App.Bootstrap.Attributes;
-using BExIS.Ext.Services;
+﻿using BExIS.Ext.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +27,7 @@ namespace BExIS.App.Bootstrap
         // keep on instance per run stage
         private static Dictionary<RunStage, Application> instances = new Dictionary<RunStage, Application>();
 
-        private Application(): this(RunStage.Production)
+        private Application() : this(RunStage.Production)
         {
         }
 
@@ -284,7 +283,7 @@ namespace BExIS.App.Bootstrap
             {
                 if (this.runStage == RunStage.Production)
                     throw ex;
-            } 
+            }
         }
 
     }
