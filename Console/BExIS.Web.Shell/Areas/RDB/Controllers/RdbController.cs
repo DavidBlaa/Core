@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web.Mvc;
 using ZXing;
 
@@ -274,21 +273,20 @@ namespace BExIS.Modules.RDB.UI.Controllers
                 string url = Path.Combine(link, id.ToString());
 
                 // create string for qrcode
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(firstTitle);
-                sb.AppendLine(firstAuthor);
-                sb.AppendLine(plot);
-                sb.AppendLine(site);
-                sb.AppendLine();
-                sb.AppendLine(url);
+                //StringBuilder sb = new StringBuilder();
+                //sb.AppendLine(firstTitle);
+                //sb.AppendLine(firstAuthor);
+                //sb.AppendLine(plot);
+                //sb.AppendLine(site);
+                //sb.AppendLine();
+                //sb.AppendLine(url);
 
 
 
-                var result = writer.Write(sb.ToString());
+                var result = writer.Write(url);
                 var barcodeBitmap = new Bitmap(result);
                 Image qrcodeImage;
                 qrcodeImage = barcodeBitmap;
-
 
                 foreach (var bc in matchingObj)
                 {

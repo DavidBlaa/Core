@@ -61,7 +61,6 @@ namespace BExIS.Modules.Rdb.UI.Controllers
 
                 Session["CreateDatasetTaskmanager"] = TaskManager;
                 Session["MetadataStructureViewList"] = LoadMetadataStructureViewList();
-                Session["DataStructureViewList"] = LoadDataStructureViewList();
                 Session["DatasetViewList"] = LoadDatasetViewList();
 
 
@@ -315,20 +314,6 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             return RedirectToAction("ReloadIndex", "CreateSample", new { id = id, type = "Datasetid" });
         }
 
-        [HttpGet]
-        public ActionResult ShowListOfDataStructures()
-        {
-            List<ListViewItemWithType> datastructures = LoadDataStructureViewList();
-
-            EntitySelectorModel model = BexisModelManager.LoadEntitySelectorModel(
-                 datastructures, new List<string> { "Id", "Title", "Description", "Type" },
-                 new EntitySelectorModelAction("ShowListOfDataStructuresReciever", "CreateSample", "RDB"));
-
-            model.Title = "Select a Data Structure";
-
-
-            return PartialView("_EntitySelectorInWindowView", model);
-        }
 
         public ActionResult ShowListOfDataStructuresReciever(long id)
         {
@@ -369,7 +354,6 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                 model.SelectedMetadataStructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.METADATASTRUCTURE_ID]);
 
             model.BlockDatasetId = false;
-            model.BlockDatastructureId = false;
             model.BlockMetadataStructureId = false;
 
             return model;
@@ -384,7 +368,6 @@ namespace BExIS.Modules.Rdb.UI.Controllers
         private SetupModel LoadLists(SetupModel model)
         {
             if ((List<ListViewItem>)Session["MetadataStructureViewList"] != null) model.MetadataStructureViewList = (List<ListViewItem>)Session["MetadataStructureViewList"];
-            if ((List<ListViewItemWithType>)Session["DataStructureViewList"] != null) model.DataStructureViewList = (List<ListViewItemWithType>)Session["DataStructureViewList"];
             if ((List<ListViewItem>)Session["DatasetViewList"] != null) model.DatasetViewList = (List<ListViewItem>)Session["DatasetViewList"];
 
             return model;
@@ -458,15 +441,14 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                 // for e new dataset
                 if (!TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_ID))
                 {
-                    long datastructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.DATASTRUCTURE_ID]);
                     long researchPlanId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.RESEARCHPLAN_ID]);
                     long metadataStructureId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.METADATASTRUCTURE_ID]);
 
                     DataStructureManager dsm = new DataStructureManager();
 
-                    DataStructure dataStructure = dsm.StructuredDataStructureRepo.Get(datastructureId);
-                    //if datastructure is not a structured one
-                    if (dataStructure == null) dataStructure = dsm.UnStructuredDataStructureRepo.Get(datastructureId);
+                    //set default sample structure
+                    DataStructure dataStructure = dsm.AllTypesDataStructureRepo.Get().Where(s => s.Name.ToLower().Equals("none")).FirstOrDefault();
+                    if (dataStructure == null) dataStructure = dsm.CreateUnStructuredDataStructure("none", "no structure needed.");
 
                     ResearchPlanManager rpm = new ResearchPlanManager();
                     ResearchPlan rp = rpm.Repo.Get(researchPlanId);
@@ -711,30 +693,6 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             return temp.OrderBy(p => p.Title).ToList();
         }
 
-        public List<ListViewItemWithType> LoadDataStructureViewList()
-        {
-            DataStructureManager dsm = new DataStructureManager();
-            List<ListViewItemWithType> temp = new List<ListViewItemWithType>();
-
-            foreach (DataStructure dataStructure in dsm.AllTypesDataStructureRepo.Get())
-            {
-                string title = dataStructure.Name;
-                string type = "";
-                if (dataStructure is StructuredDataStructure)
-                {
-                    type = "structured";
-                }
-
-                if (dataStructure is UnStructuredDataStructure)
-                {
-                    type = "unstructured";
-                }
-
-                temp.Add(new ListViewItemWithType(dataStructure.Id, title, dataStructure.Description, type));
-            }
-
-            return temp.OrderBy(p => p.Title).ToList();
-        }
 
         public List<ListViewItem> LoadDatasetViewList()
         {

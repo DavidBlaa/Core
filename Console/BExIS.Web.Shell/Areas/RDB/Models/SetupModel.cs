@@ -19,12 +19,10 @@ namespace BExIS.Modules.Rdb.UI.Models
 
         public List<ListViewItem> MetadataStructureViewList { get; set; }
 
-        public List<ListViewItemWithType> DataStructureViewList { get; set; }
 
         public List<ListViewItem> DatasetViewList { get; set; }
 
         public bool BlockDatasetId { get; set; }
-        public bool BlockDatastructureId { get; set; }
         public bool BlockMetadataStructureId { get; set; }
 
         public SetupModel()
@@ -32,12 +30,7 @@ namespace BExIS.Modules.Rdb.UI.Models
             SelectedMetadataStructureId = -1;
             MetadataStructureViewList = new List<ListViewItem>();
             BlockMetadataStructureId = false;
-
-            SelectedDataStructureId = -1;
-            DataStructureViewList = new List<ListViewItemWithType>();
-            BlockDatastructureId = false;
-
-
+            SelectedDataStructureId = 1;
             SelectedDatasetId = -1;
             DatasetViewList = new List<ListViewItem>();
             BlockDatasetId = false;
