@@ -18,6 +18,8 @@ namespace BExIS.Dcm.CreateDatasetWizard
         public static string ENTITY_ID = "ENTITY_ID";
         public static string ENTITY_TITLE = "ENTITY_TITLE";
         public static string ENTITY_CLASS_PATH = "ENTITY_CLASS_PATH";
+        public static string ENTITY_NAME = "ENTITY_NAME";
+        public static string ENTITY_TYPE_NAME = "ENTITY_TYPE_NAME";
         public static string COPY_OF_ENTITY_ID = "COPY_OF_ENTITY_ID";
 
         public static string METADATA_ATTRIBUTE_USAGE_VALUE_LIST = "METADATA_ATTRIBUTE_VALUE_LIST";
