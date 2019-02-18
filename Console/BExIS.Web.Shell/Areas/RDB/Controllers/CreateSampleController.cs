@@ -59,6 +59,9 @@ namespace BExIS.Modules.Rdb.UI.Controllers
 
                 TaskManager = new CreateTaskmanager();
 
+                TaskManager.AddToBus(CreateTaskmanager.ENTITY_NAME, "Sample");
+                TaskManager.AddToBus(CreateTaskmanager.ENTITY_TYPE_NAME, typeof(Dataset));
+
                 Session["CreateDatasetTaskmanager"] = TaskManager;
                 Session["MetadataStructureViewList"] = LoadMetadataStructureViewList();
                 Session["DatasetViewList"] = LoadDatasetViewList();
@@ -406,12 +409,16 @@ namespace BExIS.Modules.Rdb.UI.Controllers
 
         public ActionResult Submit()
         {
+
+            if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+
+
             // create and submit Dataset 
             long datasetId = SubmitSample();
 
             bool editMode = false;
 
-            if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.EDIT_MODE))
                 editMode = (bool)TaskManager.Bus[CreateTaskmanager.EDIT_MODE];
@@ -463,8 +470,20 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                     // add security
                     if (GetUsernameOrDefault() != "DEFAULT")
                     {
+                        string entity_name = "Dataset";
+                        Type entity_type = typeof(Dataset);
                         EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Sample", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                        if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_NAME))
+                        {
+                            entity_name = TaskManager.Bus[CreateTaskmanager.ENTITY_NAME].ToString();
+                        }
+
+                        if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_TYPE_NAME))
+                        {
+                            entity_type = (Type)TaskManager.Bus[CreateTaskmanager.ENTITY_TYPE_NAME];
+                        }
+
+                        entityPermissionManager.Create<User>(GetUsernameOrDefault(), entity_name, entity_type, ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                     }
 
                 }
@@ -707,7 +726,7 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             try
             {
 
-                List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), "Dataset",
+                List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), "Sample",
                     typeof(Dataset), RightType.Write);
 
                 foreach (long id in datasetIds)

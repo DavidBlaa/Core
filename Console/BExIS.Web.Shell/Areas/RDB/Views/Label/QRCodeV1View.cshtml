@@ -1,15 +1,15 @@
-﻿@model BExIS.Modules.Rdb.UI.Models.BarCodeLabelModel
+﻿@model BExIS.Modules.Rdb.UI.Models.LabelModel
 @{
-    ViewBag.Title = "BarcodeGeneratorView";
+    ViewBag.Title = "qrGeneratorView";
 
 
     MemoryStream ms = new MemoryStream();
-    //if (Model.BarCode != null)
+    //if (Model.qr != null)
     //{
-    //    Model.BarCode.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
+    //    Model.qr.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
 
-    //    var barcodeImage = String.Format("data:image/jpg;base64,{0}", Convert.ToBase64String(ms.ToArray()));
-    //    HtmlString barcode = new MvcHtmlString("<img src='" + barcodeImage + "' />");
+    //    var qrImage = String.Format("data:image/jpg;base64,{0}", Convert.ToBase64String(ms.ToArray()));
+    //    HtmlString qr = new MvcHtmlString("<img src='" + qrImage + "' />");
 
     //}
     MemoryStream msqrcode = new MemoryStream();
@@ -21,19 +21,19 @@
 }
 <!--A4 210 x 297 mm - a7 52 x 74-->
 
-<div class="barcode-label">
+<div class="qr-label">
     <div class="qrcode">
         @qrcode
     </div>
  
-    <div class="barcode-content">
-        <div class="barcode-label-id">
+    <div class="qr-content">
+        <div class="qr-label-id">
             @Model.BarCodeText
         </div>
-        <div class="barcode-label-plot">
+        <div class="qr-label-plot">
             @Model.Plot ( @Model.Site )
         </div>
-        <div class="barcode-label-text-container">
+        <div class="qr-label-text-container">
             @Model.Owner <br />
             @Model.Input <br />
             @Model.Type <br />

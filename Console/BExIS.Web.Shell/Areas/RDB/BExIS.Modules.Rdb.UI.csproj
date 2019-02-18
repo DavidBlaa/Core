@@ -158,10 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\CreateSampleController.cs" />
+    <Compile Include="Controllers\LabelController.cs" />
     <Compile Include="Controllers\RdbController.cs" />
     <Compile Include="Controllers\SampleController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Helpers\RdbSeedDataGenerator.cs" />
+    <Compile Include="Models\LabelModel.cs" />
     <Compile Include="Models\ListViewItem.cs" />
     <Compile Include="Models\RdbTestModel.cs" />
     <Compile Include="Models\SetupModel.cs" />
@@ -186,13 +188,15 @@
     <None Include="Properties\PublishProfiles\DDm21105.pubxml" />
     <None Include="Properties\PublishProfiles\DDM21108.pubxml" />
     <Content Include="Views\CreateSample\Index.cshtml" />
-    <Content Include="Views\Rdb\BarcodeGeneratorView.cshtml" />
+    <Content Include="Views\Label\QRCodeV1A4View.cshtml" />
     <Content Include="Views\Rdb\Index.cshtml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Sample\Show.cshtml" />
-    <Content Include="Views\Rdb\BarcodeLabelView.cshtml" />
+    <Content Include="Views\Label\QRCodeV1View.cshtml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <Content Include="Views\Label\QRCodeV2A4View.cshtml" />
+    <Content Include="Views\Label\QRCodeV2View.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

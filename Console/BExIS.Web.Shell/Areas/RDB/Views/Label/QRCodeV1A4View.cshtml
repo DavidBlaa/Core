@@ -1,0 +1,106 @@
+﻿@model List<BExIS.Modules.Rdb.UI.Models.LabelModel>
+
+@{
+    ViewBag.Title = "BarcodeGeneratorView";
+
+}
+<!--A4 210 x 297 mm - a7 52 x 74-->
+<div class="a4-page">
+    
+    <div class="a4-page-content">
+        @if (Model.Count > 0)
+        {
+            <table>
+
+                @for (int i = 0; i < Model.Count; i = i + 4)
+                {
+                    <tr>
+                        <td>@Html.Partial("QRCodeV1View", Model[i])</td>
+                        @if ((i + 1) < Model.Count)
+                        {
+                            <td>@Html.Partial("QRCodeV1View", Model[i + 1])</td>}
+                        @if ((i + 2) < Model.Count)
+                        {
+                            <td>@Html.Partial("QRCodeV1View", Model[i + 2])</td>}
+                        @if ((i + 3) < Model.Count)
+                        {
+                            <td>@Html.Partial("QRCodeV1View", Model[i + 3])</td>}
+                    </tr>
+                }
+
+            </table>
+        }
+    </div>
+</div>
+
+
+<style>
+
+    table {
+        font-size: 7pt;
+    }
+
+    body, table, tr, td {
+        margin: 0;
+        padding: 0;
+        border: none 0px;
+        border-spacing: 0px;
+    }
+
+    .a4-page {
+        /*border: 0.1mm #red;
+        border-style: groove;*/
+        width: 210mm;
+        height: 297mm;
+        font-size: 7pt;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+    }
+
+    .a4-page-content {
+        position:absolute;
+        left: 8mm;
+        right: 8mm;
+        top: 21.5mm;
+    }
+
+    .qr-content {
+        margin: -24mm 0mm 0 20mm;
+    }
+
+
+    .qr-label {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        border: 0.1mm dotted #000000;
+        width: 48.5mm;
+        height: 25.4mm;
+        background-color: white;
+        /*margin: 1mm;*/
+    }
+
+    .qr-label-text-container {
+        padding: 20pt 10pt 20pt 20pt;
+    }
+
+    .qr-label-id {
+        text-align: left;
+        padding: 0pt 0pt 0pt 20pt;
+        font-weight: bold;
+    }
+
+    .qr-label-plot {
+        text-align: left;
+        padding: 0pt 0pt 0pt 20pt;
+    }
+
+    .qrcode {
+        margin: 0mm 0mm 0 0mm;
+    }
+
+    .qrcode img {
+        width: 25mm;
+        height: 25mm;
+    }
+</style>

@@ -84,6 +84,7 @@ namespace BExIS.Modules.Rdb.UI.Helpers
 
                 operationManager.Create("RDB", "CreateSample", "*", Management);
                 operationManager.Create("RDB", "RDB", "*", Management);
+                operationManager.Create("RDB", "Label", "*", Management);
 
                 #endregion
 
