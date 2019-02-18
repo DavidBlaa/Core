@@ -9,7 +9,8 @@
         Title,
         Plot = 10000, // RDB Module addition,
         Site = 10001, // RDB Module addition,
-        Barcode = 10002// RDB Module addition
+        Barcode = 10002,// RDB Module addition
+        SampleType = 10003// RDB Module addition
     }
 
     public enum LinkElementComplexity
