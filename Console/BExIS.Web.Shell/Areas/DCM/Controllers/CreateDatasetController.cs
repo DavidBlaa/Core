@@ -497,8 +497,21 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         // add security
                         if (GetUsernameOrDefault() != "DEFAULT")
                         {
+                            string entity_name = "Dataset";
+                            Type entity_type = typeof(Dataset);
                             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
-                            entityPermissionManager.Create<User>(GetUsernameOrDefault(), "Dataset", typeof(Dataset), ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
+                            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_NAME))
+                            {
+                                entity_name = TaskManager.Bus[CreateTaskmanager.ENTITY_NAME].ToString();
+                            }
+
+                            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_TYPE_NAME))
+                            {
+                                entity_type = (Type)TaskManager.Bus[CreateTaskmanager.ENTITY_TYPE_NAME];
+                            }
+
+
+                            entityPermissionManager.Create<User>(GetUsernameOrDefault(), entity_name, entity_type, ds.Id, Enum.GetValues(typeof(RightType)).Cast<RightType>().ToList());
                         }
                     }
                     else

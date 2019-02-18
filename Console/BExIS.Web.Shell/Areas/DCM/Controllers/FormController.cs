@@ -196,6 +196,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 ViewData["Locked"] = (bool)TaskManager.Bus[CreateTaskmanager.LOCKED];
             }
 
+            checkForUpdates();
+
+
             return PartialView("MetadataEditor", Model);
         }
 
@@ -2986,10 +2989,18 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
 
+            string entity = "Dataset";
+            Type entityType = typeof(Dataset);
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_NAME))
+                entity = TaskManager.Bus[CreateTaskmanager.ENTITY_NAME].ToString();
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_TYPE_NAME))
+                entityType = (Type)TaskManager.Bus[CreateTaskmanager.ENTITY_TYPE_NAME];
 
             try
             {
-                return entityPermissionManager.HasEffectiveRight(GetUsernameOrDefault(), "Dataset", typeof(Dataset), entityId, RightType.Write);
+                return entityPermissionManager.HasEffectiveRight(GetUsernameOrDefault(), entity, entityType, entityId, RightType.Write);
             }
             finally
             {
@@ -3140,5 +3151,105 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         }
 
         #endregion overrideable Action
+
+        #region SET CreateTaskmanager VALUES in the Bus
+
+        public ActionResult SetEntity(string entityName, Type entityType)
+        {
+            try
+            {
+                CreateTaskmanager TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"] ??
+                                                   new CreateTaskmanager();
+
+                TaskManager.AddToBus(CreateTaskmanager.ENTITY_NAME, entityName);
+                TaskManager.AddToBus(CreateTaskmanager.ENTITY_TYPE_NAME, entityType);
+
+                return Json(true);
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        #endregion
+
+        private void checkForUpdates()
+        {
+            // get the current xml
+            TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+            XmlDocument currentXmlDocument = null;
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATA_XML))
+            {
+                currentXmlDocument = XmlUtility.ToXmlDocument((XDocument)TaskManager.Bus[CreateTaskmanager.METADATA_XML]);
+
+            }
+
+            // create a new xml
+            XmlDocument newXmlDocument = null;
+
+            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.METADATASTRUCTURE_ID))
+            {
+                var xmlMetadatWriter = new XmlMetadataWriter(XmlNodeMode.xPath);
+
+                newXmlDocument = XmlUtility.ToXmlDocument(xmlMetadatWriter.CreateMetadataXml(Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.METADATASTRUCTURE_ID])));
+
+            }
+            // compare
+
+            if (newXmlDocument != null && currentXmlDocument != null)
+            {
+                if (newXmlDocument.DocumentElement != null)
+                {
+                    currentXmlDocument = compare(newXmlDocument.DocumentElement, currentXmlDocument);
+                }
+            }
+
+            // store in taskmanager
+            TaskManager.Bus[CreateTaskmanager.METADATA_XML] = XmlUtility.ToXDocument(currentXmlDocument);
+        }
+
+        private XmlDocument compare(XmlNode node, XmlDocument currentXmlDocument)
+        {
+
+            if (node.HasChildNodes)
+            {
+                XmlNode prev = null;
+
+                foreach (XmlNode child in node.ChildNodes)
+                {
+
+                    string xpath = XmlUtility.GetDirectXPathToNode(child);
+                    if (currentXmlDocument.SelectSingleNode(xpath) == null)
+                    {
+                        if (prev == null)
+                        {
+                            string parentXPath = XmlUtility.GetDirectXPathToNode(node);
+                            var parent = currentXmlDocument.SelectSingleNode(parentXPath);
+                            parent.AppendChild(currentXmlDocument.ImportNode(child, true));
+                        }
+                        else
+                        {
+                            string parentXPath = XmlUtility.GetDirectXPathToNode(node);
+                            var parent = currentXmlDocument.SelectSingleNode(parentXPath);
+                            string prevXpath = XmlUtility.GetDirectXPathToNode(prev);
+                            var prevNode = currentXmlDocument.SelectSingleNode(prevXpath);
+                            parent.InsertAfter(currentXmlDocument.ImportNode(child, true), prevNode);
+
+                        }
+                    }
+                    else
+                    {
+                        currentXmlDocument = compare(child, currentXmlDocument);
+                    }
+
+                    prev = child;
+                }
+            }
+
+            return currentXmlDocument;
+        }
     }
 }
