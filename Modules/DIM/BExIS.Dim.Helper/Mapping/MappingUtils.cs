@@ -854,8 +854,9 @@ namespace BExIS.Dim.Helpers.Mapping
 
 
                 }
-            } return tmp;
-        }
+
+                return tmp;
+            }
             finally
             {
                 mappingManager.Dispose();

@@ -1,4 +1,5 @@
-﻿using BExIS.Ext.Services;
+﻿using BExIS.App.Bootstrap.Attributes;
+using BExIS.Ext.Services;
 using BExIS.Utils.Config;
 using System;
 using System.Collections.Generic;
