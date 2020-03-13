@@ -1,4 +1,5 @@
 ﻿using BExIS.Ext.Services;
+using BExIS.Utils.Config;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ namespace BExIS.App.Bootstrap
         Test,
         Production,
     }
+
     public class Application
     {
         // keep on instance per run stage
@@ -35,6 +37,7 @@ namespace BExIS.App.Bootstrap
         {
             this.runStage = runStage;
         }
+
         public static Application GetInstance(RunStage runStage = RunStage.Production)
         {
             if (!instances.ContainsKey(runStage) || instances[runStage] == null)
@@ -50,7 +53,6 @@ namespace BExIS.App.Bootstrap
 
         public bool Started { get { return started; } }
 
-
         public void Start(Action<HttpConfiguration> configurationCallback, bool configureModules)
         {
             if (started)
@@ -62,9 +64,11 @@ namespace BExIS.App.Bootstrap
                     case RunStage.Test:
                         runForTest(configurationCallback, configureModules);
                         break;
+
                     case RunStage.Production:
                         runForProduction(configurationCallback, configureModules);
                         break;
+
                     default:
                         break;
                 }
@@ -101,6 +105,9 @@ namespace BExIS.App.Bootstrap
             //ModuleInitializer.Initialize();
             try
             {
+                AppConfigHelper p = new AppConfigHelper();
+                p.SetAppRootKey();
+
                 application_Start(configurationCallback, configureModules); // this will error b/c not fully loaded yet.
             }
             catch (InvalidOperationException)
@@ -120,7 +127,7 @@ namespace BExIS.App.Bootstrap
             AppDomain.CurrentDomain.AssemblyResolve += ModuleManager.ResolveCurrentDomainAssembly;
             initIoC();
             GlobalConfiguration.Configure(configurationCallback);
-            // This method initializes the registered modules. It MUST be before initializing the persistence! 
+            // This method initializes the registered modules. It MUST be before initializing the persistence!
             initModules();
             // The persistnce service starts up the ORM, binds the mapping files to the database and the entities and depndeing on the modules' statuses upgrades the database schema.
             // Also, it generates the seed data of the modules by calling their install methods.
@@ -132,7 +139,7 @@ namespace BExIS.App.Bootstrap
             //This method identifies and loads the current tenant of the application. Many other methods and layout sections depends upon the tenant identified here.
             initTenancy();
             // At application start, each modules obtains a chance to perform some initialization and warmup tasks. They are coded in each module's Start method.
-            // This call starts them. 
+            // This call starts them.
             ModuleManager.StartModules();
         }
 
@@ -146,11 +153,12 @@ namespace BExIS.App.Bootstrap
         private void initIoC()
         {
             string path = Path.Combine(AppConfiguration.AppRoot, "IoC.config");
+
             if (!File.Exists(path))
                 throw new FileNotFoundException($"IoC.config file expected but was not found in '{path}'.");
             try
             {
-                IoCFactory.StartContainer(Path.Combine(AppConfiguration.AppRoot, "IoC.config"), "DefaultContainer");
+                IoCFactory.StartContainer(path, "DefaultContainer");
             }
             catch (System.TypeLoadException) { } // swallow this exception, as it means that the IoC is already running.
             catch (Exception ex)
@@ -162,7 +170,7 @@ namespace BExIS.App.Bootstrap
         private void initModules()
         {
             ModuleManager.InitModules(Path.Combine(AppConfiguration.AppRoot, "Shell.Manifest.xml"), GlobalConfiguration.Configuration); // this should be called before RegisterAllAreas
-                                                                                                                                        //AreaRegistration.RegisterAllAreas(GlobalConfiguration.Configuration); 
+                                                                                                                                        //AreaRegistration.RegisterAllAreas(GlobalConfiguration.Configuration);
         }
 
         private void initPersistence(bool configureModules = true)
@@ -258,9 +266,9 @@ namespace BExIS.App.Bootstrap
         private void registerGlobalFilters(GlobalFilterCollection filters)
         {
             //filters.Add(new PersistenceContextProviderFilterAttribute()); // disabled by Javad on 22.08.2017
-#if !DEBUG
+
             filters.Add(new BExISAuthorizeAttribute());
-#endif
+
             //filters.Add(new Vaiona.Web.Mvc.Filters.AuthorizationDelegationFilter(new Vaiona.Web.Mvc.Filters.IsAuthorizedDelegate(AuthorizationDelegationImplementor.CheckAuthorization)));
             filters.Add(new HandleErrorAttribute());
         }
@@ -269,6 +277,13 @@ namespace BExIS.App.Bootstrap
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             //if (!routes.Any(p => ((Route)p).DataTokens["__RouteName"].ToString().Equals("Default", StringComparison.InvariantCultureIgnoreCase)))
+
+            foreach (Route item in routes)
+            {
+                if (item != null)
+                    LoggerFactory.GetFileLogger().LogCustom(string.Format("route: {0}", item.Url));
+            }
+
             try
             {
                 routes.MapRoute(
@@ -285,6 +300,5 @@ namespace BExIS.App.Bootstrap
                     throw ex;
             }
         }
-
     }
 }

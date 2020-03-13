@@ -176,16 +176,16 @@
 			error: function (xhr) {
 				alert('Error: ' + xhr.statusText);
 
-	        },
-	        success: function (result) {
-	            if (result) {
-	                window.top.location = "/ddm/Data/Show/" + id;
-	            } else {
-	                
-                    alert("Dataset is locked. Please try again later.");
-	            }
-	        }
-	    });
+			},
+			success: function (result) {
+				if (result) {
+					window.open("/ddm/Data/Show/" + id, "_blank");
+				} else {
+					
+					alert("Dataset is locked. Please try again later.");
+				}
+			}
+		});
 	}
 
 

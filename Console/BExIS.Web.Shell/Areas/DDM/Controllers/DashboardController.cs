@@ -107,6 +107,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             };
             headerItems.Add(headerItem);
 
+            headerItem = new HeaderItem()
+            {
+                Name = "Valid",
+                DisplayName = "is valid",
+                DataType = "String"
+            };
+            headerItems.Add(headerItem);
+
             ViewData["DefaultHeaderList"] = headerItems;
 
             #endregion header
@@ -186,6 +194,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                     {
                         DataRow dataRow = model.NewRow();
                         Object[] rowArray = new Object[8];
+                        string isValid = "no";
 
                         if (datasetManager.IsDatasetCheckedIn(datasetId))
                         {
@@ -199,6 +208,11 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
                             string title = xmlDatasetHelper.GetInformationFromVersion(dsv.Id, NameAttributeValues.title);
                             string description = xmlDatasetHelper.GetInformationFromVersion(dsv.Id, NameAttributeValues.description);
+
+                            if (dsv.StateInfo != null)
+                            {
+                                isValid = DatasetStateInfo.Valid.ToString().Equals(dsv.StateInfo.State) ? "yes" : "no";
+                            }
 
                             rowArray[0] = Convert.ToInt64(datasetId);
                             rowArray[1] = title;
@@ -214,9 +228,10 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                         rowArray[3] = (rights & (int)RightType.Read) > 0 ? "✔" : "✘";
                         rowArray[4] = (rights & (int)RightType.Write) > 0 ? "✔" : "✘";
                         rowArray[5] = (rights & (int)RightType.Delete) > 0 ? "✔" : "✘";
-                        rowArray[6] = (rights & (int)RightType.Download) > 0 ? "✔" : "✘";
-                        rowArray[7] = (rights & (int)RightType.Grant) > 0 ? "✔" : "✘";
-
+                        //rowArray[6] = (rights & (int)RightType.Download) > 0 ? "✔" : "✘";
+                        rowArray[6] = (rights & (int)RightType.Grant) > 0 ? "✔" : "✘";
+                        rowArray[7] = isValid;
+                        
                         dataRow = model.NewRow();
                         dataRow.ItemArray = rowArray;
                         model.Rows.Add(dataRow);
@@ -294,14 +309,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             headerItem = new HeaderItem()
             {
-                Name = "Download",
-                DisplayName = "Download",
-                DataType = "String"
-            };
-            headerItems.Add(headerItem);
-
-            headerItem = new HeaderItem()
-            {
                 Name = "Write",
                 DisplayName = "Write",
                 DataType = "String"
@@ -320,6 +327,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 Name = "Grant",
                 DisplayName = "Grant",
+                DataType = "String"
+            };
+            headerItems.Add(headerItem);
+
+            headerItem = new HeaderItem()
+            {
+                Name = "Valid",
+                DisplayName = "is valid",
                 DataType = "String"
             };
             headerItems.Add(headerItem);
@@ -400,13 +415,6 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             };
             headerItems.Add(headerItem);
 
-            headerItem = new HeaderItem()
-            {
-                Name = "Download",
-                DisplayName = "Download",
-                DataType = "String"
-            };
-            headerItems.Add(headerItem);
 
             headerItem = new HeaderItem()
             {
@@ -428,6 +436,14 @@ namespace BExIS.Modules.Ddm.UI.Controllers
             {
                 Name = "Grant",
                 DisplayName = "Grant",
+                DataType = "String"
+            };
+            headerItems.Add(headerItem);
+
+            headerItem = new HeaderItem()
+            {
+                Name = "Valid",
+                DisplayName = "is valid",
                 DataType = "String"
             };
             headerItems.Add(headerItem);

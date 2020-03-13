@@ -1,17 +1,14 @@
-﻿using System;
+﻿using BExIS.Dlm.Entities.DataStructure;
+using BExIS.Dlm.Services.DataStructure;
+using BExIS.Modules.Rpm.UI.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-
-using BExIS.Dlm.Entities.DataStructure;
-using BExIS.Dlm.Services.DataStructure;
-using BExIS.Dlm.Services.TypeSystem;
 using Vaiona.Utils.Cfg;
-using Vaiona.Web.Mvc.Models;
 using Vaiona.Web.Extensions;
-using BExIS.Modules.Rpm.UI.Models;
 using Vaiona.Web.Mvc;
+using Vaiona.Web.Mvc.Models;
 
 namespace BExIS.Modules.Rpm.UI.Controllers
 {
@@ -38,7 +35,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
             ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Variable Templates", this.Session.GetTenant());
             if (Session["Window"] == null)
                 Session["Window"] = false;
-            if(dataStructureId == 0)
+            if (dataStructureId == 0)
                 return View(new DataAttributeManagerModel(showConstraints));
             else
                 return View(new DataAttributeManagerModel(dataStructureId, showConstraints));
@@ -46,11 +43,10 @@ namespace BExIS.Modules.Rpm.UI.Controllers
 
         public ActionResult editAttribute(DataAttributeModel Model)
         {
-            ViewBag.Title = PresentationModel.GetViewTitleForTenant( "Manage Data Attributes", this.Session.GetTenant());
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("Manage Data Attributes", this.Session.GetTenant());
             DataContainerManager dataAttributeManager = null;
             try
             {
-
                 dataAttributeManager = new DataContainerManager();
                 IList<DataAttribute> DataAttributeList = dataAttributeManager.DataAttributeRepo.Get();
                 long tempUnitId = Convert.ToInt64(Model.Unit.Id);
@@ -68,7 +64,6 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                 //        Model.DomainConstraints.FirstOrDefault().DomainItems = clearEmptyItems(Model.DomainItems);
                 //    }
                 //}
-
 
                 if (Model.Name == "" | Model.Name == null)
                 {
@@ -129,7 +124,8 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                                 um.Dispose();
                                 dtm.Dispose();
                             }
-                            #endregion                            
+
+                            #endregion store constraint
                         }
                         else
                         {
@@ -140,7 +136,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                     }
                     else
                     {
-                        if (nameNotExist || DataAttributeList.Where(p => p.Name.Equals(Model.Name)).ToList().First().Id == Model.Id)
+                        if (nameNotExist || DataAttributeList.Where(p => p.Name.ToLower().Equals(Model.Name.ToLower())).ToList().First().Id == Model.Id)
                         {
                             DataAttribute dataAttribute = DataAttributeList.Where(p => p.Id.Equals(Model.Id)).ToList().First();
                             if (!attributeInUse(dataAttribute))
@@ -197,8 +193,8 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                                 else
                                     dataAttribute = deletConstraint(Model.DomainConstraints.First().Id, dataAttribute);
 
+                                #endregion store constraint
 
-                                #endregion
                                 dataAttributeManager.UpdateDataAttribute(dataAttribute);
                             }
                         }
@@ -222,7 +218,6 @@ namespace BExIS.Modules.Rpm.UI.Controllers
 
         public ActionResult deletAttribute(long id, string name)
         {
-
             if (id != 0)
             {
                 DataContainerManager DAM = null;
@@ -234,10 +229,8 @@ namespace BExIS.Modules.Rpm.UI.Controllers
                     {
                         if (!attributeInUse(dataAttribute))
                         {
-
                             DAM.DeleteDataAttribute(dataAttribute);
                         }
-
                     }
                 }
                 finally
@@ -252,7 +245,6 @@ namespace BExIS.Modules.Rpm.UI.Controllers
         {
             if (id != 0)
             {
-
                 Session["nameMsg"] = null;
                 Session["Window"] = true;
                 return RedirectToAction("AttributeManager", new { dataStructureId = id, showConstraints = showConstraints });
@@ -380,7 +372,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
 
                     if (pcm.Id == 0)
                     {
-                        PatternConstraint constraint = new PatternConstraint(ConstraintProviderSource.Internal, "", AppConfiguration.Culture.Name, pcm.Description, pcm.Negated, null, null, null, pcm.MatchingPhrase, false);
+                        PatternConstraint constraint = new PatternConstraint(ConstraintProviderSource.Internal, "", AppConfiguration.Culture.Name, pcm.Description, pcm.Negated, null, null, null, pcm.MatchingPhrase, true);
                         dcManager.AddConstraint(constraint, dataAttribute);
                     }
                     else
@@ -442,7 +434,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
         }
 
         private List<DomainItem> createDomainItems(string Terms)
-        { 
+        {
             List<DomainItem> items = new List<DomainItem>();
 
             Terms = cutSpaces(Terms);
@@ -510,7 +502,7 @@ namespace BExIS.Modules.Rpm.UI.Controllers
 
         private List<DomainConstraintItemModel> clearEmptyItems(List<DomainConstraintItemModel> list)
         {
-            for (int i = 0; i < list.Count;i++ )
+            for (int i = 0; i < list.Count; i++)
             {
                 if (list.ElementAt(i).Key == null)
                 {
@@ -531,7 +523,6 @@ namespace BExIS.Modules.Rpm.UI.Controllers
 
                 if (constraintId != 0 && attribute.Id != 0)
                 {
-
                     foreach (Constraint c in attribute.Constraints.ToList())
                     {
                         if (c.Id == constraintId)
@@ -588,7 +579,6 @@ namespace BExIS.Modules.Rpm.UI.Controllers
             return RedirectToAction("openAttributeWindow", new { Id = attributeId, showConstraints = true });
         }
 
-        #endregion
-
+        #endregion constraints
     }
 }

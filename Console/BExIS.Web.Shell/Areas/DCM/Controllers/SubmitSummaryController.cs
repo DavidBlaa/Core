@@ -1,4 +1,5 @@
 ﻿using BExIS.Dcm.UploadWizard;
+using BExIS.Dim.Entities.Mapping;
 using BExIS.Dlm.Entities.Data;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Services.Data;
@@ -7,8 +8,11 @@ using BExIS.IO;
 using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Output;
 using BExIS.IO.Transform.Validation.Exceptions;
+using BExIS.Modules.Dcm.UI.Helpers;
 using BExIS.Modules.Dcm.UI.Models;
 using BExIS.Security.Services.Utilities;
+using BExIS.Utils.Data.Upload;
+using BExIS.Utils.Upload;
 using BExIS.Xml.Helpers;
 using System;
 using System.Collections.Generic;
@@ -18,6 +22,8 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml;
+using Vaiona.Entities.Common;
 using Vaiona.Logging.Aspects;
 using Vaiona.Persistence.Api;
 using Vaiona.Web.Mvc;
@@ -31,7 +37,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
         private static IDictionary<Guid, int> tasks = new Dictionary<Guid, int>();
 
-        private UploadWizardHelper uploadWizardHelper = new UploadWizardHelper();
+        private UploadHelper uploadWizardHelper = new UploadHelper();
         //
         // GET: /DCM/Summary/
 
@@ -112,17 +118,16 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         [HttpPost]
         public ActionResult Summary(object[] data)
         {
-
             TaskManager = (TaskManager)Session["TaskManager"];
             SummaryModel model = new SummaryModel();
 
             model.StepInfo = TaskManager.Current();
             model.ErrorList = FinishUpload(TaskManager);
 
-
             if (model.ErrorList.Count > 0)
             {
                 #region set summary
+
                 if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_ID))
                 {
                     model.DatasetId = Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]);
@@ -153,10 +158,10 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     model.ResearchPlanTitle = TaskManager.Bus[TaskManager.RESEARCHPLAN_TITLE].ToString();
                 }
 
-                #endregion
+                #endregion set summary
+
                 //ToDo: remove all changed from dataset and version
                 return PartialView(model);
-
             }
             else
             {
@@ -168,16 +173,12 @@ namespace BExIS.Modules.Dcm.UI.Controllers
         //temporary solution: norman :FinishUpload2
         public List<Error> FinishUpload(TaskManager taskManager)
         {
-
             DataStructureManager dsm = new DataStructureManager();
             DatasetManager dm = new DatasetManager();
             IOUtility iOUtility = new IOUtility();
 
             try
             {
-
-
-
                 List<Error> temp = new List<Error>();
                 DatasetVersion workingCopy = new DatasetVersion();
                 //datatuple list
@@ -187,7 +188,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_ID) && TaskManager.Bus.ContainsKey(TaskManager.DATASTRUCTURE_ID))
                 {
-
                     long id = Convert.ToInt32(TaskManager.Bus[TaskManager.DATASET_ID]);
                     long iddsd = Convert.ToInt32(TaskManager.Bus[TaskManager.DATASTRUCTURE_ID]);
 
@@ -199,7 +199,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                     DatasetVersion latestVersion = dm.GetDatasetLatestVersion(ds);
                     string status = DatasetStateInfo.NotValid.ToString();
                     if (latestVersion.StateInfo != null) status = latestVersion.StateInfo.State;
-
 
                     #region Progress Informations
 
@@ -221,7 +220,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         TaskManager.Bus.Add(TaskManager.CURRENTPACKAGE, 0);
                     }
 
-                    #endregion
+                    #endregion Progress Informations
 
                     #region structured data
 
@@ -231,6 +230,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         long datasetid = ds.Id;
                         XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
                         title = xmlDatasetHelper.GetInformation(ds.Id, NameAttributeValues.title);
+
+                        int numberOfRows = 0;
+
                         try
                         {
                             //Stopwatch fullTime = Stopwatch.StartNew();
@@ -253,7 +255,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 TaskManager.Bus[TaskManager.CURRENTPACKAGESIZE] = packageSize;
 
                                 int counter = 0;
-
 
                                 //schleife
                                 dm.CheckOutDatasetIfNot(ds.Id, GetUsernameOrDefault()); // there are cases, the dataset does not get checked out!!
@@ -285,7 +286,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                                 do
                                 {
-
                                     counter++;
                                     TaskManager.Bus[TaskManager.CURRENTPACKAGE] = counter;
 
@@ -317,7 +317,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                                 dm.EditDatasetVersion(workingCopy, rows, null, null);
                                                 //Debug.WriteLine("EditDatasetVersion: " + counter + "  Time " + upload.Elapsed.TotalSeconds.ToString());
                                                 //Debug.WriteLine("----");
-
                                             }
                                             else
                                             if (TaskManager.Bus[TaskManager.DATASET_STATUS].ToString().Equals("edit"))
@@ -328,26 +327,23 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                                     splittedDatatuples = uploadWizardHelper.GetSplitDatatuples(rows, (List<long>)TaskManager.Bus[TaskManager.PRIMARY_KEYS], workingCopy, ref datatupleFromDatabaseIds);
 
                                                     dm.EditDatasetVersion(workingCopy, splittedDatatuples["new"], splittedDatatuples["edit"], null);
-
                                                 }
                                             }
                                         }
                                         else
                                         {
-
                                         }
-
                                     }
                                     Stream?.Close();
 
-
-                                } while (rows.Count() > 0);
-
+                                    //count rows
+                                    numberOfRows += rows.Count();
+                                } while (rows.Count() > 0 && rows.Count() == packageSize);
                             }
-                            #endregion
+
+                            #endregion excel reader
 
                             #region ascii reader
-
 
                             if (iOUtility.IsSupportedAsciiFile(TaskManager.Bus[TaskManager.EXTENTION].ToString()))
                             {
@@ -404,7 +400,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                         {
                                             if (TaskManager.Bus[TaskManager.DATASET_STATUS].ToString().Equals("new") || ((UploadMethod)TaskManager.Bus[TaskManager.UPLOAD_METHOD]).Equals(UploadMethod.Append))
                                             {
-
                                                 dm.EditDatasetVersion(workingCopy, rows, null, null);
                                             }
                                             else
@@ -430,26 +425,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                             }
                                         }
 
-
-                                    } while (rows.Count() > 0 || inputWasAltered == true);
-
-
+                                        //count rows
+                                        numberOfRows += rows.Count();
+                                    } while ((rows.Count() > 0 && rows.Count() == packageSize) || inputWasAltered == true);
 
                                     totalTime.Stop();
                                     Debug.WriteLine(" Total Time " + totalTime.Elapsed.TotalSeconds.ToString());
-
-
                                 }
 
                                 //Stream.Close();
-
                             }
 
-                            #endregion
+                            #endregion ascii reader
 
                             #region contentdescriptors
 
-                            //remove all contentdescriptors from the old version 
+                            //remove all contentdescriptors from the old version
                             //generatedTXT
                             if (workingCopy.ContentDescriptors.Any(c => c.Name.Equals("generatedTXT")))
                             {
@@ -476,14 +467,33 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 dm.DeleteContentDescriptor(tmp);
                             }
 
+                            #endregion contentdescriptors
 
-                            #endregion
+                            #region set System value into metadata
 
+                            if (TaskManager.Bus.ContainsKey(TaskManager.DATASET_STATUS))
+                            {
+                                bool newdataset = TaskManager.Bus[TaskManager.DATASET_STATUS].ToString().Equals("new");
+                                int v = 1;
+                                if (workingCopy.Dataset.Versions != null && workingCopy.Dataset.Versions.Count > 1) v = workingCopy.Dataset.Versions.Count();
+
+                                //set modification
+                                workingCopy.ModificationInfo = new EntityAuditInfo()
+                                {
+                                    Performer = GetUsernameOrDefault(),
+                                    Comment = "Data",
+                                    ActionType = newdataset ? AuditActionType.Create : AuditActionType.Edit
+                                };
+
+                                setSystemValuesToMetadata(id, v, workingCopy.Dataset.MetadataStructure.Id, workingCopy.Metadata, newdataset);
+                                dm.EditDatasetVersion(workingCopy, null, null, null);
+                            }
+
+                            #endregion set System value into metadata
 
                             // ToDo: Get Comment from ui and users
                             MoveAndSaveOriginalFileInContentDiscriptor(workingCopy);
-                            dm.CheckInDataset(ds.Id, "upload data from upload wizard", GetUsernameOrDefault());
-
+                            dm.CheckInDataset(ds.Id, numberOfRows + " rows", GetUsernameOrDefault());
 
                             //send email
                             var es = new EmailService();
@@ -491,26 +501,22 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                 MessageHelper.GetUpdateDatasetMessage(datasetid, title, GetUsernameOrDefault()),
                                 ConfigurationManager.AppSettings["SystemEmail"]
                                 );
-
                         }
                         catch (Exception e)
                         {
-
                             temp.Add(new Error(ErrorType.Other, "Can not upload. : " + e.Message));
                             var es = new EmailService();
                             es.Send(MessageHelper.GetErrorHeader(),
                                 "Can not upload. : " + e.Message,
                                 ConfigurationManager.AppSettings["SystemEmail"]
                                 );
-
                         }
                         finally
                         {
-
                         }
                     }
 
-                    #endregion
+                    #endregion structured data
 
                     #region unstructured data
 
@@ -519,12 +525,9 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         // checkout the dataset, apply the changes, and check it in.
                         if (dm.IsDatasetCheckedOutFor(ds.Id, GetUsernameOrDefault()) || dm.CheckOutDataset(ds.Id, GetUsernameOrDefault()))
                         {
-
                             try
                             {
                                 workingCopy = dm.GetDatasetWorkingCopy(ds.Id);
-
-
 
                                 using (var unitOfWork = this.GetUnitOfWork())
                                 {
@@ -546,12 +549,27 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                                     unitOfWork.GetReadOnlyRepository<DatasetVersion>().Load(workingCopy.ContentDescriptors);
 
                                     SaveFileInContentDiscriptor(workingCopy);
-
                                 }
+
+                                //set modification
+                                workingCopy.ModificationInfo = new EntityAuditInfo()
+                                {
+                                    Performer = GetUsernameOrDefault(),
+                                    Comment = "File",
+                                    ActionType = AuditActionType.Create
+                                };
+
                                 dm.EditDatasetVersion(workingCopy, null, null, null);
 
+                                //filename
+                                string filename = "";
+                                if (TaskManager.Bus.ContainsKey(TaskManager.FILENAME))
+                                {
+                                    filename = TaskManager.Bus[TaskManager.FILENAME]?.ToString();
+                                }
+
                                 // ToDo: Get Comment from ui and users
-                                dm.CheckInDataset(ds.Id, "upload unstructured data", GetUsernameOrDefault(), ViewCreationBehavior.None);
+                                dm.CheckInDataset(ds.Id, filename, GetUsernameOrDefault(), ViewCreationBehavior.None);
                             }
                             catch (Exception ex)
                             {
@@ -560,10 +578,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                         }
                     }
 
-                    #endregion
-
-
-
+                    #endregion unstructured data
                 }
                 else
                 {
@@ -572,7 +587,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
                 if (temp.Count <= 0)
                 {
-                    dm.CheckInDataset(ds.Id, "checked in but no update on data tuples", GetUsernameOrDefault(), ViewCreationBehavior.None);
+                    dm.CheckInDataset(ds.Id, "no update on data tuples", GetUsernameOrDefault(), ViewCreationBehavior.None);
                 }
                 else
                 {
@@ -600,7 +615,6 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             return !string.IsNullOrWhiteSpace(username) ? username : "DEFAULT";
         }
-
 
         private string SaveFileInContentDiscriptor(DatasetVersion datasetVersion)
         {
@@ -636,9 +650,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 // add current contentdesciptor to list
                 datasetVersion.ContentDescriptors.Add(originalDescriptor);
 
-
                 return storePath;
-
             }
             catch (Exception e)
             {
@@ -680,7 +692,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             };
 
             if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(originalDescriptor.Name)) > 0)
-            {   // remove the one contentdesciptor 
+            {   // remove the one contentdesciptor
                 foreach (ContentDescriptor cd in datasetVersion.ContentDescriptors)
                 {
                     if (cd.Name == originalDescriptor.Name)
@@ -698,6 +710,20 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             return storePath;
         }
 
-        #endregion
+        private XmlDocument setSystemValuesToMetadata(long datasetid, long version, long metadataStructureId, XmlDocument metadata, bool newDataset)
+        {
+            SystemMetadataHelper SystemMetadataHelper = new SystemMetadataHelper();
+
+            Key[] myObjArray = { };
+
+            if (newDataset) myObjArray = new Key[] { Key.Id, Key.Version, Key.DateOfVersion, Key.DataCreationDate, Key.DataLastModified };
+            else myObjArray = new Key[] { Key.Id, Key.Version, Key.DateOfVersion, Key.DataLastModified };
+
+            metadata = SystemMetadataHelper.SetSystemValuesToMetadata(metadataStructureId, version, metadataStructureId, metadata, myObjArray);
+
+            return metadata;
+        }
+
+        #endregion private methods
     }
 }
