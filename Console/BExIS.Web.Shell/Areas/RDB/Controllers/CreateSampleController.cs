@@ -15,6 +15,7 @@ using BExIS.Security.Entities.Authorization;
 using BExIS.Security.Entities.Subjects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Subjects;
+using BExIS.Utils.Data.Upload;
 using BExIS.Web.Shell.Helpers;
 using BExIS.Web.Shell.Models;
 using BExIS.Xml.Helpers;
@@ -541,11 +542,11 @@ namespace BExIS.Modules.Rdb.UI.Controllers
         {
             TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
 
-            BExIS.Dcm.UploadWizard.DataStructureType type = new BExIS.Dcm.UploadWizard.DataStructureType();
+            DataStructureType type = new DataStructureType();
 
             if (TaskManager.Bus.ContainsKey(CreateTaskmanager.DATASTRUCTURE_TYPE))
             {
-                type = (BExIS.Dcm.UploadWizard.DataStructureType)TaskManager.Bus[CreateTaskmanager.DATASTRUCTURE_TYPE];
+                type = (DataStructureType)TaskManager.Bus[CreateTaskmanager.DATASTRUCTURE_TYPE];
             }
 
             long datasetid = 0;
@@ -701,7 +702,7 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             foreach (MetadataStructure metadataStructure in msm.Repo.Get())
             {
                 if (xmlDatasetHelper.IsActive(metadataStructure.Id) &&
-                    xmlDatasetHelper.HasEntityType(metadataStructure.Id, "BExIS.Dlm.Entities.Data.Dataset", "Sample"))
+                    xmlDatasetHelper.HasEntityType(metadataStructure.Id, "BExIS.Dlm.Entities.Data.Dataset"))
                 {
                     string title = metadataStructure.Name;
 

@@ -70,8 +70,8 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                     MetadataStructureId = metadataStructureId,
                     DataStructureId = dataStructureId,
                     ResearchPlanId = researchPlanId,
-                    ViewAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, "Sample", typeof(Dataset), id, RightType.Read),
-                    GrantAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name, "Sample", typeof(Dataset), id, RightType.Grant)
+                    ViewAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name,  typeof(Dataset), id, RightType.Read),
+                    GrantAccess = entityPermissionManager.HasEffectiveRight(HttpContext.User.Identity.Name,  typeof(Dataset), id, RightType.Grant)
                 };
 
                 //set metadata in session

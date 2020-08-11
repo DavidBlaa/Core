@@ -97,7 +97,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityViewerHelper.cs" />
     <Compile Include="Helpers\BexisUIHelper.cs" />
     <Compile Include="Helpers\EntityViewerHelper.cs" />
     <Compile Include="Helpers\ErrorHelper.cs" />

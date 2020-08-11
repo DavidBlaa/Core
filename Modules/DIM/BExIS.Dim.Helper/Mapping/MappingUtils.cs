@@ -990,7 +990,7 @@ namespace BExIS.Dim.Helpers.Mapping
                         IEnumerable<XElement> elements = XmlUtility.GetXElementsByAttribute(AttrDic, metadata);
 
                         string parentname = "";
-                        if(m.Parent != null && m.Parent.Source!=null) parentname = m.Parent.Source.Name;
+                        if (m.Parent != null && m.Parent.Source != null) parentname = m.Parent.Source.Name;
 
                         foreach (var element in elements)
                         {
@@ -1001,6 +1001,15 @@ namespace BExIS.Dim.Helpers.Mapping
 
 
                 }
+
+                return tmp;
+            }
+            finally
+            {
+                mappingManager.Dispose();
+            }
+        }
+
 
         private static IEnumerable<XElement> getXElementsFromAMapping(Entities.Mapping.Mapping m, XDocument metadata)
         {
@@ -1146,5 +1155,11 @@ namespace BExIS.Dim.Helpers.Mapping
         }
 
         #endregion Helpers
+    }
+
+    public class MatchingObject
+    {
+        public string Value { get; set; }
+        public string Parent { get; set; }
     }
 }

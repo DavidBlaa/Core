@@ -51,7 +51,7 @@
         EastBoundLongitude = 711,
         MinEvelation = 712,
         MaxEvelation = 713,
-        Platform = 714
+        Platform = 714,
 
 
         Plot = 10000, // RDB Module addition,
