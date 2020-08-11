@@ -3,6 +3,7 @@ using BExIS.Security.Entities.Objects;
 using BExIS.Security.Entities.Requests;
 using BExIS.Security.Entities.Subjects;
 using System;
+using System.Configuration;
 using System.Linq;
 using Vaiona.Persistence.Api;
 
@@ -47,7 +48,7 @@ namespace BExIS.Security.Services.Requests
             }
         }
 
-        public Request Create(long applicantId, long entityId, long key, short rights = 1)
+        public Request Create(long applicantId, long entityId, long key, short rights = 1, string intention = "")
         {
             using (var uow = this.GetUnitOfWork())
             {
@@ -71,7 +72,7 @@ namespace BExIS.Security.Services.Requests
                     {
                         var partyRelationship =
                             partyRelationshipRepository.Query(
-                                    m => m.PartyRelationshipType.Title == "Owner" && m.TargetParty.Id == dataset_party.Id)
+                                    m => m.PartyRelationshipType.Title == ConfigurationManager.AppSettings["OwnerPartyRelationshipType"]  && m.TargetParty.Id == dataset_party.Id)
                                 .FirstOrDefault();
 
                         if (partyRelationship != null)
@@ -89,7 +90,8 @@ namespace BExIS.Security.Services.Requests
                                     Key = key,
                                     RequestDate = DateTime.Now,
                                     Status = RequestStatus.Open,
-                                    Rights = rights
+                                    Rights = rights,
+                                    Intention = intention
                                 };
 
                                 requestRepository.Put(request);
@@ -148,6 +150,20 @@ namespace BExIS.Security.Services.Requests
                 var request =
                     requestRepository.Query(
                         m => m.Applicant.Id == applicantId && m.Entity.Id == entityId && m.Key == key).FirstOrDefault();
+
+                return request != null;
+            }
+        }
+
+        public bool Exists(long applicantId, long entityId, long key, RequestStatus status)
+        {
+            using (var uow = this.GetUnitOfWork())
+            {
+                var requestRepository = uow.GetReadOnlyRepository<Request>();
+
+                var request =
+                    requestRepository.Query(
+                        m => m.Applicant.Id == applicantId && m.Entity.Id == entityId && m.Key == key && m.Status == status).FirstOrDefault();
 
                 return request != null;
             }

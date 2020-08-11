@@ -23,12 +23,10 @@ namespace BExIS.Dim.Helpers.Export
         private Repository _dataRepo { get; set; }
         private Broker _broker { get; set; }
 
-
         //ToDO -> David <- do not store the files on the server
         public string Convert(long datasetVersionId)
         {
             string datarepo = _dataRepo.Name;
-
 
             DatasetManager datasetManager = new DatasetManager();
             DataStructureManager dataStructureManager = new DataStructureManager();
@@ -55,7 +53,6 @@ namespace BExIS.Dim.Helpers.Export
 
                     if (broker != null)
                     {
-
                         OutputMetadataManager.GetConvertedMetadata(datasetId, TransmissionType.mappingFileExport,
                             broker.MetadataFormat);
 
@@ -66,12 +63,12 @@ namespace BExIS.Dim.Helpers.Export
                             OutputDataManager odm = new OutputDataManager();
                             // apply selection and projection
 
-                            string title = xmlDatasetHelper.GetInformation(datasetId, NameAttributeValues.title);
-
-                            odm.GenerateAsciiFile(datasetId, title, broker.PrimaryDataFormat);
+                            odm.GenerateAsciiFile(datasetId, datasetVersion.Id, broker.PrimaryDataFormat, false);
                         }
 
-                        string zipName = publishingManager.GetZipFileName(datasetId, datasetVersion.Id);
+                        int versionNr = datasetManager.GetDatasetVersionNr(datasetVersion);
+
+                        string zipName = publishingManager.GetZipFileName(datasetId, versionNr);
                         string zipPath = publishingManager.GetDirectoryPath(datasetId, broker.Name);
                         string dynamicZipPath = publishingManager.GetDynamicDirectoryPath(datasetId, broker.Name);
                         string zipFilePath = Path.Combine(zipPath, zipName);
@@ -87,20 +84,16 @@ namespace BExIS.Dim.Helpers.Export
                             }
                         }
 
-
-
                         // add datastructure
                         //ToDo put that functiom to the outputDatatructureManager
 
                         #region datatructure
-
 
                         long dataStructureId = datasetVersion.Dataset.DataStructure.Id;
                         DataStructure dataStructure = dataStructureManager.StructuredDataStructureRepo.Get(dataStructureId);
 
                         if (dataStructure != null)
                         {
-
                             try
                             {
                                 string dynamicPathOfDS = "";
@@ -111,8 +104,6 @@ namespace BExIS.Dim.Helpers.Export
                                 string json = OutputDataStructureManager.GetVariableListAsJson(dataStructureId);
 
                                 AsciiWriter.AllTextToFile(datastructureFilePath, json);
-
-
                             }
                             catch (Exception ex)
                             {
@@ -120,7 +111,7 @@ namespace BExIS.Dim.Helpers.Export
                             }
                         }
 
-                        #endregion
+                        #endregion datatructure
 
                         ZipFile zip = new ZipFile();
 
@@ -145,18 +136,16 @@ namespace BExIS.Dim.Helpers.Export
                         if (manifest != null)
                         {
                             string dynamicManifestFilePath = OutputDatasetManager.GetDynamicDatasetStorePath(datasetId,
-                                datasetVersion.Id, "manifest", ".xml");
+                                versionNr, "manifest", ".xml");
                             string fullFilePath = Path.Combine(AppConfiguration.DataPath, dynamicManifestFilePath);
 
                             manifest.Save(fullFilePath);
                             zip.AddFile(fullFilePath, "");
-
                         }
 
                         string message = string.Format("dataset {0} version {1} was published for repository {2}", datasetId,
                             datasetVersion.Id, broker.Name);
                         LoggerFactory.LogCustom(message);
-
 
                         //Session["ZipFilePath"] = dynamicFilePath;
 
@@ -184,9 +173,10 @@ namespace BExIS.Dim.Helpers.Export
         private static string storeGeneratedFilePathToContentDiscriptor(long datasetId, DatasetVersion datasetVersion,
             string title, string ext)
         {
-
             string name = "";
             string mimeType = "";
+            DatasetManager dm = new DatasetManager();
+
 
             if (ext.Contains("csv"))
             {
@@ -194,9 +184,10 @@ namespace BExIS.Dim.Helpers.Export
                 mimeType = "text/comma-separated-values";
             }
 
+            var versionNr = dm.GetDatasetVersionNr(datasetVersion);
 
             // create the generated FileStream and determine its location
-            string dynamicPath = OutputDatasetManager.GetDynamicDatasetStorePath(datasetId, datasetVersion.Id, title,
+            string dynamicPath = OutputDatasetManager.GetDynamicDatasetStorePath(datasetId, versionNr, title,
                 ext);
             //Register the generated data FileStream as a resource of the current dataset version
             //ContentDescriptor generatedDescriptor = new ContentDescriptor()
@@ -208,10 +199,9 @@ namespace BExIS.Dim.Helpers.Export
             //    DatasetVersion = datasetVersion,
             //};
 
-            DatasetManager dm = new DatasetManager();
             if (datasetVersion.ContentDescriptors.Count(p => p.Name.Equals(name)) > 0)
             {
-                // remove the one contentdesciptor 
+                // remove the one contentdesciptor
                 foreach (ContentDescriptor cd in datasetVersion.ContentDescriptors)
                 {
                     if (cd.Name == name)
@@ -237,6 +227,5 @@ namespace BExIS.Dim.Helpers.Export
             _dataRepo = datarepo;
             _broker = datarepo.Broker;
         }
-
     }
 }

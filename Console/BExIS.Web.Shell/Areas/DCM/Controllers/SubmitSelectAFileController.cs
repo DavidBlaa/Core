@@ -4,6 +4,8 @@ using BExIS.IO;
 using BExIS.IO.Transform.Input;
 using BExIS.IO.Transform.Validation.Exceptions;
 using BExIS.Modules.Dcm.UI.Models;
+using BExIS.Utils.Data.Upload;
+using BExIS.Utils.Upload;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +45,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
 
             //get datastuctureType
             model.DataStructureType = GetDataStructureType();
-            model.SupportedFileExtentions = UploadWizardHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
+            model.SupportedFileExtentions = UploadHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
 
             //Get StepInfo
             model.StepInfo = TaskManager.Current();
@@ -163,10 +165,15 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                             }
 
                         }
+                        catch (NotSupportedException ex) 
+                        {
+                            model.ErrorList.Add(new Error(ErrorType.Other, ex.Message));
+                        }
                         catch (Exception ex)
                         {
                             model.ErrorList.Add(new Error(ErrorType.Other, "Cannot access FileStream on server."));
                         }
+
                     }
                     else
                     {
@@ -193,7 +200,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
             model.serverFileList = GetServerFileList();
             //get datastuctureType
             model.DataStructureType = GetDataStructureType();
-            model.SupportedFileExtentions = UploadWizardHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
+            model.SupportedFileExtentions = UploadHelper.GetExtentionList(model.DataStructureType, this.Session.GetTenant());
 
             return PartialView(model);
         }
@@ -309,7 +316,7 @@ namespace BExIS.Modules.Dcm.UI.Controllers
                 var ext = taskManager.Bus[TaskManager.EXTENTION].ToString();
                 var type = (DataStructureType)taskManager.Bus[TaskManager.DATASTRUCTURE_TYPE];
 
-                if (UploadWizardHelper.GetExtentionList(type, this.Session.GetTenant()).Contains(ext.ToLower())) return true;
+                if (UploadHelper.GetExtentionList(type, this.Session.GetTenant()).Contains(ext.ToLower())) return true;
 
             }
 

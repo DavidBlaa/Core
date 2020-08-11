@@ -46,6 +46,9 @@ namespace BExIS.Web.Shell
             bundles.Add(new ScriptBundle("~/bundles/switchery").Include(
                 "~/Scripts/switchery/switchery.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/datatables").Include(
+                "~/Scripts/DataTables/media/js/jquery.dataTables.js"));
+
             bundles.Add(new StyleBundle("~/Content/css").Include(
                 //$"~/{Themes.GetResourcePath("Styles")}/bexis-jquery-ui.css",
                 //$"~/{Themes.GetResourcePath("Styles")}/bexis-font-awesome-extension.css",
@@ -58,7 +61,18 @@ namespace BExIS.Web.Shell
                 "~/Content/bootstrap-slider.min.css",
                 "~/Scripts/minimap/minimap.min.css",
                 "~/Content/handsontable/handsontable.full.css",
+                "~/Content/DataTables/media/css/jquery.dataTables.css",
                 "~/Content/Site.css"));
+
+            bundles.Add(new StyleBundle("~/bundles/general_bexis").Include(
+
+                 "~/Themes/Default/Styles/bexis-custom-style.css",
+                 "~/Themes/Default/Styles/bexis-jquery-ui.css",
+                 "~/Themes/Default/Styles/bexis-font-awesome-extension.css",
+                 "~/Themes/Default/Styles/bexis-elements.css",
+                 "~/Themes/Default/Styles/bexis-datatables-net.css",
+                 "~/Themes/Default/Styles/bexis-telerik.css"
+                ));
 
             BundleTable.EnableOptimizations = true;
         }

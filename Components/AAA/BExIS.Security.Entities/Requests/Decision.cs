@@ -1,5 +1,6 @@
 ﻿using BExIS.Security.Entities.Subjects;
 using System;
+using System.ComponentModel;
 using Vaiona.Entities.Common;
 
 namespace BExIS.Security.Entities.Requests
@@ -8,7 +9,8 @@ namespace BExIS.Security.Entities.Requests
     {
         Open = 0,
         Accepted = 1,
-        Rejected = 2
+        Rejected = 2,
+        Withdrawn = 3
     }
 
     public class Decision : BaseEntity

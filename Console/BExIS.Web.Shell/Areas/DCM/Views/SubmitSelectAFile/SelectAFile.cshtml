@@ -4,6 +4,8 @@
 @using System.Web.Configuration;
 @using BExIS.Modules.Dcm.UI.Models;
 
+@using BExIS.Utils.Data.Upload
+
 @{
 
     HttpRuntimeSection section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
@@ -23,11 +25,19 @@
             fileExtListAsString = s;
         }
     }
+
+    string selectedFile = "";
+    if (Model.SelectedFileName != "")
+    {
+        selectedFile = "Selected files";
+    }
+
+
 }
 
 <div id="Step1" class="uploadWizardStep">
 
-    <div class="uploadWizardStep_Main">
+    <div class="uploadWizardStep_Main" style="width: 100%;">
         <div class="uploadWizardStep_Header stepper">
 
             <h3>@Model.StepInfo.title</h3>
@@ -37,8 +47,10 @@
             <p>Please select a data file to be uploaded to the system.</p>
             <p>Note:  Large data files may take several minutes or hours to transfer, depending on your network speed. The system is freezed until the file has been transfered completely. Please be patient! </p>
             <p>For multiple large files you may use the "Push Big Data to Server" option before entering this Upload Wizard.</p>
-            <p>Supported file formats: @{foreach (string s in @Model.SupportedFileExtentions)
-                {<b>(*@s) </b>} }</p>
+            <p>
+                Supported file formats: @{foreach (string s in @Model.SupportedFileExtentions)
+                    {<b>(*@s) </b>} }
+            </p>
             <p>Maximum file size: @mbMax MB</p>
         </div>
 
@@ -49,19 +61,19 @@
 
                     <td>
                         @(Html.Telerik().Upload()
-                                .Name("SelectFileUploader")
-                                .Multiple(false)
-                                .ShowFileList(false)
-                                .HtmlAttributes(new { title = "Browse" })
-                                .ClientEvents(events =>
-                                    events.OnSelect("SelectFileProcess_OnSelect")
-                                            .OnRemove("SelectFileProcess_OnRemove")
-                                            .OnSuccess("SelectFileProcess_OnSuccess")
+                                                        .Name("SelectFileUploader")
+                                                        .Multiple(false)
+                                                        .ShowFileList(false)
+                                                        .HtmlAttributes(new { title = "Browse" })
+                                                        .ClientEvents(events =>
+                                                            events.OnSelect("SelectFileProcess_OnSelect")
+                                                                    .OnRemove("SelectFileProcess_OnRemove")
+                                                                    .OnSuccess("SelectFileProcess_OnSuccess")
 
-                                )
-                                .Async(async => async
-                                    .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName)
-                                    .AutoUpload(true))
+                                                        )
+                                                        .Async(async => async
+                                                            .Save("SelectFileProcess", @Model.StepInfo.PostActionInfo.ControllerName)
+                                                            .AutoUpload(true))
 
                         )
                     </td>
@@ -74,10 +86,10 @@
 
                     <td>
                         @(Html.Telerik().DropDownList()
-                                    .Placeholder("Select, please")
-                                    .Name("SelectedServerFileName")
-                                    .BindTo(new SelectList(Model.serverFileList))
-                                    .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
+                                                            .Placeholder("Please select")
+                                                            .Name("SelectedServerFileName")
+                                                            .BindTo(new SelectList(Model.serverFileList))
+                                                            .ClientEvents(e => e.OnChange("SelectedServerFileName_onChange")))
 
                         @*@Html.DropDownListFor(m => m.SelectedServerFileName, new SelectList(Model.serverFileList), "Select")*@@*, new { disabled = "disabled" })*@
                     </td>
@@ -85,38 +97,49 @@
                         Select a data file previously uploaded to the server.
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <div class="uploadWizardStep_Success stepper">
+                            <div id="fileNameDiv">
+                                @if (Model.SelectedFileName != "")
+                                {@Model.SelectedFileName}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="fileNameDivHelp">
+                            @if (Model.SelectedFileName != "")
+                            {<span>Selected file.</span>}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="uploadWizardStep_Error stepper">
+                            @if (Model != null)
+                            {
+                                if (Model.ErrorList != null)
+                                {
+                                    if (Model.ErrorList.Count == 0)
+                                    {
+                                    }
+                                    else
+                                    {
+                                        <ul>
+                                            @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
+                                            {
+                                                <li>@s.ToString()</li>
+                                            }
+                                        </ul>
+                                    }
+                                }
+                            }
+                        </div>
+                    </td>
+                </tr>
+
             </table>
         </div>
-    </div>
-
-    <div class="uploadWizardStep_Success stepper">
-        <div id="fileNameDiv">@if (Model.SelectedFileName != "")
-        {@Model.SelectedFileName}</div>
-    </div>
-
-    <div class="uploadWizardStep_Error stepper">
-        @if (Model != null)
-        {
-            if (Model.ErrorList != null)
-            {
-                if (Model.ErrorList.Count == 0)
-                {
-
-
-                }
-                else
-                {
-                    <ul>
-                        @foreach (BExIS.IO.Transform.Validation.Exceptions.Error s in @Model.ErrorList)
-                        {
-                            <li>@s.ToString()</li>
-                        }
-                    </ul>
-
-                }
-            }
-
-        }
     </div>
 
 </div>
@@ -131,8 +154,8 @@
     function SelectFileProcess_OnSelect(e) {
 
         var type = '@Model.DataStructureType';
-        var structuredType = '@BExIS.Dcm.UploadWizard.DataStructureType.Structured';
-        var unStructuredType = '@BExIS.Dcm.UploadWizard.DataStructureType.Unstructured';
+        var structuredType = '@DataStructureType.Structured';
+        var unStructuredType = '@DataStructureType.Unstructured';
 
         if( type == structuredType)
         {
@@ -222,6 +245,7 @@
 
         $('.uploadWizardStep_Error').empty();
         $('#fileNameDiv').text(e.files[0].name);
+        $('#fileNameDivHelp').text("Selected file.");
     }
 
     function SelectedServerFileName_onChange()
@@ -237,6 +261,7 @@
 
                     $('.uploadWizardStep_Error').empty();
                     $('#fileNameDiv').text(value);
+                    $('#fileNameDivHelp').text("Selected file.");
                 });
     }
 

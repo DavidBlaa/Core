@@ -11,13 +11,13 @@ using Vaiona.Utils.Cfg;
 
 /// <summary>
 ///
-/// </summary>        
+/// </summary>
 namespace BExIS.IO.Transform.Output
 {
     /// <summary>
     ///
     /// </summary>
-    /// <remarks></remarks>        
+    /// <remarks></remarks>
     public class AsciiWriter : DataWriter
     {
         #region constructor
@@ -26,7 +26,7 @@ namespace BExIS.IO.Transform.Output
         ///
         /// </summary>
         /// <remarks></remarks>
-        /// <seealso cref=""/>        
+        /// <seealso cref=""/>
         public TextSeperator Delimeter { get; set; }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace BExIS.IO.Transform.Output
         /// </summary>
         /// <remarks></remarks>
         /// <seealso cref=""/>
-        /// <param>NA</param>       
+        /// <param>NA</param>
         public AsciiWriter()
         {
             Delimeter = TextSeperator.comma;
@@ -51,22 +51,29 @@ namespace BExIS.IO.Transform.Output
             Delimeter = delimeter;
         }
 
-        #endregion
+        #endregion constructor
 
         #region constants
-        private static char[] specialChars = new char[] { '"', ',' };
-        #endregion
+
+        //private static char[] specialChars = new char[] { '"', ',' };
+
+        #endregion constants
 
         #region instance variables
+
         // filepath to the output file
         private string filepath;
+
         // file content
         private StringBuilder data;
+
         // separator
-        string separator;
-        #endregion
+        private string separator;
+
+        #endregion instance variables
 
         #region setup / close actions
+
         protected override void Init(string file, long dataStructureId)
         {
             // store pointer to dataStructure
@@ -93,9 +100,11 @@ namespace BExIS.IO.Transform.Output
             this.data = null;
             this.separator = null;
         }
-        #endregion
+
+        #endregion setup / close actions
 
         #region addHeader
+
         protected override bool AddHeader(StructuredDataStructure ds)
         {
             if (ds.Variables != null && ds.Variables.Any())
@@ -158,9 +167,66 @@ namespace BExIS.IO.Transform.Output
 
             return true;
         }
-        #endregion
+
+        protected override bool AddHeader(string[] header)
+        {
+            // Add header to data
+            data.AppendLine(String.Join(this.separator, header.ToArray()));
+
+            return true;
+        }
+
+        #endregion addHeader
+
+        #region add units
+
+        protected override bool AddUnits(StructuredDataStructure ds)
+        {
+            if (ds.Variables != null && ds.Variables.Any())
+            {
+                List<Variable> variables = ds.Variables.ToList();
+
+                if (VisibleColumns != null)
+                {
+                    variables = GetSubsetOfVariables(ds.Variables.ToList(), VisibleColumns);
+                }
+
+                variables = variables.OrderBy(v => v.OrderNo).ToList();
+
+                // copy header titles to array
+                string[] line = new string[variables.Count];
+
+                //foreach (Variable v in variables)
+                for (int i = 0; i < variables.Count; i++)
+                {
+                    // get unit
+                    string unit = variables[i].Unit != null ? variables[i].Unit.Name : "";
+
+                    // add unit
+                    line[i] = escapeValue(unit);
+                }
+
+                // add to data collection
+                data.AppendLine(String.Join(this.separator, line));
+
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override bool AddUnits(string[] units)
+        {
+            // Add header to data
+            data.AppendLine(String.Join(this.separator, units.ToArray()));
+
+            return true;
+        }
+
+        #endregion add units
 
         #region addRow
+
         protected override bool AddRow(AbstractTuple tuple, long rowIndex)
         {
             // number of columns
@@ -184,6 +250,7 @@ namespace BExIS.IO.Transform.Output
 
                     if (vv != null && vv.Value != null)
                     {
+                        // checking for display pattern
                         string format = GetStringFormat(dataType);
                         if (!string.IsNullOrEmpty(format))
                         {
@@ -191,11 +258,15 @@ namespace BExIS.IO.Transform.Output
                         }
                         else value = vv.Value.ToString();
 
+                        // check if the value is a missing value and should be replaced
+                        if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                        {
+                            value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                        }
+
                         // Add value to row
                         line[i] = escapeValue(value);
-
                     }
-
                 }
             }
 
@@ -218,9 +289,28 @@ namespace BExIS.IO.Transform.Output
                 // get value as string
                 string value = row[i].ToString();
 
+                // check if the value is a missing value and should be replaced
+                var variable = dataStructure.Variables.ElementAt(i);
+
+                if (variable != null)
+                {
+                    //checking for display pattern
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+                    string format = GetStringFormat(dataType);
+                    if (!string.IsNullOrEmpty(format))
+                    {
+                        value = GetFormatedValue(value, dataType, format);
+                    }
+                    else value = value.ToString();
+
+                    // checking for missing values
+                    if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                    {
+                        value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                    }
+                }
                 // add value to row
                 line[i] = escapeValue(value);
-
             }
 
             // Add to result
@@ -228,7 +318,45 @@ namespace BExIS.IO.Transform.Output
 
             return true;
         }
-        #endregion
+
+        protected override bool AddRow(string[] row, long rowIndex)
+        {
+            List<string> newRow = new List<string>();
+
+            // set vor missing values
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                var value = row[i];
+                // check if the value is a missing value and should be replaced
+                var variable = dataStructure.Variables.ElementAt(i);
+
+                if (variable != null)
+                {
+                    //checking for display pattern
+                    Dlm.Entities.DataStructure.DataType dataType = variable.DataAttribute.DataType;
+                    string format = GetStringFormat(dataType);
+                    if (!string.IsNullOrEmpty(format))
+                    {
+                        value = GetFormatedValue(value, dataType, format);
+                    }
+                    else value = value.ToString();
+
+                    if (variable.MissingValues.Any(mv => mv.Placeholder.Equals(value)))
+                    {
+                        value = variable.MissingValues.FirstOrDefault(mv => mv.Placeholder.Equals(value)).DisplayName;
+                    }
+                }
+                newRow.Add(value);
+            }
+
+            // Add to result
+            data.AppendLine(String.Join(this.separator, newRow.ToArray()));
+
+            return true;
+        }
+
+        #endregion addRow
 
         #region generic
 
@@ -246,19 +374,22 @@ namespace BExIS.IO.Transform.Output
             return true;
         }
 
-        #endregion
+        #endregion generic
 
         #region helper
+
         private string escapeValue(string value)
         {
             // modify if special characters are present
-            if (value.IndexOfAny(specialChars) != -1)
+
+            if (value.IndexOfAny(AsciiHelper.GetAllSeperator().ToArray()) != -1)
             {
                 value = "\"" + value.Replace("\"", "\"\"") + "\"";
             }
             return value;
         }
-        #endregion
+
+        #endregion helper
 
         #region bexis internal usage
 
@@ -277,9 +408,11 @@ namespace BExIS.IO.Transform.Output
             {
                 if (!File.Exists(dataPath))
                 {
+                    string directory = Path.GetDirectoryName(dataPath);
+                    FileHelper.CreateDicrectoriesIfNotExist(directory);
+
                     File.Create(dataPath).Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -307,9 +440,11 @@ namespace BExIS.IO.Transform.Output
             {
                 if (!File.Exists(dataPath))
                 {
+                    string directory = Path.GetDirectoryName(dataPath);
+                    FileHelper.CreateDicrectoriesIfNotExist(directory);
+
                     File.Create(dataPath).Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -318,7 +453,6 @@ namespace BExIS.IO.Transform.Output
 
             return dataPath;
         }
-
 
         /// <summary>
         /// create a new file in the given namespace and return the full path
@@ -335,9 +469,11 @@ namespace BExIS.IO.Transform.Output
             {
                 if (!File.Exists(dataPath))
                 {
+                    string directory = Path.GetDirectoryName(dataPath);
+                    FileHelper.CreateDicrectoriesIfNotExist(directory);
+
                     File.Create(dataPath).Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -347,8 +483,6 @@ namespace BExIS.IO.Transform.Output
             return dataPath;
         }
 
-        #endregion
-
+        #endregion bexis internal usage
     }
-
 }

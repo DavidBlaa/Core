@@ -6,6 +6,20 @@ $(document).ready(function ()
 	//console.log("on document ready");
 	//Bootstrat tooltip
 	$('[data-toggle="tooltip"]').tooltip();
+
+	//get height of the menu and add this to the margin of the content
+	var h = $(".navbar").height();
+	console.log("h = " + h);
+	$("#information-container").css("top", h);
+	$(".main-content").css("margin-top", h);
+
+	$(window).resize(function () {
+
+		var h = $(".navbar").height();
+		console.log("h = " + h);
+		$("#information-container").css("top", h);
+		$(".main-content").css("margin-top", h);
+	});
 });
 
 function resetAllTelerikIconTitles()
@@ -369,8 +383,22 @@ if (jQuery.validator) {
 		var checked = false;
 		checked = $(element).is(':checked');
 		return checked;
-	}, '');
+    }, '');
+
+    jQuery.validator.addMethod('selectvalidation', function (value, element, params) {
+        if (value !== "-1")
+            return true;
+        else
+            return false;
+    });
+
+ 
+
 	if (jQuery.validator.unobtrusive) {
-		jQuery.validator.unobtrusive.adapters.addBool("checkrequired");
+        jQuery.validator.unobtrusive.adapters.addBool("checkrequired");
+        jQuery.validator.unobtrusive.adapters.add('selectvalidation', function (options) {
+            options.rules['selectvalidation'] = {};
+            options.messages['selectvalidation'] = options.message;
+        });
 	}
 }

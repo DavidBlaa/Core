@@ -1,58 +1,53 @@
 ﻿var minimapOriginalTop = 0;
 $(document).ready(function (e) {
-
-
     setTimeout(
-      function () {
-          //do something special
-          //console.log("doc ready before autosize");
-          //console.log($('textarea'));
-          if ($('textarea') !== null) {
+        function () {
+            //do something special
+            //console.log("doc ready before autosize");
+            //console.log($('textarea'));
+            if ($('textarea') !== null) {
+                $($('textarea')).each(function (index, element) {
+                    // element == this
+                    autosize($(this));
+                    //console.log("done autosize");
+                });
+            }
+        }, 10);
 
-              $($('textarea')).each(function (index, element) {
-                  // element == this
-                  autosize($(this));
-                  //console.log("done autosize");
-              });
-          }
-      }, 10);
-
-    
     //setTabIndex();
     resetAllTelerikIconTitles();
 });
 
 function setTabIndex() {
-
     var list = $(".metadataAttributeInput .t-input");
     //console.log(list);
-    for (var i = 0; i < list.length ; i++) {
+    for (var i = 0; i < list.length; i++) {
         var input = list[i];
         //console.log(input);
         $(input).attr("tabindex", i);
     }
 }
 
-
 /******************************************
  ********* FORM    ************************
  ******************************************/
 
 $(window).scroll(function () {
+    if ($("#MetadataEditor").is(':visible')) {
         bindMinimap();
+    }
 });
 
 var originalMinimapTop = 0;
 var originalMiniRegionTop = 0;
 function bindMinimap(create) {
-
     var scrollpostion = $(document).scrollTop();
     var topContainer = $('#root').position().top;
     var menubar = $(".navbar").height() + 20;
 
     var hContainer = $('#root').height();
     var hWindow = $(window).height();
-       
+
     var hRatio = 1 - hWindow / hContainer;
 
     if (hRatio <= 0) hRatio = 0.1;
@@ -63,8 +58,8 @@ function bindMinimap(create) {
         $(".miniregion").remove();
         $(".minimap").remove();
 
-            var previewBody = $('#root')
-                .minimap(
+        var previewBody = $('#root')
+            .minimap(
                 {
                     heightRatio: hRatio,
                     widthRatio: 0.095,
@@ -75,17 +70,15 @@ function bindMinimap(create) {
                     smoothScroll: false,
                     smoothScrollDelay: 100
                 });
-                var x = $(".minimap").css("top");
-                originalMinimapTop = parseInt(x.split("px"));
-                originalMiniRegionTop = $(".miniregion").position().top;
-                    
-                $(".minimap").css("top", originalMinimapTop + (topContainer - menubar));
-                //$(".miniregion").css("top", originalMiniRegionTop + (topContainer - menubar));
-                    
-                //console.log("created");
-        }
-            
-            
+        var x = $(".minimap").css("top");
+        originalMinimapTop = parseInt(x.split("px"));
+        originalMiniRegionTop = $(".miniregion").position().top;
+
+        $(".minimap").css("top", originalMinimapTop + (topContainer - menubar));
+        //$(".miniregion").css("top", originalMiniRegionTop + (topContainer - menubar));
+
+        //console.log("created");
+    }
 
     var scrollmax = (topContainer - menubar) - scrollpostion;
     //console.log(topContainer);
@@ -99,22 +92,18 @@ function bindMinimap(create) {
         //console.log("setty");
         $(".miniregion").removeClass("hidden");
     } else {
-
         $(".miniregion").addClass("hidden");
         //$(".miniregion").css("top", originalMiniRegionTop + (topContainer - menubar));
-
     }
     //console.log(scrollmax);
-            
+
     ////var miniregionoffset = topContainer - originalMiniRegionTop;
     var positionMinimap = parseInt(originalMinimapTop) + parseInt(scrollmax);
 
+    //console.log("position : " + positionMinimap + "(topContainer - scrollpostion) :" + (topContainer - scrollpostion) + "menubar : " + menubar);
+
     $(".minimap").css("top", positionMinimap);
-
-   
-
 }
-
 
 function getRatioHeight(containerStart) {
     return (containerStart / $(window).height());
@@ -135,7 +124,6 @@ function OnKeyUpTextInput(e) {
     //console.log(e.value.length);
     //console.log(e.value);
 
-       
     var length = e.value.length;
 
     if (length >= 60) {
@@ -144,13 +132,15 @@ function OnKeyUpTextInput(e) {
         //console.log(textarea);
         $("#" + e.id).replaceWith(textarea);
 
+        $(textarea).trigger("change");
+
         //set focus
         var tmp = $("#" + e.id).val();
         $("#" + e.id).val('');
         autosize($("#" + e.id));
         $("#" + e.id).val(tmp);
         $("#" + e.id).focus();
-      
+
         //console.log("done");
     }
 }
@@ -162,7 +152,7 @@ function inputToTextArea(input) {
         "id='" + $("#" + input.id).attr("id") + "'" +
         "name='" + $("#" + input.id).attr("name") + "'" +
         "onchange=\"OnChange(this)\"" +
-        "onkeyup= \"OnKeyUpTextArea(this)\""+
+        "onkeyup= \"OnKeyUpTextArea(this)\"" +
         "title='" + $("#" + input.id).attr("title") + "'" +
         "class=\"bx-textarea bx-metadataFormTextInput \"" +
         "cols=\"2\" rows=\"2\">" + input.value + "</textarea>";
@@ -176,7 +166,6 @@ function OnKeyUpTextArea(e) {
     //console.log(e.value.length);
     //console.log(e.value);
 
-
     var length = e.value.length;
 
     if (length < 60) {
@@ -187,10 +176,10 @@ function OnKeyUpTextArea(e) {
 
         //set focus
         var tmp = $("#" + e.id).value;
-        $("#" + e.id).value='';
+        $("#" + e.id).value = '';
         $("#" + e.id).value = tmp;
         $("#" + e.id).focus();
- 
+
         //console.log("done");
 
         autosize($('textarea'));
@@ -204,7 +193,7 @@ function textareaToInput(textarea) {
         "id='" + $("#" + textarea.id).attr("id") + "'" +
         "name='" + $("#" + textarea.id).attr("name") + "'" +
         "onkeyup=\"OnKeyUpTextInput(this)\"" +
-        "title='"+$("#" + textarea.id).attr("title")+"'" +
+        "title='" + $("#" + textarea.id).attr("title") + "'" +
         "class=\"t-widget t-autocomplete t-input bx-metadataFormTextInput \"" +
         "value='" + $("#" + textarea.id).val() + "' " +
         "autocomplete=\"off\"></input>";
@@ -212,75 +201,117 @@ function textareaToInput(textarea) {
     return input;
 }
 
-
 var afterClosed = false;
 
-function OnChangeTextInput(e) {
+function OnChangeTextInput(e, ui) {
 
-    var substr = e.target.id.split('_');
-    var id = substr[0];
-    var parentid = substr[1];
-    var parentname = $("#" + e.id).attr("title");
-    var number = substr[2];
-    var ParentModelNumber = substr[3];
-    var ParentStepID = substr[5];
+        console.log("change");
+        console.log("afterClosed : " + afterClosed);
+        console.log("on change text input");
+        var value;
 
-    //alert(parentid);
-    //alert(metadataStructureId);
-    //alert(ParentStepID);
-    //object value,  int id, int parentid,       string parentname,     int number, int parentModelNumber,                    int parentStepId)
-    $.post('/DCM/Form/ValidateMetadataAttributeUsage',
-    {
-        value: e.value,
-        id: id,
-        parentid: parentid,
-        parentname: parentname,
-        number: number,
-        parentModelNumber: ParentModelNumber,
-        ParentStepId: ParentStepID
-    },
-    function (response) {
-
-        var id = e.target.id;
-        //console.log("OnChangeTextInput");
-        //console.log(id);
-
-        var index = id.lastIndexOf("_");
-        var newId = id.substr(0, index);
-        //console.log(newId);
-
-        $("#" + newId).replaceWith(response);
-
-        //alert("test");
-        autosize($('textarea'));
-
-        //check if the parent is set to a party
-        console.log("after change");
-        var parent = $("#" + ParentStepID)[0];
-        console.log(parent);
-        var partyid = $(parent).attr("partyid");
-        console.log(partyid);
-
-        var partyidConverted = TryParseInt(partyid, null)
-        console.log("tryparse:" + partyidConverted)
-
-        //delete party informations when a party was selected before
-        if (partyidConverted !== null && partyidConverted > 0 && afterClosed === false) {
-
-            console.log(ParentStepID);
-            console.log(ParentModelNumber);
-
-            UpdateWithParty(ParentStepID, ParentModelNumber, 0);
+        if (ui.item === null) {
+            value = e.target.value;
         }
         else {
-            afterClosed = false;
+            value = ui.item.value;
+        }
+        //console.log(value);
+        var substr = e.target.id.split('_');
+        var id = substr[0];
+        var parentid = substr[1];
+        var parentname = $("#" + e.id).attr("title");
+        var number = substr[2];
+        var ParentModelNumber = substr[3];
+        var ParentStepID = substr[5];
+
+        // after close a autocomplete there is a id in the value, 
+        // this should be removed before send to the server
+        if (afterClosed === true) {
+            if (~value.indexOf("(") && ~value.indexOf(")")) {
+                var start = value.lastIndexOf("(") + 1;
+                value = value.substr(0, start - 2);
+
+                console.log("--> after autocomplete the value from the selection needs to be cutted");
+            }
         }
 
-    })
+        //alert(parentid);
+        //alert(metadataStructureId);
+        //alert(ParentStepID);
+        //object value,  int id, int parentid,       string parentname,     int number, int parentModelNumber,                    int parentStepId)
+        $.post('/DCM/Form/ValidateMetadataAttributeUsage',
+            {
+                value: value,
+                id: id,
+                parentid: parentid,
+                parentname: parentname,
+                number: number,
+                parentModelNumber: ParentModelNumber,
+                ParentStepId: ParentStepID
+            },
+            function (response) {
+
+                // after the on close event from the autocomplete component, the values change in the input fields
+                // after this changes again this change event is triggered
+                // to prevent this, a flag is set to check wheter this event is fired after a close event or not
+                if (afterClosed === false) {
+
+                    console.log("after validate value on server");
+                    console.log("afterClosed : " + afterClosed);
+                    console.log("if : " + (afterClosed === false));
+
+                    var id = e.target.id;
+                    //console.log("OnChangeTextInput");
+                    //console.log(id);
+
+                    var index = id.lastIndexOf("_");
+                    var newId = id.substr(0, index);
+                    //console.log(newId);
+
+                    $("#" + newId).replaceWith(response);
+                    updateHeader();
+
+                    //alert("test");
+                    autosize($('textarea'));
+
+
+
+                    console.log("--> only runs when autocomplete is not used");
+
+
+                    //check if the parent is set to a party
+                    //console.log("after change");
+                    var parent = $("#" + ParentStepID)[0];
+                    //console.log(parent);
+                    var partyid = $(parent).attr("partyid");
+                    //console.log(partyid);
+
+                    var partyidConverted = TryParseInt(partyid, null);
+                    //console.log("tryparse:" + partyidConverted)
+
+                    //delete party informations when a party was selected before
+                    if (partyidConverted !== null && partyidConverted > 0 && afterClosed === false) {
+                        console.log(ParentStepID);
+                        console.log(ParentModelNumber);
+
+                        UpdateWithParty(ParentStepID, ParentModelNumber, 0);
+                    }
+                    else {
+                        afterClosed = false;
+                    }
+                }
+                else {
+                    afterClosed = false;
+                }
+            })
+    
+
+    // reset after close flag
+    //afterClosed = false
 }
 
 function OnChange(e) {
-
     //console.log("OnChange");
     var substr = e.id.split('_');
     var id = substr[0];
@@ -290,12 +321,8 @@ function OnChange(e) {
     var ParentModelNumber = substr[3];
     var ParentStepID = substr[5];
 
-    //alert(parentid);
-    //alert(metadataStructureId);
-    //alert(ParentStepID);
-    //object value,  int id, int parentid,       string parentname,     int number, int parentModelNumber,                    int parentStepId)
     $.post("/DCM/Form/ValidateMetadataAttributeUsage",
-    {
+        {
             value: e.value,
             id: id,
             parentid: parentid,
@@ -305,16 +332,17 @@ function OnChange(e) {
             ParentStepId: ParentStepID
         },
         function (response) {
-   
             var index = e.id.lastIndexOf("_");
             var newId = e.id.substr(0, index);
 
             $("#" + newId).replaceWith(response);
+
+            updateHeader();
+
             if ($('textarea') !== null) {
                 autosize($('textarea'));
             }
         });
-
 }
 
 function OnChangeCheckBox(e) {
@@ -334,20 +362,6 @@ function OnChangeCheckBox(e) {
         value = false;
     }
 
-    var data = {
-        value: e.value,
-        id: id,
-        parentid: parentid,
-        parentname: parentname,
-        number: number,
-        parentModelNumber: ParentModelNumber,
-        ParentStepId: ParentStepID
-    };
-
-    //alert(parentid);
-    //alert(metadataStructureId);
-    //alert(ParentStepID);
-    //object value,  int id, int parentid,       string parentname,     int number, int parentModelNumber,                    int parentStepId)
     $.post("/DCM/Form/ValidateMetadataAttributeUsage",
         {
             value: value,
@@ -367,11 +381,12 @@ function OnChangeCheckBox(e) {
             //alert(newId);
 
             $("#" + newId).replaceWith(response);
-        })
-
+            updateHeader();
+        });
 }
 
 function OnChangeDropDown(e) {
+    var idParentDiv = $(this).attr("id");
     var substr = e.target.id.split('_');
     var id = substr[0];
     var parentid = substr[1];
@@ -380,21 +395,6 @@ function OnChangeDropDown(e) {
     var ParentModelNumber = substr[3];
     var ParentStepID = substr[5];
 
-    var data = {
-        value: e.value,
-        id: id,
-        parentid: parentid,
-        parentname: parentname,
-        number: number,
-        parentModelNumber: ParentModelNumber,
-        ParentStepId: ParentStepID
-    };
-
-
-    //alert(parentid);
-    //alert(metadataStructureId);
-    //alert(ParentStepID);
-    //object value,  int id, int parentid,       string parentname,     int number, int parentModelNumber,                    int parentStepId)
     $.post("/DCM/Form/ValidateMetadataAttributeUsage",
         {
             value: e.value,
@@ -405,15 +405,19 @@ function OnChangeDropDown(e) {
             parentModelNumber: ParentModelNumber,
             ParentStepId: ParentStepID
         },
-        function(response) {
+        function (response) {
+            var index = idParentDiv.lastIndexOf("_");
+            var newId = idParentDiv.substr(0, index);
 
-        })
+            $("#" + newId).replaceWith(response);
 
-
-}
+            updateHeader();
+        });
+};
 
 function OnChangeNumbers(e) {
-
+    var idParentDiv = $(this).attr("id");
+    var value = $(e.currentTarget).val();
     var substr = e.target.id.split('_');
     var id = substr[0];
     var parentid = substr[1];
@@ -423,85 +427,60 @@ function OnChangeNumbers(e) {
     var ParentModelNumber = substr[4];
     var ParentStepID = substr[5];
 
-
-    var data = {
-        value: e.target.value,
-        id: id,
-        parentid: parentid,
-        parentname: parentname,
-        number: number,
-        ParentModelNumber: ParentModelNumber,
-        ParentStepId: ParentStepID
-    };
-
-    //alert(id);
-    //alert(parentid);
-    //alert(metadataStructureId);
-    //alert(number);
-
-    $.ajax({
-        url: '/DCM/Form/ValidateMetadataAttributeUsage',
-        type: 'POST',
-        data: JSON.stringify(data),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        error: function(xhr) {
-            //alert('Error: ' + xhr.statusText);
+    $.post("/DCM/Form/ValidateMetadataAttributeUsage",
+        {
+            value: value,
+            id: id,
+            parentid: parentid,
+            parentname: parentname,
+            number: number,
+            parentModelNumber: ParentModelNumber,
+            ParentStepId: ParentStepID
         },
-        success: function(result) {
-            //alert("success");
-        },
-        async: true,
-        processData: false
-    });
+        function (response) {
+            var index = idParentDiv.lastIndexOf("_");
+            var newId = idParentDiv.substr(0, index);
+
+            $("#" + newId).replaceWith(response);
+
+            updateHeader();
+        });
 }
 
 function OnChangeDatePicker(e) {
+    //console.log(e.value);
 
-
+    var value = $(e.currentTarget).val(); // data value as normal text string (not as DateTime string -> e.value)
+    var idParentDiv = $(this).attr("id");
     var substr = e.target.id.split('_');
     var id = substr[0];
     var parentid = substr[1];
     var parentname = $("#" + e.id).attr("title");
-    //var metadataStructureId = substr[2];
     var number = substr[2];
     var ParentModelNumber = substr[3];
     var ParentStepID = substr[5];
 
-    var data = {
-        value: e.value,
-        id: id,
-        parentid: parentid,
-        parentname: parentname,
-        number: number,
-        ParentModelNumber: ParentModelNumber,
-        ParentStepId: ParentStepID
-    };
-
-    //alert(id);
-    //alert(parentid);
-    //alert(metadataStructureId);
-    //alert(number);
-
-    $.ajax({
-        url: '/DCM/Form/ValidateMetadataAttributeUsage',
-        type: 'POST',
-        data: JSON.stringify(data),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        error: function(xhr) {
-            //alert('Error: ' + xhr.statusText);
+    $.post("/DCM/Form/ValidateMetadataAttributeUsage",
+        {
+            value: value,
+            id: id,
+            parentid: parentid,
+            parentname: parentname,
+            number: number,
+            parentModelNumber: ParentModelNumber,
+            ParentStepId: ParentStepID
         },
-        success: function(result) {
-            //alert("success");
-        },
-        async: true,
-        processData: false
-    });
+        function (response) {
+            var index = idParentDiv.lastIndexOf("_");
+            var newId = idParentDiv.substr(0, index);
+
+            $("#" + newId).replaceWith(response);
+
+            updateHeader();
+        });
 }
 
 function OnClickAdd(e, max) {
-
     var substr = e.id.split('_');
     var id = substr[0];
     var parentid = substr[1];
@@ -521,15 +500,13 @@ function OnClickAdd(e, max) {
                 parentModelNumber: ParentModelNumber,
                 ParentStepId: ParentStepID
             },
-            function(response) {
-
+            function (response) {
                 var id = ParentStepID;
                 //alert(id);
                 //alert(response);
                 $("#" + id).replaceWith(response);
 
                 resetAllTelerikIconTitles();
-
             });
     } else {
         alert("Maxium cardinality is reached.");
@@ -537,11 +514,9 @@ function OnClickAdd(e, max) {
 }
 
 function OnClickRemove(e) {
-
     var value = $("#" + e.id).closest(".ValueClass").value;
 
     if (value !== "") {
-
         var substr = e.id.split('_');
         var id = substr[0];
         var parentid = substr[1];
@@ -549,7 +524,6 @@ function OnClickRemove(e) {
         var ParentModelNumber = substr[3];
         var NumberOfSourceInPackage = substr[4];
         var ParentStepID = substr[5];
-
 
         if (NumberOfSourceInPackage > 1) {
             var data = {
@@ -569,8 +543,7 @@ function OnClickRemove(e) {
                         parentModelNumber: ParentModelNumber,
                         ParentStepId: ParentStepID
                     },
-                    function(response) {
-
+                    function (response) {
                         $("#" + ParentStepID).replaceWith(response);
                     });
         } else {
@@ -583,14 +556,12 @@ function OnClickUp(e) {
     //alert(value);
     var value = $("#" + e.id).closest(".ValueClass").value;
     if (value !== "") {
-
         var substr = e.id.split('_');
         var id = substr[0];
         var parentid = substr[1];
         var number = substr[2];
         var ParentModelNumber = substr[3];
         var ParentStepID = substr[5];
-
 
         $.post('/DCM/Form/UpMetadataAttributeUsage',
             {
@@ -600,20 +571,16 @@ function OnClickUp(e) {
                 ParentModelNumber: ParentModelNumber,
                 ParentStepId: ParentStepID
             },
-            function(response) {
-
+            function (response) {
                 var id = ParentStepID;
                 $("#" + id).replaceWith(response);
             });
-
     }
 }
 
 function OnClickDown(e) {
-
     var value = $("#" + e.id).closest(".ValueClass").value;
     if (value !== "") {
-
         var substr = e.id.split('_');
         var id = substr[0];
         var parentid = substr[1];
@@ -637,42 +604,127 @@ function OnClickDown(e) {
                 ParentModelNumber: ParentModelNumber,
                 ParentStepId: ParentStepID
             },
-            function(response) {
-
+            function (response) {
                 var id = ParentStepID;
                 $("#" + id).replaceWith(response);
             })
-
     }
 }
 
-function OnClose(e) {
+// Autocomplete
+function OnClose(e, ui) {
 
-    console.log(e.target.value);
-    var value = e.target.value;
-    if (~value.indexOf("(") && ~value.indexOf(")")) {
+    console.log("OnClose start");
 
-        var start = value.lastIndexOf("(")+1;
-        var end = value.lastIndexOf(")");
-        var partyid = value.substr(start, end - start);
+    // after the on close event from the autocomplete component, the values change in the input fields
+    // after this changes again a change event is triggered
+    // to prevent this, a flag is set to check wheter this event is fired after a close event or not
+    afterClosed = true;
 
-        console.log("partyid = " + partyid);
+    //console.log(ui);
+    //var value = e.target.value;
 
-        if (partyid !== "0") {
-            // find parent
+    var uiid = e.target.id;
+    var substr = e.target.id.split('_');
+    var id = substr[0];
+   // var tAutoComplete = $('#' + uiid).data("tAutoComplete");
+   // console.log(tAutoComplete);
+    var value = ui.item.value;
 
-            var parent = $(e.target).parents(".metadataCompountAttributeUsage")[0];
-            console.log("parent");
-            console.log(parent);
+    var type = $('#' + uiid).attr("type");
+    var start = 0;
+    var end = 0;
+    var partyid = 0;
+    var entityid = 0;
+    var entitytypeid = 0;
+    var entityinfo;
+    var number = 0;
+    var parent;
+    var parentid = 0;
+
+    //console.log(value);
+    //console.log(type);
+    // if the autocomplete type a partycustm type
+    if (type === "PartyCustomType") {
+        console.log("partycustomtype");
+
+        if (~value.indexOf("(") && ~value.indexOf(")")) {
+            start = value.lastIndexOf("(") + 1;
+            end = value.lastIndexOf(")");
+            partyid = value.substr(start, end - start);
+
+            var onlyValue = value.substr(0, start-2);
+
+            console.log("partyid = " + partyid);
+
+            if (partyid !== "0") {
+
+                // check if mapping to this metadata attribute is simple or complex.
+                // complex means, that the attribute is defined in the context of the parent
+                // e.g. name of User
+                // simple means, that the attribute is not defined in the context of the
+                // e.g. DataCreator Name in Contacts as list of contacts
+
+                if ($(e.target).attr("simple") !== null) {
+
+                    console.log("SIMPLE start");
+
+
+                    var simple = $(e.target).attr("simple");
+                    var xpath = $(e.target).attr("xpath");
+
+                    if (simple === "True") {
+
+                        UpdateSimpleMappingWithParty(uiid, xpath, partyid, onlyValue);
+                    }
+                }
+
+                var complex;
+                if ($(e.target).attr("complex") !== null) {
+
+
+                    console.log("COMPLEX start");
+
+                    complex = $(e.target).attr("complex");
+                    if (complex === "True") {
+                        parent = $(e.target).parents(".metadataCompountAttributeUsage")[0];
+                        //console.log("parent");
+                        //console.log(parent);
+
+                        if (parent !== null) {
+                            parentid = $(parent).attr("id");
+                            number = $(parent).attr("number");
+                            UpdateWithParty(parentid, number, partyid);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // if the autocomplete type a Entity
+    if (type === "Entity") {
+        console.log("ENTITY STARTS");
+
+        if (~value.indexOf("(") && ~value.indexOf(")")) {
+            start = value.lastIndexOf("(") + 1;
+            end = value.lastIndexOf(")");
+            //(1/2)
+            entityInfo = value.substr(start, end - start);
+            entityid = entityInfo.split("_")[0];
+            entitytypeid = entityInfo.split("_")[1];
+
+            var title = value.substr(0, start - 2);
+
+            parent = $(e.target).parents(".metadataCompountAttributeUsage")[0];
 
             if (parent !== null) {
+                parentid = $(parent).attr("id");
+                number = $(parent).attr("number");
+                var attrnumber = $('#' + id).attr("number");
 
-                var parentid = $(parent).attr("id");
-                var number = $(parent).attr("number");
-                UpdateWithParty(parentid, number, partyid);
+                UpdateWithEntity(parentid, number, id, attrnumber, entityid, entitytypeid, title);
             }
-
-            afterClosed = true;
         }
     }
 }
@@ -680,12 +732,44 @@ function OnClose(e) {
 /******************************************
  ********* Component************************
  ******************************************/
+
+function UpdateWithEntity(componentId, number, inputid, inputattrnumber, entityid, entitytypeid, value) {
+    //console.log("update with entity");
+    //console.log(componentId + "-" + number + "-" + entityid + "_" + entitytypeid);
+
+    var attrId = inputid.split("_")[0];
+
+    if (inputattrnumber === undefined) inputattrnumber = 1;
+
+    //$("#" + componentId).find(".metadataAttributeInput").each(function () {
+    //    $(this).preloader(12, "...loading");
+    //})
+
+    $.post('/DCM/Form/UpdateComplexUsageWithEntity',
+        {
+            stepId: componentId,
+            number: number,
+            inputattrid: attrId,
+            inputAttrNumber: inputattrnumber,
+            entityId: entityid,
+            entityTypeId: entitytypeid,
+            value: value
+        },
+        function (response) {
+            //console.log(componentId);
+            //console.log(response);
+
+            $("#" + componentId).replaceWith(response);
+            // update party id to component
+            $($("#" + inputid)[inputattrnumber - 1]).attr("entityid", entityid);
+            //alert("test");
+            autosize($('textarea'));
+        })
+}
+
 function UpdateWithParty(componentId, number, partyid) {
-
-    console.log("update with party");
-    console.log(componentId + "-" + number + "-" + partyid);
-
-    
+    console.log("update with complex mapping");
+    //console.log(componentId + "-" + number + "-" + partyid);
 
     $("#" + componentId).find(".metadataAttributeInput").each(function () {
         $(this).preloader(12, "...loading");
@@ -694,12 +778,11 @@ function UpdateWithParty(componentId, number, partyid) {
     $.post('/DCM/Form/UpdateComplexUsageWithParty',
         {
             stepId: componentId,
-            number:number,
+            number: number,
             partyId: partyid
         },
         function (response) {
-
-            console.log(componentId);
+            //console.log(componentId);
             //console.log(response);
 
             $("#" + componentId).replaceWith(response);
@@ -710,12 +793,34 @@ function UpdateWithParty(componentId, number, partyid) {
         })
 }
 
+function UpdateSimpleMappingWithParty(componentId, xpath, partyid, value)
+{
+    console.log("update with simple mapping");
+    console.log(value);
+    console.log($("#" + componentId));
+    console.log("----------------------");
+
+
+    $.post('/DCM/Form/UpdateSimpleUsageWithParty',
+        {
+            xpath: xpath,
+            partyId: partyid
+        },
+        function (response) {
+
+            if (response) {
+                $("#" + componentId).attr("partyid", partyid);
+                $("#" + componentId).val(value);
+                $("#" + componentId).attr("value", value);
+            }
+        });
+}
 
 function Add(e) {
     var temp = e.id;
     var parentId = temp.split("_")[0];
     var number = temp.split("_")[1];
-      
+
     //alert(e.id);
     //alert(parentId);
     $.get('/DCM/Form/AddComplexUsage',
@@ -761,7 +866,7 @@ function Down(e) {
 
     $.get('/DCM/Form/DownComplexUsage',
         { parentStepId: parentId, number: number },
-        function(response) {
+        function (response) {
             $('#' + parentId).replaceWith(response);
             bindMinimap(true);
         })
@@ -773,11 +878,10 @@ function Activate(e) {
     var active = $(e).hasClass("bx-check-square-o");
 
     $.get('/DCM/Form/ActivateComplexUsage',
-    {
-        id : stepid
-    },
+        {
+            id: stepid
+        },
         function (response) {
-
             console.log(response);
 
             $('#' + stepid).replaceWith(response);
@@ -790,8 +894,6 @@ function Activate(e) {
             resetAllTelerikIconTitles();
             bindMinimap(true);
         });
-
-    
 }
 
 function ActivateFromChoice(e) {
@@ -802,25 +904,22 @@ function ActivateFromChoice(e) {
     var active = $(e).hasClass("bx-dot-circle-o");
 
     $.get('/DCM/Form/ActivateComplexUsageInAChoice',
-    {
-        parentid: stepid, id: v
-    },
-
-    function (response) {
-
-
-        $('#' + stepid).replaceWith(response);
-
-        if (!active)
         {
-            $('html, body').animate({
-                scrollTop: $('#' + stepid).offset().top - 70
-            }, 'slow');
-        }
+            parentid: stepid, id: v
+        },
 
-        resetAllTelerikIconTitles();
-        bindMinimap(true);
-    });
+        function (response) {
+            $('#' + stepid).replaceWith(response);
+
+            if (!active) {
+                $('html, body').animate({
+                    scrollTop: $('#' + stepid).offset().top - 70
+                }, 'slow');
+            }
+
+            resetAllTelerikIconTitles();
+            bindMinimap(true);
+        });
 }
 
 function showHideClick(e) {
@@ -831,13 +930,43 @@ function showHideClick(e) {
     var id = parentId + "_" + number + "_Container";
     var buttonId = parentId + "_" + number + "_ButtonView";
     $('#' + id).toggle();
-    $('#' + buttonId).toggleClass("bx-angle-double-up bx-angle-double-down");
+    $('#' + buttonId).toggleClass("fa-angle-double-down fa-angle-double-right");
+    bindMinimap(true);
+}
+
+function showAllClick(e) {
+    $('.first_level').show();
+    $('.header-menu').css('background-color', '##bee1da');
+    $(e).parent().css('background-color', '#a1bbb6');
+    bindMinimap(true);
+}
+function showFirstLevelClick(e) {
+    var temp = e.id;
+    var parentId = temp.split("_")[0];
+    var number = temp.split("_")[1];
+
+    var id = parentId + "_" + number + "_Container";
+    var buttonId = parentId + "_" + number + "_ButtonView";
+
+    $('.header-menu').css('background-color', '##bee1da');
+    $(e).parent().css('background-color', '#a1bbb6');
+
+    $('.first_level').hide();
+    $('#' + parentId).show();
+    $('#' + id).show();
+    bindMinimap(true);
+}
+
+function updateHeader() {
+    bindMinimap(true);
+    $('.header-menu').removeClass('bx-input-error')
+    $('.bx-input-error').closest('.Metadata-Level-1:first-child').each(function () { $('#' + $(this).parent().parent().attr('id') + '_Menu').addClass('bx-input-error') });
     bindMinimap(true);
 }
 
 function TryParseInt(str, defaultValue) {
     var retValue = defaultValue;
-    if (str !== null && str != undefined) {
+    if (str !== null && str !== undefined) {
         if (str.length > 0) {
             if (!isNaN(str)) {
                 retValue = parseInt(str);
@@ -845,4 +974,24 @@ function TryParseInt(str, defaultValue) {
         }
     }
     return retValue;
+}
+
+/******************************************
+ ********* HELP ***************************
+ ******************************************/
+
+function showHelp(id) {
+    $("#" + id).toggle();
+}
+
+function showHelpAll() {
+    $(".help").show();
+    $("#show_help_all").hide();
+    $("#hide_help_all").show();
+}
+
+function hideHelpAll() {
+    $(".help").hide();
+    $("#show_help_all").show();
+    $("#hide_help_all").hide();
 }

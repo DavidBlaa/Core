@@ -20,20 +20,23 @@
 {
     @foreach (var item in Model.Entities)
     {
+        if (@item.Value == "Dataset") // ToDo: remove this / extend list once we have more use cases. The JavaScript needs also be adapated to allow more types. Currently only "dataset" is handled.
+        {
         <h3>@item.Value</h3>
         <ul>
 
             <li><a class="@item.Value.ToLower()">My @{@item.Value}s</a></li>
-            <li><a entityid="@item.Key" class="request">Requests</a></li>
+            <li><a entityid="@item.Key" class="request">My Requests</a></li>
             <li><a entityid="@item.Key" class="decision">Decisions</a></li>
         </ul>
+        }
     }
 
 }
 
 <div id="dashboard_content">
 
-    @Html.Partial("_myDatasetGridView", Model.MyDatasets)
+    @*Html.Partial("_myDatasetGridView", Model.MyDatasets) *@
 
 </div>
 
@@ -67,7 +70,7 @@
                 var result = confirm('Are you sure you want to reject this request (Id:' + $(this).attr("value") + ')?');
 
                 if (result) {
-                    $.post('/sam/request/reject', { DecisionId: $(this).attr("value") }, function (e) {
+                    $.post('/sam/requests/reject', { RequestId: $(this).attr("value") }, function (e) {
                         $("#grid_decisions .t-refresh").trigger('click');
                     });
                 }
@@ -112,13 +115,16 @@
         });
 
         $(".dataset").click(function () {
+            var entityname = "Dataset";
+            var rightType = "grant";
 
             $(".bold-option").removeClass("bold-option");
             $(this).addClass("bold-option");
 
-            $("#dashboard_content").preloader("..loading decisions");
+            $("#dashboard_content").preloader("..loading datasets");
 
             $.get("/ddm/dashboard/ShowMyDatasets",
+                {entityname, rightType },
                 function (data, textStatus, jqXHR) {
                     $("#dashboard_content").html(data);
                 }

@@ -147,7 +147,7 @@ namespace BExIS.Security.Services.Requests
                     var mergedDecision = decisionRepository.Get(decision.Id);
                     decisionRepository.Put(mergedDecision);
 
-                    if (decisionRepository.Query(m => m.Request.Id == decision.Request.Id)
+                    if (decisionRepository.Query(m => m.Request.Id == decision.Request.Id).ToList()
                         .All(m => m.Status != DecisionStatus.Open))
                     {
                         var request = requestRepository.Get(decision.Request.Id);
@@ -166,6 +166,38 @@ namespace BExIS.Security.Services.Requests
                 }
             }
         }
+
+        public void Withdraw(long requestID)
+        {
+            using (var uow = this.GetUnitOfWork())
+            {
+                var decisionRepository = uow.GetRepository<Decision>();
+                var requestRepository = uow.GetRepository<Request>();
+
+                var request = requestRepository.Get(requestID);
+
+                if (request != null)
+                {
+                    request.Status = RequestStatus.Withdrawn;
+
+                    requestRepository.Merge(request);
+                    var mergedRequest = requestRepository.Get(request.Id);
+                    requestRepository.Put(mergedRequest);
+
+                    var decision = decisionRepository.Query(m => m.Request.Id == requestID).FirstOrDefault();
+                    decision.Status = DecisionStatus.Withdrawn;
+
+
+                    decisionRepository.Merge(decision);
+                    var mergedDecision = decisionRepository.Get(decision.Id);
+                    decisionRepository.Put(mergedDecision);
+
+                }
+
+                uow.Commit();
+
+            }
+       }
 
         public void Update(Decision entity)
         {

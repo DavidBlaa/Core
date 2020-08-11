@@ -1,4 +1,6 @@
-﻿using BExIS.Dlm.Entities.Common;
+﻿using BExIS.Dim.Entities.Mapping;
+using BExIS.Dim.Helpers.Mapping;
+using BExIS.Dlm.Entities.Common;
 using BExIS.Dlm.Entities.DataStructure;
 using BExIS.Dlm.Entities.MetadataStructure;
 using BExIS.IO.DataType.DisplayPattern;
@@ -15,7 +17,6 @@ namespace BExIS.Modules.Dcm.UI.Helpers
         {
             return new MetadataCompoundAttributeModel
             {
-
                 Id = metadataAttributeUsage.Id,
                 Number = number,
                 Source = metadataAttributeUsage,
@@ -54,16 +55,32 @@ namespace BExIS.Modules.Dcm.UI.Helpers
             MetadataAttribute metadataAttribute;
             List<object> domainConstraintList = new List<object>();
             string constraintsDescription = "";
+            double lowerBoundary = 0;
+            double upperBoundary = 0;
+            LinkElementType type = LinkElementType.MetadataNestedAttributeUsage;
+            bool locked = false;
+            bool entityMappingExist = false;
+            bool partyMappingExist = false;
+
+            string metadataAttributeName = "";
+
+            //simple
+            bool partySimpleMappingExist = false;
+            //complex
+            bool partyComplexMappingExist = false;
 
             if (current is MetadataNestedAttributeUsage)
             {
                 MetadataNestedAttributeUsage mnau = (MetadataNestedAttributeUsage)current;
                 metadataAttribute = mnau.Member;
+                type = LinkElementType.MetadataNestedAttributeUsage;
+        
             }
             else
             {
                 MetadataAttributeUsage mau = (MetadataAttributeUsage)current;
                 metadataAttribute = mau.MetadataAttribute;
+                type = LinkElementType.MetadataAttributeUsage;
             }
 
             if (metadataAttribute.Constraints.Where(c => (c is DomainConstraint)).Count() > 0)
@@ -76,11 +93,43 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                     if (string.IsNullOrEmpty(constraintsDescription)) constraintsDescription = c.FormalDescription;
                     else constraintsDescription = String.Format("{0}\n{1}", constraintsDescription, c.FormalDescription);
                 }
+                if (metadataAttribute.DataType.Name == "string" && metadataAttribute.Constraints.Where(c => (c is RangeConstraint)).Count() > 0)
+                {
+                    foreach (RangeConstraint r in metadataAttribute.Constraints.Where(c => (c is RangeConstraint)))
+                    {
+                        lowerBoundary = r.Lowerbound;
+                        upperBoundary = r.Upperbound;
+                    }
+                }
             }
+
+            //set metadata attr name
+            metadataAttributeName = metadataAttribute.Name;
+
             //load displayPattern
             DataTypeDisplayPattern dtdp = DataTypeDisplayPattern.Materialize(metadataAttribute.DataType.Extra);
             string displayPattern = "";
             if (dtdp != null) displayPattern = dtdp.StringPattern;
+
+            //ToDO/Check if dim is active
+            //check if its linked with a system field
+            //
+            locked = MappingUtils.ExistSystemFieldMappings(current.Id, type);
+
+            // check if a mapping for parties exits
+            partyMappingExist = MappingUtils.ExistMappingWithParty(current.Id, type);
+
+
+            // check if mapping to this metadata attribute is simple or complex.
+            // complex means, that the attribute is defined in the context of the parent
+            // e.g. name of User
+            // simple means, that the attribute is not defined in the context of the
+            // e.g. DataCreator Name in Contacts as list of contacts
+            partySimpleMappingExist = hasSimpleMapping(current.Id, type);
+            partyComplexMappingExist = hasComplexMapping(current.Id, type);
+
+            // check if a mapping for entites exits
+            entityMappingExist = MappingUtils.ExistMappingWithEntity(current.Id, type);
 
             return new MetadataAttributeModel
             {
@@ -88,6 +137,7 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                 Number = 1,
                 ParentModelNumber = packageModelNumber,
                 MetadataStructureId = metadataStructureId,
+                MetadataAttributeName = metadataAttributeName,
                 Parent = parent,
                 Source = current,
                 DisplayName = current.Label,
@@ -104,7 +154,14 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                 last = true,
                 MetadataAttributeId = metadataAttribute.Id,
                 ParentStepId = parentStepId,
-                Errors = null
+                Errors = null,
+                Locked = locked,
+                EntityMappingExist = entityMappingExist,
+                PartyMappingExist = partyMappingExist,
+                PartySimpleMappingExist = partySimpleMappingExist,
+                PartyComplexMappingExist = partyComplexMappingExist,
+                LowerBoundary = lowerBoundary,
+                UpperBoundary = upperBoundary,
             };
         }
 
@@ -125,5 +182,26 @@ namespace BExIS.Modules.Dcm.UI.Helpers
             return list;
         }
 
+        private static bool hasComplexMapping(long id, LinkElementType type)
+        {
+            if (MappingUtils.ExistComplexMappingWithParty(id, type) || 
+                MappingUtils.ExistComplexMappingWithPartyCustomType(id,type))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool hasSimpleMapping(long id, LinkElementType type)
+        {
+            if (MappingUtils.ExistSimpleMappingWithParty(id, type) ||
+                MappingUtils.ExistSimpleMappingWithPartyCustomType(id, type))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
