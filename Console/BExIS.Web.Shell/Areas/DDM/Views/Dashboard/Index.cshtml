@@ -26,15 +26,10 @@
             <ul>
 
                 <li><a class="entityselection" entity="@item.Value">My @{@item.Value}s</a></li>
+                <li><a entityid="@item.Key" class="request">My Requests</a></li>
+                <li><a entityid="@item.Key" class="decision">Decisions</a></li>
             </ul>
-
-            
         }
-
-        <ul>
-            <li><a entityid="@item.Key" class="request">My Requests</a></li>
-            <li><a entityid="@item.Key" class="decision">Decisions</a></li>
-        </ul>
     }
 
 }
