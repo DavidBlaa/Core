@@ -15,8 +15,13 @@
              title="Create Sample" description="Create new Sample" icon=""
              controller="CreateSample" action="index"
              extends="./menubarRoot/sample" />
+	  <Export tag="internalApi" id="sampledashboard"
+                title="load dashobrad " description="..." icon=""
+                controller="Dashboard" action="ShowMySamples"
+                extends="" />
   </Exports>
   <EntityActions>
-    <EntityAction id="showSample" entity="sample" controller="Sample" action="Show" area="Rdb" modus="show"/>
+    <EntityAction id="showSample" entity="sample" controller="Sample" action="Show" area="RDB" modus="show"/>
+    <EntityAction id="dashboardSample" entity="sample" controller="Dashboard" action="ShowMySamples" area="RDB" modus="dashboard" />
   </EntityActions>
 </Manifest>

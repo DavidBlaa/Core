@@ -115,5 +115,16 @@ namespace BExIS.Modules.Rdb.UI.Controllers
 
             return Content(view.ToHtmlString(), "text/html");
         }
+
+        public JsonResult IsSampleCheckedIn(long id)
+        {
+            DatasetManager dm = new DatasetManager();
+
+            if (id != -1 && dm.IsDatasetCheckedIn(id))
+                return Json(true);
+            else
+                return Json(false);
+        }
+
     }
 }

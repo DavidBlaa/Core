@@ -158,11 +158,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\CreateSampleController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\LabelController.cs" />
     <Compile Include="Controllers\RdbController.cs" />
     <Compile Include="Controllers\SampleController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Helpers\RdbSeedDataGenerator.cs" />
+    <Compile Include="Models\DashboardModel.cs" />
     <Compile Include="Models\LabelModel.cs" />
     <Compile Include="Models\ListViewItem.cs" />
     <Compile Include="Models\RdbTestModel.cs" />
@@ -200,6 +202,9 @@
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="Views\Label\QRCodeV2A4View.cshtml" />
     <Content Include="Views\Label\QRCodeV2View.cshtml" />
+    <Content Include="Views\Dashboard\_mySamplesViewHeader.cshtml" />
+    <Content Include="Views\Dashboard\_mySamplesView.cshtml" />
+    <Content Include="Views\Dashboard\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

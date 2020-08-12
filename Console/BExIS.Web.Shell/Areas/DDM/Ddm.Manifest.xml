@@ -81,6 +81,7 @@
   </Exports>
 
   <EntityActions>
-    <EntityAction id="showDataset" entity="dataset" controller="data" action="Showdata" area="DDM" modus="show" />
+	  <EntityAction id="showDataset" entity="dataset" controller="data" action="Showdata" area="DDM" modus="show" />
+	  <EntityAction id="dashboardDataset" entity="dataset" controller="dashboard" action="ShowMyDatasets" area="DDM" modus="dashboard" />
   </EntityActions>
 </Manifest>

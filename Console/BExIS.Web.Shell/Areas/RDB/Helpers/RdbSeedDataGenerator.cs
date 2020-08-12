@@ -59,13 +59,14 @@ namespace BExIS.Modules.Rdb.UI.Helpers
                 Feature Sample = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Sample"));
                 if (Sample == null) Sample = featureManager.Create("Sample", "Sample");
 
-                Feature Search = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Search"));
+                Feature Search = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Search") && f.Parent != null && f.Parent.Id.Equals(Sample.Id));
                 if (Search == null) Search = featureManager.Create("Search", "Search", Sample);
 
-                Feature Management = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Management"));
+                Feature Management = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Management") && f.Parent != null && f.Parent.Id.Equals(Sample.Id));
                 if (Management == null) Management = featureManager.Create("Management", "Management", Sample);
 
-
+                Feature Dashboard = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("Dashboard") && f.Parent != null && f.Parent.Id.Equals(Sample.Id));
+                if (Dashboard == null) Dashboard = featureManager.Create("Dashboard", "Dashboard", Sample);
 
                 #region Help Workflow
 
@@ -85,6 +86,12 @@ namespace BExIS.Modules.Rdb.UI.Helpers
                 operationManager.Create("RDB", "CreateSample", "*", Management);
                 operationManager.Create("RDB", "RDB", "*", Management);
                 operationManager.Create("RDB", "Label", "*", Management);
+
+                #endregion
+
+                #region Dashboard
+
+                operationManager.Create("RDB", "Dashboard", "*", Dashboard);
 
                 #endregion
 

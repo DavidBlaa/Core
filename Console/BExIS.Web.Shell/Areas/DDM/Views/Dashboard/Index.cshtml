@@ -9,10 +9,10 @@
 @section Information
 {
     In this page you can see all datasets, created by you as a current logged on user or owned by you or you sent a request to have access on it. You are also able to manage the requests of other users, who wants to have access to your datasets.
-    
+
     By right clicking on the header, you can manage the visibility of columns. You can also use filtering or grouping to see the more operative informations.
-    
-    To view more details of a dataset, click the View details button available in each row.    
+
+    To view more details of a dataset, click the View details button available in each row.
 }
 
 
@@ -20,16 +20,21 @@
 {
     @foreach (var item in Model.Entities)
     {
-        if (@item.Value == "Dataset") // ToDo: remove this / extend list once we have more use cases. The JavaScript needs also be adapated to allow more types. Currently only "dataset" is handled.
+        if (@item.Value == "Sample" || @item.Value == "Dataset") // ToDo: remove this / extend list once we have more use cases. The JavaScript needs also be adapated to allow more types. Currently only "dataset" is handled.
         {
-        <h3>@item.Value</h3>
-        <ul>
+            <h3>@item.Value</h3>
+            <ul>
 
-            <li><a class="@item.Value.ToLower()">My @{@item.Value}s</a></li>
+                <li><a class="entityselection" entity="@item.Value">My @{@item.Value}s</a></li>
+            </ul>
+
+            
+        }
+
+        <ul>
             <li><a entityid="@item.Key" class="request">My Requests</a></li>
             <li><a entityid="@item.Key" class="decision">Decisions</a></li>
         </ul>
-        }
     }
 
 }
@@ -114,21 +119,28 @@
             );
         });
 
-        $(".dataset").click(function () {
-            var entityname = "Dataset";
+        $(".entityselection").click(function (e) {
+
+            var entityname = $(this).attr("entity");
             var rightType = "grant";
 
             $(".bold-option").removeClass("bold-option");
             $(this).addClass("bold-option");
 
             $("#dashboard_content").preloader("..loading datasets");
+            console.log("start");
 
-            $.get("/ddm/dashboard/ShowMyDatasets",
-                {entityname, rightType },
+            $.get("/ddm/dashboard/ShowMyData",
+                { entityname, rightType },
+
                 function (data, textStatus, jqXHR) {
+                    console.log("return");
+
                     $("#dashboard_content").html(data);
                 }
             );
         });
+
+
     </script>
 }

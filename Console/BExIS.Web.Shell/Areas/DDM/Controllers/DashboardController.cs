@@ -7,6 +7,7 @@ using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Authorization;
 using BExIS.Security.Services.Objects;
 using BExIS.Security.Services.Subjects;
+using BExIS.UI.Helpers;
 using BExIS.Utils.Models;
 using BExIS.Xml.Helpers;
 using System;
@@ -146,6 +147,55 @@ namespace BExIS.Modules.Ddm.UI.Controllers
 
             return model;
         }
+
+        public ActionResult ShowMyData(string entityname, string rightType, string onlyTable = "false")
+        {
+            string modus = "dashboard";
+
+            //ToDo in the entity table there must be the information
+            using (EntityManager entityManager = new EntityManager())
+            {
+                var entity = entityManager.Entities.Where(e => e.Name.Equals(entityname)).FirstOrDefault();
+                
+                string moduleId = "";
+                Tuple<string, string, string> action = null;
+                string defaultAction = "ShowMyDatasets";
+
+                if (entity != null && entity.Extra != null)
+                {
+                    var node = entity.Extra.SelectSingleNode("extra/modules/module");
+
+                    if (node != null) moduleId = node.Attributes["value"].Value;
+
+                    action = EntityViewerHelper.GetEntityViewAction(entityname, moduleId, modus);
+                }
+
+                if (action == null) RedirectToAction(defaultAction, new { entityname, rightType, onlyTable });
+
+                try
+                {
+                    if (this.IsAccessible(action.Item1, action.Item2, action.Item3))
+                    {
+                        var view = this.Render(action.Item1, action.Item2, action.Item3, new RouteValueDictionary()
+                        {
+                            { "entityname", entityname },
+                            { "rightType", rightType },
+                            { "onlyTable", onlyTable }
+                        });
+
+
+                        return Content(view.ToHtmlString(), "text/html");
+                    }
+
+                    return RedirectToAction(defaultAction, new { entityname, rightType, onlyTable });
+                }
+                catch
+                {
+                    return RedirectToAction(defaultAction, new { entityname, rightType, onlyTable });
+                }
+            }
+        }
+
 
         #region mydatasets
 
@@ -299,7 +349,7 @@ namespace BExIS.Modules.Ddm.UI.Controllers
                 }
 
 
-                List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), "Dataset",
+                List<long> datasetIds = entityPermissionManager.GetKeys(GetUsernameOrDefault(), entityname,
                        typeof(Dataset), rightTypeId);
 
                 List<DatasetVersion> datasetVersions = datasetManager.GetDatasetLatestVersions(datasetIds, true);
