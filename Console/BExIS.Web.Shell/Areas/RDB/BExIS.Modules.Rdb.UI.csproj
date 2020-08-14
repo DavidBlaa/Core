@@ -268,6 +268,10 @@
       <Project>{252F7872-A69C-43A6-84B4-4D2ABDBDD9AB}</Project>
       <Name>BExIS.Xml.Helpers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Components\XML\BExIS.Xml.Models\BExIS.Xml.Models.csproj">
+      <Project>{C0C9F0F2-9E65-448D-8000-D311DB326460}</Project>
+      <Name>BExIS.Xml.Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Modules\DCM\BExIS.Dcm.CreateDatasetWizard\BExIS.Dcm.CreateDatasetWizard.csproj">
       <Project>{93EEEDA5-6D79-41A1-947B-0A3FC9E46ABC}</Project>
       <Name>BExIS.Dcm.CreateDatasetWizard</Name>

@@ -27,7 +27,7 @@ namespace BExIS.Xml.Helpers
             DatasetManager dm = new DatasetManager();
             try
             {
-                
+
 
                 using (var unitOfWork = this.GetUnitOfWork())
                 {
@@ -48,8 +48,12 @@ namespace BExIS.Xml.Helpers
                     string xpath = temp.Attribute("value").Value.ToString();
                     string value = metadata.SelectSingleNode(xpath).InnerText;
 
-                    return string.IsNullOrWhiteSpace(value) ?"not available": value;
+                    return string.IsNullOrWhiteSpace(value) ? "not available" : value;
                 }
+            }
+            catch (Exception ex)
+            {
+                return "";
             }
             finally
             {
@@ -852,6 +856,7 @@ namespace BExIS.Xml.Helpers
     public enum TransmissionType
     {
         mappingFileExport,
-        mappingFileImport
+        mappingFileImport,
+        mappingFileTransform
     }
 }

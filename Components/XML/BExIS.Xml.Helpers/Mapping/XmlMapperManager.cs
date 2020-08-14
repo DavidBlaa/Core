@@ -19,7 +19,8 @@ namespace BExIS.Xml.Helpers.Mapping
     public enum TransactionDirection
     {
         InternToExtern,
-        ExternToIntern
+        ExternToIntern,
+        InternToIntern
     }
 
     public class XmlMapperManager
@@ -423,8 +424,9 @@ namespace BExIS.Xml.Helpers.Mapping
 
                         if (this.TransactionDirection == TransactionDirection.ExternToIntern)
                             destinationXPath = mapExternPathToInternPathWithIndex(sourceXPath, destinationXMppingFilePath);
-                        else
+                        else if (this.TransactionDirection == TransactionDirection.InternToExtern)
                             destinationXPath = mapInternPathToExternPathWithIndex(sourceXPath, destinationXMppingFilePath);
+                        else destinationXPath = mapInternPathToInternPathWithIndex(sourceXPath, destinationXMppingFilePath);
 
                         // create xmlnode in document
 
@@ -561,7 +563,44 @@ namespace BExIS.Xml.Helpers.Mapping
             return String.Join("/", destinationSplit); ;
         }
 
-        // add content from nodes from source to destination
+        private string mapInternPathToInternPathWithIndex(string source, string destination)
+        {
+            //SOURCE
+            // X[1]\XType[2]\Y[1]\yType[4]\F[1]\FType[2]\
+            //DESTINATION
+            // X[1]\XType[2]\Y[1]\yType[4]\F[1]\FType[2]\
+
+            string[] sourceSplitWidthIndex = source.Split('/');
+
+            // XFType[2]\F[1]\yType[4]\Y[1]\XType[2]\x[1]
+            Array.Reverse(sourceSplitWidthIndex);
+
+            string[] destinationSplit = destination.Split('/');
+
+            // XFType\F\yType\Y\XType\x
+            Array.Reverse(destinationSplit);
+            int j = 0;
+            for (int i = 0; i < sourceSplitWidthIndex.Length; i++)
+            {
+                string tmp = sourceSplitWidthIndex[i];
+
+                if (tmp.Contains("["))
+                {
+                    string tmpIndex = tmp.Split('[')[1];
+                    string index = tmpIndex.Remove(tmpIndex.IndexOf(']'));
+
+                    string destinationTemp = destinationSplit[i];
+                    destinationSplit[i] = destinationTemp + "[" + index + "]";
+                }
+            }
+
+            Array.Reverse(destinationSplit);
+
+            // f[1]\y[2]\x[1]
+            return String.Join("/", destinationSplit); ;
+        }
+
+
         //private XmlDocument mapNodeOld(XmlDocument destinationDoc, XmlNode destinationParentNode, XmlNode sourceNode)
         //{
         //    // load the xpath from source node
