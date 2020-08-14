@@ -25,6 +25,7 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Xml;
 using System.Xml.Linq;
+using Vaiona.Entities.Common;
 using Vaiona.IoC;
 using Vaiona.Logging;
 using Vaiona.Web.Extensions;
@@ -408,33 +409,48 @@ namespace BExIS.Modules.Rdb.UI.Controllers
 
         #region Submit And Create And Finish And Cancel and Reset
 
-        public ActionResult Submit()
+        public JsonResult Submit(bool valid)
         {
+            try
+            {
+                // create and submit Dataset
+                long datasetId = SubmitSample(valid);
 
-            if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
-
-
-
-            // create and submit Dataset 
-            long datasetId = SubmitSample();
-
-            bool editMode = false;
-
-
-            if (TaskManager.Bus.ContainsKey(CreateTaskmanager.EDIT_MODE))
-                editMode = (bool)TaskManager.Bus[CreateTaskmanager.EDIT_MODE];
-
-            if (editMode)
-                return RedirectToAction("LoadMetadata", "Form", new { area = "DCM", entityId = datasetId, locked = true, created = false, fromEditMode = true });
-            else
-                return RedirectToAction("LoadMetadata", "Form", new { area = "DCM", entityId = datasetId, locked = true, created = true });
+                return Json(new { result = "redirect", url = Url.Action("Show", "Sample", new { area = "RDB", id = datasetId }) }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { result = "error", message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
+
+        //public ActionResult Submit()
+        //{
+
+        //    if (TaskManager == null) TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
+
+
+
+        //    // create and submit Dataset 
+        //    long datasetId = SubmitSample();
+
+        //    bool editMode = false;
+
+
+        //    if (TaskManager.Bus.ContainsKey(CreateTaskmanager.EDIT_MODE))
+        //        editMode = (bool)TaskManager.Bus[CreateTaskmanager.EDIT_MODE];
+
+        //    if (editMode)
+        //        return RedirectToAction("LoadMetadata", "Form", new { area = "DCM", entityId = datasetId, locked = true, created = false, fromEditMode = true });
+        //    else
+        //        return RedirectToAction("LoadMetadata", "Form", new { area = "DCM", entityId = datasetId, locked = true, created = true });
+        //}
 
         /// <summary>
         /// Submit a Dataset based on the imformations
         /// in the CreateTaskManager
         /// </summary>
-        public long SubmitSample()
+        public long SubmitSample(bool valid)
         {
             #region create sample
 
@@ -446,6 +462,9 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             {
                 DatasetManager dm = new DatasetManager();
                 long datasetId = 0;
+                string title = "";
+                bool newDataset = true;
+
                 // for e new dataset
                 if (!TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_ID))
                 {
@@ -471,7 +490,7 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                     // add security
                     if (GetUsernameOrDefault() != "DEFAULT")
                     {
-                        string entity_name = "Dataset";
+                        string entity_name = "Sample";
                         Type entity_type = typeof(Dataset);
                         EntityPermissionManager entityPermissionManager = new EntityPermissionManager();
                         if (TaskManager.Bus.ContainsKey(CreateTaskmanager.ENTITY_NAME))
@@ -491,6 +510,7 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                 else
                 {
                     datasetId = Convert.ToInt64(TaskManager.Bus[CreateTaskmanager.ENTITY_ID]);
+                    newDataset = false;
                 }
 
                 TaskManager = (CreateTaskmanager)Session["CreateDatasetTaskmanager"];
@@ -505,8 +525,13 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                         workingCopy.Metadata = XmlMetadataWriter.ToXmlDocument(xMetadata);
                     }
 
-                    string title = xmlDatasetHelper.GetInformation(datasetId, NameAttributeValues.title);
-                    if (String.IsNullOrEmpty(title)) title = "No Title available.";
+                    //set status
+                    workingCopy = setStateInfo(workingCopy, valid);
+                    //set modifikation
+                    workingCopy = setModificationInfo(workingCopy, newDataset, GetUsernameOrDefault(), "Metadata");
+
+                    title = workingCopy.Title;
+                    if (string.IsNullOrEmpty(title)) title = "No Title available.";
 
                     TaskManager.AddToBus(CreateTaskmanager.ENTITY_TITLE, title);//workingCopy.Metadata.SelectNodes("Metadata/Description/Description/Title/Title")[0].InnerText);
                     TaskManager.AddToBus(CreateTaskmanager.ENTITY_ID, datasetId);
@@ -784,6 +809,42 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             TaskManager.Actions.Add(CreateTaskmanager.SUBMIT_ACTION, submitAction);
 
         }
+
+
+        private DatasetVersion setStateInfo(DatasetVersion workingCopy, bool valid)
+        {
+            //StateInfo
+            if (workingCopy.StateInfo == null) workingCopy.StateInfo = new Vaiona.Entities.Common.EntityStateInfo();
+
+            if (valid)
+                workingCopy.StateInfo.State = DatasetStateInfo.Valid.ToString();
+            else workingCopy.StateInfo.State = DatasetStateInfo.NotValid.ToString();
+
+            return workingCopy;
+        }
+
+        private DatasetVersion setModificationInfo(DatasetVersion workingCopy, bool newDataset, string user, string comment)
+        {
+            // modifikation info
+            if (workingCopy.StateInfo == null) workingCopy.ModificationInfo = new EntityAuditInfo();
+
+            if (newDataset)
+                workingCopy.ModificationInfo.ActionType = AuditActionType.Create;
+            else
+                workingCopy.ModificationInfo.ActionType = AuditActionType.Edit;
+
+            //set performer
+            workingCopy.ModificationInfo.Performer = string.IsNullOrEmpty(user) ? "" : user;
+
+            //set comment
+            workingCopy.ModificationInfo.Comment = string.IsNullOrEmpty(comment) ? "" : comment;
+
+            //set time
+            workingCopy.ModificationInfo.Timestamp = DateTime.Now;
+
+            return workingCopy;
+        }
+
 
         #endregion
 
