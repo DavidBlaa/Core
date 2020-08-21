@@ -60,7 +60,7 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Dataset is just in processing.");
+                    ModelState.AddModelError(string.Empty, "Sample is just in processing.");
                 }
 
                 model = new ShowModel()

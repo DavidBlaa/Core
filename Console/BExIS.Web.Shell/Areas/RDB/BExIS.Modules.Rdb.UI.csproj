@@ -164,8 +164,9 @@
     <Compile Include="Controllers\SampleController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Helpers\RdbSeedDataGenerator.cs" />
+    <Compile Include="Helpers\SystemMetadataHelper.cs" />
     <Compile Include="Models\DashboardModel.cs" />
-    <Compile Include="Models\LabelModel.cs" />
+    <Compile Include="Models\LabelModels.cs" />
     <Compile Include="Models\ListViewItem.cs" />
     <Compile Include="Models\RdbTestModel.cs" />
     <Compile Include="Models\SetupModel.cs" />
@@ -205,6 +206,7 @@
     <Content Include="Views\Dashboard\_mySamplesViewHeader.cshtml" />
     <Content Include="Views\Dashboard\_mySamplesView.cshtml" />
     <Content Include="Views\Dashboard\Index.cshtml" />
+    <Content Include="Views\Label\Show.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -229,11 +231,11 @@
       <Name>BExIS.Security.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\DLM\BExIS.Dlm.Entities\BExIS.Dlm.Entities.csproj">
-      <Project>{B4E7B1BF-01B4-40AF-8D19-B8F362167261}</Project>
+      <Project>{b4e7b1bf-01b4-40af-8d19-b8f362167261}</Project>
       <Name>BExIS.Dlm.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\DLM\BExIS.Dlm.Services\BExIS.Dlm.Services.csproj">
-      <Project>{C4CA0A99-0AF3-4372-A9B7-B9073599BD8B}</Project>
+      <Project>{c4ca0a99-0af3-4372-a9b7-b9073599bd8b}</Project>
       <Name>BExIS.Dlm.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\EXT\BExIS.Ext.Services\BExIS.Ext.Services.csproj">
@@ -319,6 +321,14 @@
     <ProjectReference Include="..\..\BExIS.Web.Shell.csproj">
       <Project>{E5128814-4541-45C8-A9E6-6C91A7E3D1E2}</Project>
       <Name>BExIS.Web.Shell</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DCM\BExIS.Modules.Dcm.UI.csproj">
+      <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B7}</Project>
+      <Name>BExIS.Modules.Dcm.UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DDM\BExIS.Modules.Ddm.UI.csproj">
+      <Project>{44DD2A5E-0D2F-4FAB-B297-4211441030B6}</Project>
+      <Name>BExIS.Modules.Ddm.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

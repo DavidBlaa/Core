@@ -1,0 +1,138 @@
+﻿@model BExIS.Modules.Rdb.UI.Models.LabelManagerModel 
+@{
+    ViewBag.Title = "Show";
+}
+
+<p style="height:50px;">
+    <button id="submit" class="bx-button function bx-disabled" disabled="disabled" onclick="create()">Create Labels</button>
+</p>
+<table id="sample_table" class="display" style="width:100%" >
+    <thead>
+        <tr>
+            <th></th>
+            <th title="Id">Id</th>
+            <th title="Input">Name</th>
+            <th title="Owner">Owner</th>
+            <th title="Plot">Plot</th>
+            <th title="Site">Site</th>
+            <th title="Type of the sample">Type</th>
+            <th title="Count">Barcodes</th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var sample in Model.Samples)
+        {
+        <tr>
+            <td id="@sample.Id" ></td>
+            <td>@sample.Id</td>
+            <td>@sample.Input</td>
+            <td>@sample.Owner</td>
+            <td>@sample.Plot</td>
+
+            <td>@sample.Site</td>
+            <td>@sample.Type</td>
+            <td class="dt-body-center">
+               @sample.Barcodes.Count
+            </td>
+        </tr>
+        }
+    </tbody>
+
+</table>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var table = $("#sample_table").DataTable({
+                "autoWidth": false,
+                "paging": false,
+                "columns": [
+                    { "width": "50px" },
+                    { "width": "50px" },
+                    { "width": "100px" },
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "width": "50px" },
+                ],
+                "columnDefs": [{
+                    "orderable": false,
+                    "className": 'select-checkbox',
+                    "targets": 0
+                }],
+                "select": {
+                    "style": "multi"
+                    //"selector": 'td:first-child'
+                },
+                "order": [[1, "asc"]]
+
+            });
+
+            table.on('select', checkboxChange)
+            table.on('deselect', checkboxChange)
+
+        })
+
+        function checkboxChange(e, dt, type, indexes) {
+
+            //console.log(indexes)
+
+            var table = dt;
+            var r = table.rows('.selected');
+            var count = r.count();
+            var rows = r.data();
+
+            var barcodecount = 0;
+
+            //console.log(rows);
+
+            for (var i = 0; i < count; i++) {
+
+                console.log("in for loop");
+                var c = rows[i][rows[i].length - 1];
+
+                barcodecount += parseInt(c);
+            }
+
+            //console.log(rows);
+            //console.log(barcodecount);
+            //console.log(count);
+
+            if (count > 0) {
+
+                $("#submit").removeAttr("disabled");
+                $("#submit").removeClass("bx-disabled");
+            }
+            else {
+
+                $("#submit").attr("disabled", "disabled");
+                $("#submit").addClass("bx-disabled");
+            }
+        }
+
+        function create() {
+
+            var table = $("#sample_table").DataTable();
+            var r = table.rows('.selected');
+            var count = r.count();
+            var rows = r.data();
+
+            var arr = new Array();
+
+            for (var i = 0; i < count; i++) {
+
+                arr.push(rows[i][1]);
+            }
+
+            var format = 0;
+
+            window.open("Create?sampleids=" + arr+" && format = "+format, "_blank");
+
+        }
+
+    </script>
+    }

@@ -10,7 +10,7 @@
     <!--<Dependency moduleId="dcm" version="*.*.*" />-->
   </Dependencies>
   <Exports>
-    <!--<Export tag="menubar" id="ManageDataStructures" order="1"
+    <Export tag="menubar" id="ManageDataStructures" order="1"
             title="Manage Data Structures" description="Edit, Create or Delet Data Structures" icon=""
             controller="DataStructureSearch" action="" argument=""
             extends="./menubarRoot/Plan"/>
@@ -36,7 +36,7 @@
     <Export tag="settings" id="ManageDataTypes" order="3"
             title="Manage Data Types" description="Edit, Create or Delet Data Types" icon=""
             controller="Home" action="DataTypeManager" argument=""
-            extends="./settingsRoot" />-->
+            extends="./settingsRoot" />
 
     <Export tag="internalApi" id="DataStructureEdit"
             title="DataStructure Edit" description="" icon=""

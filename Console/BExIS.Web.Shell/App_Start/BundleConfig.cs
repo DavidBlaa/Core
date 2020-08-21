@@ -47,7 +47,9 @@ namespace BExIS.Web.Shell
                 "~/Scripts/switchery/switchery.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/datatables").Include(
-                "~/Scripts/DataTables/media/js/jquery.dataTables.js"));
+                "~/Scripts/DataTables/media/js/jquery.dataTables.js",
+                "~/Scripts/DataTables/extensions/FixedColumns/js/dataTables.fixedColumns.min.js",
+                "~/Scripts/DataTables/extensions/Select/js/dataTables.select.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                 //$"~/{Themes.GetResourcePath("Styles")}/bexis-jquery-ui.css",
@@ -62,6 +64,8 @@ namespace BExIS.Web.Shell
                 "~/Scripts/minimap/minimap.min.css",
                 "~/Content/handsontable/handsontable.full.css",
                 "~/Content/DataTables/media/css/jquery.dataTables.css",
+                "~/Content/DataTables/extensions/FixedColumns/css/fixedColumns.dataTables.min.css",
+                "~/Content/DataTables/extensions/Select/css/select.dataTables.min.css",
                 "~/Content/Site.css"));
 
             bundles.Add(new StyleBundle("~/bundles/general_bexis").Include(

@@ -105,8 +105,6 @@ namespace BExIS.Modules.Dcm.UI.Helpers
                         long datasetid = id;
                         XmlDatasetHelper xmlDatasetHelper = new XmlDatasetHelper();
 
-                        
-
                         try
                         {
                             // load all data tuple ids from the latest version
