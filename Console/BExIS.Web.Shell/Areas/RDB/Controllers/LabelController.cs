@@ -168,11 +168,13 @@ namespace BExIS.Modules.Rdb.UI.Controllers
             LabelManagerModel model = new LabelManagerModel();
             model.Samples = GetSamples();
 
+
+
             return View(model);
         }
 
 
-        public ActionResult Create(string sampleids, int format = 0)
+        public ActionResult Create(string sampleids, int format = 1)
         {
             DatasetManager datasetManager = new DatasetManager();
             //e.g.http://localhost:63530/rdb/Sample/Show/
@@ -301,10 +303,13 @@ namespace BExIS.Modules.Rdb.UI.Controllers
                     }
                 }
 
-                if (format == 0)
+                if (format == 1)
                     return PartialView("QRCodeV1A4View", model);
-                else
+                else if (format == 2)
                     return PartialView("QRCodeV2A4View", model);
+                else
+                    return PartialView("QRCodeV1A4View", model);
+
             }
             catch (Exception ex)
             {

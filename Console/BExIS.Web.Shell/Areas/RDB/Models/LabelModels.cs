@@ -5,9 +5,14 @@ using System.Drawing;
 namespace BExIS.Modules.Rdb.UI.Models
 {
 
-
+    public enum LabelFormat
+    {
+        small = 40,
+        big = 8
+    }
     public class LabelManagerModel
     {
+        public LabelFormat Format;
         public List<SampleModel> Samples { get; set; }
     }
 

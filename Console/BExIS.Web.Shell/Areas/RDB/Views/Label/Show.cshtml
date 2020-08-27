@@ -1,12 +1,23 @@
-﻿@model BExIS.Modules.Rdb.UI.Models.LabelManagerModel 
+﻿@model BExIS.Modules.Rdb.UI.Models.LabelManagerModel
 @{
     ViewBag.Title = "Show";
+
+    int pagesize = 40;
 }
 
-<p style="height:50px;">
-    <button id="submit" class="bx-button function bx-disabled" disabled="disabled" onclick="create()">Create Labels</button>
-</p>
-<table id="sample_table" class="display" style="width:100%" >
+<div style="height:50px;" class="row">
+    <div class="col-sm-1">
+        <button id="submit"title="create labels" class="bx-button function bx-disabled" disabled="disabled" onclick="create()">Create</button>
+    </div>
+    <div class="col-sm-2"  >
+        @Html.EnumDropDownListFor(m => m.Format, "select a format", new { @class = "bx-dropdown format-dropdown" })
+    </div>
+    <div id="counter" class="col-sm-4">
+    </div>
+
+</div>
+
+<table id="sample_table" class="display" style="width:100%">
     <thead>
         <tr>
             <th></th>
@@ -24,26 +35,45 @@
 
         @foreach (var sample in Model.Samples)
         {
-        <tr>
-            <td id="@sample.Id" ></td>
-            <td>@sample.Id</td>
-            <td>@sample.Input</td>
-            <td>@sample.Owner</td>
-            <td>@sample.Plot</td>
+            <tr>
+                <td id="@sample.Id"></td>
+                <td>@sample.Id</td>
+                <td>@sample.Input</td>
+                <td>@sample.Owner</td>
+                <td>@sample.Plot</td>
 
-            <td>@sample.Site</td>
-            <td>@sample.Type</td>
-            <td class="dt-body-center">
-               @sample.Barcodes.Count
-            </td>
-        </tr>
+                <td>@sample.Site</td>
+                <td>@sample.Type</td>
+                <td class="dt-body-center">
+                    @sample.Barcodes.Count
+                </td>
+            </tr>
         }
     </tbody>
 
 </table>
+
+
+<style type="text/css">
+    #counter {
+        padding: 12px;
+        font-size: 30px;
+    }
+
+    .format-dropdown {
+        margin-top: 4px;
+    }
+</style>
+
+
+
 @section scripts
 {
     <script type="text/javascript">
+
+        var pagesize = 0;
+        var formatIndex = 0;
+
         $(document).ready(function () {
 
             var table = $("#sample_table").DataTable({
@@ -102,13 +132,22 @@
             //console.log(barcodecount);
             //console.log(count);
 
-            if (count > 0) {
+            if (count > 0 && formatIndex > 0) {
+
+                var pages = barcodecount / pagesize;
+                var rest = barcodecount % pagesize;
+                var pageAsWord = 'page';
+
+                if (parseInt(pages) > 1) pageAsWord = 'pages';
+
+                $("#counter").text(parseInt(pages) + ' ' + pageAsWord + ' &  ' + rest + '/' + pagesize + ' labels');
 
                 $("#submit").removeAttr("disabled");
                 $("#submit").removeClass("bx-disabled");
             }
             else {
 
+                $("#counter").text('');
                 $("#submit").attr("disabled", "disabled");
                 $("#submit").addClass("bx-disabled");
             }
@@ -128,11 +167,25 @@
                 arr.push(rows[i][1]);
             }
 
-            var format = 0;
+            var format = formatIndex;
 
-            window.open("Create?sampleids=" + arr+" && format = "+format, "_blank");
+            console.log("f:"+formatIndex);
+
+            window.open("Create?sampleids=" + arr + " && format = " + formatIndex, " _blank");
 
         }
 
+        $("#Format").on('change', function (e) {
+            console.log("change");
+            console.log(e.currentTarget.value);
+            console.log(e.currentTarget.selectedIndex);
+
+            pagesize = parseInt(e.currentTarget.value);
+            formatIndex = parseInt(e.currentTarget.selectedIndex);
+            //update counter based on selection in the grid
+            var table = $("#sample_table").DataTable()
+            checkboxChange(null, table, null, null)
+        })
+
     </script>
-    }
+}
