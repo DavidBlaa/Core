@@ -3,36 +3,48 @@
 @{
     ViewBag.Title = "BarcodeGeneratorView";
 
+    int pageLimit = 40;
+
 }
-<!--A4 210 x 297 mm - a7 52 x 74-->
-<div class="a4-page">
-    
-    <div class="a4-page-content">
-        @if (Model.Count > 0)
-        {
-            <table>
 
-                @for (int i = 0; i < Model.Count; i = i + 4)
-                {
-                    <tr>
-                        <td>@Html.Partial("QRCodeV1View", Model[i])</td>
-                        @if ((i + 1) < Model.Count)
-                        {
-                            <td>@Html.Partial("QRCodeV1View", Model[i + 1])</td>}
-                        @if ((i + 2) < Model.Count)
-                        {
-                            <td>@Html.Partial("QRCodeV1View", Model[i + 2])</td>}
-                        @if ((i + 3) < Model.Count)
-                        {
-                            <td>@Html.Partial("QRCodeV1View", Model[i + 3])</td>}
-                    </tr>
-                }
+@for (int j = 0; j < Model.Count; j+= pageLimit)
+{
+    var list = Model.Skip(j).Take(pageLimit).ToList();
 
-            </table>
-        }
+    <!--A4 210 x 297 mm - a7 52 x 74-->
+    <div class="a4-page">
+
+        <div class="a4-page-content">
+            @if (list.Count > 0)
+            {
+                <table>
+
+                    @for (int i = 0; i < list.Count; i = i + 4)
+                    {
+                        <tr>
+                            <td>@Html.Partial("QRCodeV1View", list[i])</td>
+                            @if ((i + 1) < list.Count)
+                            {
+                                <td>@Html.Partial("QRCodeV1View", list[i + 1])</td>
+                            }
+                            @if ((i + 2) < list.Count)
+                            {
+                                <td>@Html.Partial("QRCodeV1View", list[i + 2])</td>
+                            }
+                            @if ((i + 3) < list.Count)
+                            {
+                                <td>@Html.Partial("QRCodeV1View", list[i + 3])</td>
+                            }
+                        </tr>
+                    }
+
+                </table>
+            }
+        </div>
     </div>
-</div>
-
+    <hr />
+   
+}
 
 <style>
 
@@ -49,16 +61,15 @@
 
     .a4-page {
         /*border: 0.1mm #red;
-        border-style: groove;*/
+    border-style: groove;*/
         width: 210mm;
-        height: 297mm;
+        height: 307mm;
         font-size: 7pt;
         font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-
     }
 
     .a4-page-content {
-        position:absolute;
+        position: relative;
         left: 8mm;
         right: 8mm;
         top: 21.5mm;
@@ -99,8 +110,8 @@
         margin: 0mm 0mm 0 0mm;
     }
 
-    .qrcode img {
-        width: 25mm;
-        height: 25mm;
-    }
+        .qrcode img {
+            width: 25mm;
+            height: 25mm;
+        }
 </style>

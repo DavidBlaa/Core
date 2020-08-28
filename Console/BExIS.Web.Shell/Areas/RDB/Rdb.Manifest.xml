@@ -19,6 +19,10 @@
                 title="load dashobrad " description="..." icon=""
                 controller="Dashboard" action="ShowMySamples"
                 extends="" />
+	  <Export tag="settings" id="manageLabels" order="1"
+            title="Manage Labels" description="Manage and create labels form samples" icon=""
+            controller="label" action="show" argument=""
+            extends="./settingsRoot" />
   </Exports>
   <EntityActions>
     <EntityAction id="showSample" entity="sample" controller="Sample" action="Show" area="RDB" modus="show"/>
