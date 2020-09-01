@@ -42,8 +42,6 @@
             }
         </div>
     </div>
-    <hr />
-   
 }
 
 <style>
@@ -60,19 +58,21 @@
     }
 
     .a4-page {
-        /*border: 0.1mm #red;
-    border-style: groove;*/
+       /* border: 0.1mm #red;
+        border-style: groove;*/
         width: 210mm;
-        height: 307mm;
+        height: 297mm;
         font-size: 7pt;
         font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     }
 
     .a4-page-content {
-        position: relative;
-        left: 8mm;
+        position: inherit;
+        /*left: 8mm;
         right: 8mm;
         top: 21.5mm;
+        bottom: 21.5mm;*/
+        padding: 21.5mm 8mm;
     }
 
     .qr-content {
@@ -84,7 +84,8 @@
         box-sizing: border-box;
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
-        border: 0.1mm dotted #000000;
+        border-bottom: 0.1mm dotted #000000;
+        border-left: 0.1mm dotted #000000;
         width: 48.5mm;
         height: 25.4mm;
         background-color: white;
@@ -92,7 +93,7 @@
     }
 
     .qr-label-text-container {
-        padding: 20pt 10pt 20pt 20pt;
+        padding: 15pt 10pt 15pt 20pt;
     }
 
     .qr-label-id {
