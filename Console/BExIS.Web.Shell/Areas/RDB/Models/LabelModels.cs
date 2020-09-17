@@ -8,7 +8,7 @@ namespace BExIS.Modules.Rdb.UI.Models
     public enum LabelFormat
     {
         small = 40,
-        big = 8
+        big = 4
     }
     public class LabelManagerModel
     {

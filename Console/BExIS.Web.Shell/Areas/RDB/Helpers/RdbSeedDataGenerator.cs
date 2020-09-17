@@ -1,5 +1,6 @@
 ﻿
 using BExIS.Dlm.Entities.Data;
+using BExIS.Rdb.Helper;
 using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Objects;
 using BExIS.Xml.Helpers;
@@ -29,7 +30,7 @@ namespace BExIS.Modules.Rdb.UI.Helpers
                     entity = new Entity();
                     entity.Name = "Sample";
                     entity.EntityType = typeof(Dataset);
-                    entity.EntityStoreType = typeof(Xml.Helpers.DatasetStore);
+                    entity.EntityStoreType = typeof(SampleStore);
                     entity.UseMetadata = true;
                     entity.Securable = true;
 
